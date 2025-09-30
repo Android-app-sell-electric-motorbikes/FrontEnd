@@ -14,5 +14,9 @@
     <color name="ev_hint">#A9A9A9</color>
     <color name="ev_blue">#FF2196F3</color>
     <color name="ev_error">#FFFF5252</color>
+    <color name="red">#FF000D</color>
+    <color name="gray_light">#E0E0E0</color>
+    <color name="gray">#9E9E9E</color>
+    <color name="gray_dark">#616161</color>
 </resources>
     
