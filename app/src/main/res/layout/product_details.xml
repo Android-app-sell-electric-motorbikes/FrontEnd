@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_gradient"
+    android:padding="16dp"
+    android:id="@+id/main">
+
+
+
+    <!-- Nội dung chính -->
+    <ScrollView
+        android:id="@+id/scroll_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottom_bar"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
+
+            <!-- Tên sản phẩm -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:layout_marginTop="20dp">
+
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/viewPager"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"/>
+
+                <!-- Mũi tên trái -->
+                <ImageButton
+                    android:id="@+id/btnPrev"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentStart="true"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_arrow_left"/>
+
+                <!-- Mũi tên phải -->
+                <ImageButton
+                    android:id="@+id/btnNext"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentEnd="true"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_arrow_right"/>
+
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/product_title"
+                android:layout_below="@+id/product_image"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Xe Máy Điện NISPA VERA X"
+                android:textSize="22sp"
+                android:textColor="#222222"
+                android:fontFamily="@font/poppins_bold"
+                android:layout_marginTop="16dp"/>
+
+            <!-- Giá sản phẩm -->
+            <TextView
+                android:id="@+id/product_price"
+                android:layout_below="@id/product_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="18.990.000đ"
+                android:textSize="20sp"
+                android:textColor="#E53935"
+                android:fontFamily="@font/poppins_bold"
+                android:layout_marginTop="8dp"/>
+
+            <!-- Rating -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingBottom="20dp">
+
+                <RatingBar
+                    android:id="@+id/product_rating"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:numStars="5"
+                    android:rating="4.5"
+                    android:stepSize="0.5"
+                    android:progressTint="#FFD700"
+                    style="?android:attr/ratingBarStyleSmall"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="(120 đánh giá)"
+                    android:textColor="@color/gray"/>
+            </LinearLayout>
+
+            <!-- Thông số kỹ thuật -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="🔧 Thông số kỹ thuật"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:paddingBottom="6dp" />
+
+            <TextView
+                android:id="@+id/product_specs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="• Động cơ: 5000W\n• Tốc độ tối đa: 90 km/h\n• Pin: Lithium 72V - 40Ah\n• Quãng đường: 120 km/lần sạc"
+                android:paddingBottom="20dp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/poppins_regular"/>
+
+            <!-- Mô tả -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="📖 Mô tả sản phẩm"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:paddingBottom="6dp" />
+
+            <TextView
+                android:id="@+id/product_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Xe máy điện EV Super X với thiết kế hiện đại, tiết kiệm năng lượng và thân thiện môi trường. Được trang bị pin Lithium bền bỉ, tốc độ tối đa 90 km/h, thích hợp cho cả thành phố và đường dài."
+                android:paddingBottom="120dp"
+                android:textColor="@color/black"
+                android:fontFamily="@font/poppins_regular"/>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Bottom bar Add to Cart -->
+    <LinearLayout
+        android:id="@+id/bottom_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:background="@color/white"
+        android:elevation="8dp"
+        android:gravity="center_vertical">
+
+        <Button
+            android:id="@+id/btn_minus"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:text="-"
+            android:textSize="18sp"
+            android:backgroundTint="@color/gray_light"/>
+
+        <EditText
+            android:id="@+id/quantity_input"
+            android:layout_width="60dp"
+            android:layout_height="40dp"
+            android:inputType="number"
+            android:hint="1"
+            android:gravity="center"
+            android:background="@drawable/edittext_bg"/>
+
+        <Button
+            android:id="@+id/btn_plus"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:text="+"
+            android:textSize="18sp"
+            android:backgroundTint="@color/gray_light"/>
+
+        <Button
+            android:id="@+id/add_to_cart_button"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:backgroundTint="@color/teal_700"
+            android:text="🛒 Thêm vào giỏ hàng"
+            android:textStyle="bold"
+            android:textAllCaps="false"
+            android:textColor="@color/white"/>
+    </LinearLayout>
+</RelativeLayout>
