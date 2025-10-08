@@ -1,5 +1,6 @@
 package com.example.evshop.ui.home;
 
+import android.content.Intent;
 import android.os.*;
 import android.view.*;
 import android.widget.*;
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.evshop.R;
 import com.example.evshop.data.Analytics;
 import com.example.evshop.data.HomeRepository;
+import com.example.evshop.data.TokenManager;
 import com.example.evshop.databinding.FragmentHomeBinding;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.badge.BadgeDrawable;
@@ -40,6 +42,8 @@ public class HomeFragment extends Fragment {
 
     @Inject
     Analytics analytics;
+    @Inject
+    TokenManager tokenManager;
 
 
     @Nullable
@@ -63,6 +67,10 @@ public class HomeFragment extends Fragment {
         vm.refresh();
 
         b.btnSignIn.setOnClickListener(v -> NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_loginFragment));
+
+        updateAuthUi();
+        toggleSearch();
+        openFilterSheet();
     }
 
 
@@ -84,7 +92,7 @@ public class HomeFragment extends Fragment {
             MenuItem loginItem = menu.findItem(R.id.login); // id của menu
             if (loginItem != null) {
                 loginItem.setOnMenuItemClickListener(mi -> {
-                    NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_loginFragment);
+                    startActivity(new Intent(requireContext(), com.example.evshop.ui.LoginActivity.class));
                     return true;
                 });
             }
@@ -207,6 +215,25 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    private void updateAuthUi() {
+        boolean loggedIn = tokenManager != null && tokenManager.getAccessToken() != null;
+
+        // Panel “Đăng nhập / Đăng ký”
+        b.panelAuth.setVisibility(loggedIn ? View.GONE : View.VISIBLE);
+
+        // Chip chào user (tạm thời chỉ hiển thị "Welcome" nếu đã login)
+        b.chipUser.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
+
+        // Ẩn/hiện nút Login trên toolbar (nếu có)
+        if (toolbar != null) {
+            Menu m = toolbar.getMenu();
+            if (m != null) {
+                MenuItem loginItem = m.findItem(R.id.login);
+                if (loginItem != null) loginItem.setVisible(!loggedIn);
+            }
+        }
+    }
+
     private void openFilterSheet() {
         BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
         View v = LayoutInflater.from(getContext()).inflate(R.layout.sheet_filter_sort, null);
@@ -317,6 +344,7 @@ public class HomeFragment extends Fragment {
         if (bannerHandler != null && bannerRunnable != null) {
             bannerHandler.postDelayed(bannerRunnable, 3000);
         }
+        updateAuthUi();
     }
 
     @Override
