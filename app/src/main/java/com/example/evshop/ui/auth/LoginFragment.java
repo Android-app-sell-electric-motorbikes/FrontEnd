@@ -20,6 +20,6 @@ public class LoginFragment extends Fragment {
 
     @Override public void onDestroyView() {
         super.onDestroyView();
-        b = null;
+        b = null; //.
     }
 }
