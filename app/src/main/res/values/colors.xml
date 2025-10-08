@@ -22,5 +22,8 @@
     <color name="teal_700">#006D77</color>
     <color name="brand_chip_bg">#E8F5E9</color>
     <color name="brand_chip_text">#1B5E20</color>
+    <color name="gray_light">#E0E0E0</color>
+    <color name="gray">#9E9E9E</color>
+    <color name="gray_dark">#616161</color>
 </resources>
     
