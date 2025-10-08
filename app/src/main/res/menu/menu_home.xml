@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/login"
+        android:title="@string/login"
+        android:icon="@drawable/ic_round_person_24"
+        app:showAsAction="ifRoom"/>
+    <item android:id="@+id/action_search"
+        android:title="@string/menu_search"
+        android:icon="@drawable/ic_search_24"
+        app:showAsAction="ifRoom|collapseActionView"/>
+    <item android:id="@+id/action_filter"
+        android:title="@string/menu_filter"
+        android:icon="@drawable/ic_tune_24"
+        app:showAsAction="ifRoom"/>
+    <item android:id="@+id/action_cart"
+        android:title="@string/menu_cart"
+        android:icon="@drawable/ic_cart_24"
+        app:showAsAction="always"/>
+</menu>

@@ -1,19 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
     <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar" android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary" android:theme="@style/ThemeOverlay.Material3.Dark.ActionBar"
-        app:title="Xe máy điện" app:menu="@menu/menu_main"/>
+        android:id="@+id/toolbar"
+        style="@style/Widget.Material3.Toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/title_evshop"
+        app:title="@string/title_evshop"
+        app:menu="@menu/menu_home"/>
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipe" android:layout_width="match_parent" android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize" app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler" android:layout_width="match_parent" android:layout_height="match_parent"
-            android:padding="12dp"/>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+    <fragment
+        android:id="@+id/nav_host"
+        android:name="androidx.navigation.fragment.NavHostFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
+        app:defaultNavHost="true"
+        app:navGraph="@navigation/nav_main"/>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

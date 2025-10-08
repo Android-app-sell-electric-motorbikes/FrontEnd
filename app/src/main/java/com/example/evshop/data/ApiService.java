@@ -1,9 +1,9 @@
 // data/ApiService.java
 package com.example.evshop.data;
 
-import com.example.evshop.models.ApiEnvelope;
-import com.example.evshop.models.LoginRequest;
-import com.example.evshop.models.LoginResult;
+import com.example.evshop.domain.models.ApiEnvelope;
+import com.example.evshop.domain.models.LoginRequest;
+import com.example.evshop.domain.models.LoginResult;
 
 import retrofit2.Call;
 import retrofit2.http.Body;

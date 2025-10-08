@@ -13,7 +13,7 @@ public class RetrofitClient {
     private static Retrofit retrofit;
     private static ApiService api;
 
-    private static final String BASE_URL = "https://f9ca9d5ccc29.ngrok-free.app"; // TODO: đổi cho đúng
+    private static final String BASE_URL = "https://api.metrohcmc.xyz"; // TODO: đổi cho đúng
 
     public static ApiService getApi(Context ctx){
         if (api == null){
