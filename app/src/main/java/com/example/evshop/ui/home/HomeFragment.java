@@ -216,21 +216,24 @@ public class HomeFragment extends Fragment {
     }
 
     private void updateAuthUi() {
-        boolean loggedIn = tokenManager != null && tokenManager.getAccessToken() != null;
+        String token = tokenManager != null ? tokenManager.getAccessToken() : null;
+        boolean loggedIn = token != null;
 
-        // Panel “Đăng nhập / Đăng ký”
         b.panelAuth.setVisibility(loggedIn ? View.GONE : View.VISIBLE);
 
-        // Chip chào user (tạm thời chỉ hiển thị "Welcome" nếu đã login)
-        b.chipUser.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
+        if (loggedIn) {
+            String name = com.example.evshop.util.JwtUtils.getDisplayName(token);
+            b.chipUser.setText(name != null && !name.isEmpty()
+                    ? "Xin chào, " + name
+                    : getString(R.string.welcome));
+            b.chipUser.setVisibility(View.VISIBLE);
+        } else {
+            b.chipUser.setVisibility(View.GONE);
+        }
 
-        // Ẩn/hiện nút Login trên toolbar (nếu có)
-        if (toolbar != null) {
-            Menu m = toolbar.getMenu();
-            if (m != null) {
-                MenuItem loginItem = m.findItem(R.id.login);
-                if (loginItem != null) loginItem.setVisible(!loggedIn);
-            }
+        if (toolbar != null && toolbar.getMenu() != null) {
+            MenuItem loginItem = toolbar.getMenu().findItem(R.id.login);
+            if (loginItem != null) loginItem.setVisible(!loggedIn);
         }
     }
 

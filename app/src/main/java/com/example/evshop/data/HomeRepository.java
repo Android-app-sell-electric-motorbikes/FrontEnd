@@ -3,6 +3,7 @@ package com.example.evshop.data;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.example.evshop.R;
 import com.example.evshop.common.Callback;
 import com.example.evshop.domain.models.Product;
 import java.util.*;
@@ -97,10 +98,10 @@ public class HomeRepository {
     private String demoImage(int i) {
 // royalty‑free demo images
         String[] urls = new String[]{
-                "https://images.unsplash.com/photo-1542367597-8849eb227ebb",
-                "https://images.unsplash.com/photo-1516116216624-53e697fedbea",
-                "https://images.unsplash.com/photo-1519648023493-d82b5f8d7fd9",
-                "https://images.unsplash.com/photo-1518779578993-ec3579fee39f"
+                String.valueOf(R.drawable.ev_scooter),
+                String.valueOf(R.drawable.ev_scooter),
+                String.valueOf(R.drawable.ev_scooter),
+                String.valueOf(R.drawable.ev_scooter)
         };
         return urls[i % urls.length] + "?auto=format&fit=crop&w=800&q=60";
     }
