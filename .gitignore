@@ -8,7 +8,7 @@ local.properties
 # Log/OS Files
 *.log
 
-settings.gradle
+local.properties
 
 # Android Studio generated files and folders
 captures/
