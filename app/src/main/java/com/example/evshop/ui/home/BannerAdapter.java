@@ -10,8 +10,8 @@ import java.util.List;
 
 
 public class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.VH> {
-    private final List<String> images;
-    public BannerAdapter(List<String> images){ this.images = images; }
+    private final List<Integer> images;
+    public BannerAdapter(List<Integer> images){ this.images = images; }
 
 
     @NonNull @Override public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
