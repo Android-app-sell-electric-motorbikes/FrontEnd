@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -68,6 +69,10 @@ public class VietMapMapViewActivity extends AppCompatActivity {
     private LocationEngineCallback<LocationEngineResult> locationCallback;
     private LatLng storeLatLng;
     private boolean hasRouted = false;
+    private boolean isRouting = false;
+    private boolean isRequestingLoc = false;
+    private Call currentRouteCall;
+    private View btnRouteView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,6 +80,28 @@ public class VietMapMapViewActivity extends AppCompatActivity {
         Vietmap.getInstance(this); // theo hướng dẫn chính thức. :contentReference[oaicite:1]{index=1}
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_viet_map_map_view);
+
+        btnRouteView = findViewById(R.id.btnRoute);
+        View btnNav = findViewById(R.id.btnExternalNav);
+        if (btnRouteView != null) {
+            btnRouteView.setOnClickListener(v -> {
+                if (isRouting) return;               // đang xử lý thì bỏ qua
+                isRouting = true;
+                btnRouteView.setEnabled(false);      // khóa nút để không spam
+                hasRouted = false;
+
+                LatLng quick = getCurrentLatLngQuick();
+                if (quick != null) {
+                    if (routePolyline != null) { try { routePolyline.remove(); } catch (Exception ignore) {} }
+                    drawRouteUserToStore(quick, storeLatLng);
+                } else {
+                    Toast.makeText(this, "Đang tìm vị trí hiện tại...", Toast.LENGTH_SHORT).show();
+                    startLocationFlowOrAsk(); // sẽ vẽ khi có vị trí
+                }
+            });
+        }
+
+        if (btnNav != null) btnNav.setOnClickListener(v -> openExternalGoogleMaps());
 
         STORE_LAT = getIntent().getDoubleExtra("STORE_LAT", 0d);
         STORE_LNG = getIntent().getDoubleExtra("STORE_LNG", 0d);
@@ -175,19 +202,22 @@ public class VietMapMapViewActivity extends AppCompatActivity {
     @SuppressLint("MissingPermission")
     private void startLocationFlowOrAsk() {
         if (!ensureLocationPermissionOrRequest()) return;
-
         if (!isLocationEnabled()) {
             Toast.makeText(this, "Vui lòng bật Dịch vụ vị trí (GPS)", Toast.LENGTH_LONG).show();
             startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
             return;
         }
+        if (isRequestingLoc) return;   // tránh request lặp
+        isRequestingLoc = true;
 
         try {
-            // gọi cả lastLocation và updates để chắc chắn nhận được toạ độ
             locationEngine.getLastLocation(locationCallback);
             locationEngine.requestLocationUpdates(locationRequest, locationCallback, getMainLooper());
         } catch (SecurityException se) {
             Toast.makeText(this, "Thiếu quyền vị trí", Toast.LENGTH_SHORT).show();
+            isRequestingLoc = false;
+            if (btnRouteView != null) btnRouteView.setEnabled(true);
+            isRouting = false;
         }
     }
     @SuppressLint("MissingPermission")
@@ -298,15 +328,17 @@ public class VietMapMapViewActivity extends AppCompatActivity {
                 + "&point=" + store.getLatitude() + "," + store.getLongitude()
                 + "&vehicle=car&points_encoded=false";
 
-        OkHttpClient client = new OkHttpClient();
-        Request req = new Request.Builder().url(url).get().build();
-        client.newCall(req).enqueue(new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                runOnUiThread(() ->
-                        Toast.makeText(VietMapMapViewActivity.this, "Route API lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show()
-                );
-            }
+            OkHttpClient client = new OkHttpClient();
+            Request req = new Request.Builder().url(url).get().build();
+            client.newCall(req).enqueue(new Callback() {
+                @Override public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    runOnUiThread(() -> {
+                        Toast.makeText(VietMapMapViewActivity.this, "Route API lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        // mở lại nút
+                        if (btnRouteView != null) btnRouteView.setEnabled(true);
+                        isRouting = false;
+                    });
+                }
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
@@ -332,27 +364,46 @@ public class VietMapMapViewActivity extends AppCompatActivity {
                         line.add(new LatLng(lat, lng));
                     }
 
+                    final List<LatLng> simplified = downsample(line, 600);
+
                     runOnUiThread(() -> {
                         if (routePolyline != null) routePolyline.remove();
                         routePolyline = vietMapGL.addPolyline(new PolylineOptions()
-                                .addAll(line)
+                                .addAll(simplified)
                                 .color(Color.BLUE));
 
-                        vietMapGL.animateCamera(CameraUpdateFactory.newLatLngZoom(line.get(0), 15));
+                        vietMapGL.animateCamera(CameraUpdateFactory.newLatLngZoom(simplified.get(0), 15));
 
                         // dừng nhận location nếu đã vẽ xong
                         if (locationEngine != null && locationCallback != null) {
                             try { locationEngine.removeLocationUpdates(locationCallback); } catch (Exception ignore) {}
                         }
+                        isRequestingLoc = false;
+
+                        // mở lại nút
+                        if (btnRouteView != null) btnRouteView.setEnabled(true);
+                        isRouting = false;
                     });
 
                 } catch (Exception ex) {
-                    runOnUiThread(() ->
-                            Toast.makeText(VietMapMapViewActivity.this, "Parse route lỗi: " + ex.getMessage(), Toast.LENGTH_SHORT).show()
-                    );
+                    runOnUiThread(() -> {
+                        Toast.makeText(VietMapMapViewActivity.this, "Parse route lỗi: " + ex.getMessage(), Toast.LENGTH_SHORT).show();
+                        if (btnRouteView != null) btnRouteView.setEnabled(true);
+                        isRouting = false;
+                        isRequestingLoc = false;
+                    });
                 }
             }
         });
+    }
+
+    private List<LatLng> downsample(List<LatLng> src, int maxPts) {
+        if (src == null || src.size() <= maxPts) return src;
+        int step = Math.max(1, src.size() / maxPts); // giữ tối đa ~maxPts điểm
+        List<LatLng> out = new ArrayList<>();
+        for (int i = 0; i < src.size(); i += step) out.add(src.get(i));
+        if (!out.get(out.size() - 1).equals(src.get(src.size() - 1))) out.add(src.get(src.size() - 1));
+        return out;
     }
 
     // Lifecycle MapView
@@ -397,8 +448,6 @@ public class VietMapMapViewActivity extends AppCompatActivity {
                 return new LatLng(l.getLatitude(), l.getLongitude());
             }
         } catch (Throwable ignore) {}
-
-        // Fallback: hỏi LastKnownLocation từ LocationManager (trường hợp engine chưa trả về)
         try {
             android.location.LocationManager lm = (android.location.LocationManager) getSystemService(LOCATION_SERVICE);
             if (lm != null) {

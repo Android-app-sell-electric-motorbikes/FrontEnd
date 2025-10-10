@@ -147,11 +147,10 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupBanner() {
-        List<String> banners = Arrays.asList(
-                "https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=1200&q=60",
-                "https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=1200&q=60",
-                "https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=1200&q=60",
-                "https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=1200&q=60"
+        List<Integer> banners = Arrays.asList(
+                R.drawable.banner_xe3,
+                R.drawable.banner_xe5,
+                R.drawable.banner_xe6
         );
         b.viewPager.setAdapter(new BannerAdapter(banners));
 
