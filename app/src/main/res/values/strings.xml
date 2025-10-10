@@ -34,4 +34,5 @@
     <string name="login">Đăng nhập</string>
     <string name="register">Đăng ký</string>
     <string name="welcome">Xin chào, Quý Khách</string>
+    <string name="view_map">Bản đồ</string>
 </resources>

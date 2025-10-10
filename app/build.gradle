@@ -15,6 +15,15 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        def localProps = new Properties()
+        def lpFile = rootProject.file("local.properties")
+        if (lpFile.exists()) {
+            lpFile.withInputStream { localProps.load(it) }
+        }
+        def VIETMAP_KEY = (localProps.getProperty("VIETMAP_API_KEY") ?: "")
+
+        buildConfigField "String", "VIETMAP_API_KEY", "\"${VIETMAP_KEY}\""
     }
 
     buildTypes {
@@ -26,6 +35,7 @@ android {
     
     buildFeatures {
         viewBinding true
+        buildConfig true
     }
 
     compileOptions {
@@ -38,6 +48,7 @@ hilt { enableAggregatingTask = false }
 
 dependencies {
     implementation libs.javapoet
+    implementation libs.play.services.maps
 
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
@@ -89,6 +100,14 @@ dependencies {
 // Facebook Shimmer
     implementation libs.shimmer
 
+    implementation libs.maps.sdk.android
+    implementation libs.maps.sdk.plugin.localization.android
+    implementation libs.vietmap.services.geojson.android
+    implementation libs.vietmap.services.turf.android
+    implementation libs.okhttp.v493
+    implementation libs.gson
+
+    implementation 'com.github.vietmap-company:maps-sdk-android:4.1.0'
 }
 
 configurations.configureEach {

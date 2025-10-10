@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <vn.vietmap.vietmapsdk.maps.MapView
+        android:id="@+id/vietmapView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:vietmap_cameraZoom="14"/>
+
+    <!-- Nút chỉ đường (vẽ tuyến trong app) -->
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/btnRoute"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Chỉ đường"
+        app:icon="@drawable/ic_round_navigation_24"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"/>
+
+    <!-- (Tuỳ chọn) Nút mở Google Maps điều hướng ngoài -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btnExternalNav"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/ic_round_navigation_24"
+        android:contentDescription="Mở Google Maps"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="16dp"/>
+</FrameLayout>
