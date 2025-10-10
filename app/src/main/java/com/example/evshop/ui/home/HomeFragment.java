@@ -194,6 +194,12 @@ public class HomeFragment extends Fragment {
             analytics.viewProduct(p.id);
             Toast.makeText(getContext(), "Xem " + p.name, Toast.LENGTH_SHORT).show();
             // TODO: Nav to product detail when available
+            Intent intent = new Intent(requireContext(), com.example.evshop.ui.ProductDetailsActivity.class);
+            intent.putExtra("product_name", p.name);
+            intent.putExtra("product_price", p.priceVnd);
+            intent.putExtra("product_image", p.imageUrl);
+            startActivity(intent);
+
         });
         b.rvProducts.setAdapter(adapter);
 
