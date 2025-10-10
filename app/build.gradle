@@ -32,7 +32,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    
+
     buildFeatures {
         viewBinding true
         buildConfig true
@@ -44,11 +44,13 @@ android {
     }
 }
 
+
 hilt { enableAggregatingTask = false }
 
 dependencies {
     implementation libs.javapoet
     implementation libs.play.services.maps
+    implementation libs.play.services.location
 
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
@@ -100,14 +102,28 @@ dependencies {
 // Facebook Shimmer
     implementation libs.shimmer
 
-    implementation libs.maps.sdk.android
-    implementation libs.maps.sdk.plugin.localization.android
-    implementation libs.vietmap.services.geojson.android
-    implementation libs.vietmap.services.turf.android
-    implementation libs.okhttp.v493
-    implementation libs.gson
-
-    implementation 'com.github.vietmap-company:maps-sdk-android:4.1.0'
+    implementation "androidx.recyclerview:recyclerview:1.2.1"
+    implementation "androidx.cardview:cardview:1,0,0"
+    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
+    implementation "com.google.android.gms:play-services-location:21.0.1"
+    implementation "com.jakewharton:butterknife:10.2.3"
+    implementation 'androidx.core:core-ktx:1.7.0'
+    implementation libs.maps.sdk.android.v260
+    implementation 'com.github.vietmap-company:maps-sdk-navigation-ui-android:2.3.2'
+    implementation 'com.github.vietmap-company:maps-sdk-navigation-android:2.3.3'
+    implementation 'com.github.vietmap-company:vietmap-services-core:1.0.0'
+    implementation 'com.github.vietmap-company:vietmap-services-directions-models:1.0.1'
+    implementation 'com.github.vietmap-company:vietmap-services-turf-android:1.0.2'
+    implementation 'com.github.vietmap-company:vietmap-services-android:1.1.2'
+    implementation 'com.squareup.picasso:picasso:2.8'
+    implementation 'com.github.vietmap-company:vietmap-services-geojson-android:1.0.0'
+    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.2.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'com.squareup.retrofit2:converter-gson:2.0.0-beta4'
+    implementation libs.maps.sdk.android.v410
+    implementation 'com.github.vietmap-company:maps-sdk-plugin-localization-android:2.0.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
 }
 
 configurations.configureEach {

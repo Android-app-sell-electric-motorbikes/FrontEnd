@@ -35,4 +35,5 @@
     <string name="register">Đăng ký</string>
     <string name="welcome">Xin chào, Quý Khách</string>
     <string name="view_map">Bản đồ</string>
+    <string name="tts_guide">tts_guide\n</string>
 </resources>

@@ -1,468 +1,397 @@
 package com.example.evshop.ui.map;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
+import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-
-import com.example.evshop.R;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import androidx.core.content.res.ResourcesCompat;
 
 import com.example.evshop.BuildConfig;
+import com.example.evshop.R;
+import com.example.evshop.util.IconUtils;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.mapbox.api.directions.v5.models.DirectionsResponse;
+import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.geojson.Point;
 
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import vn.vietmap.services.android.navigation.v5.location.engine.LocationEngineProvider;
+import vn.vietmap.services.android.navigation.ui.v5.route.NavigationMapRoute;
+import vn.vietmap.services.android.navigation.v5.navigation.NavigationRoute;
 import vn.vietmap.vietmapsdk.Vietmap;
+import vn.vietmap.vietmapsdk.annotations.Marker;
+import vn.vietmap.vietmapsdk.annotations.MarkerOptions;
+import vn.vietmap.vietmapsdk.camera.CameraPosition;
 import vn.vietmap.vietmapsdk.camera.CameraUpdateFactory;
 import vn.vietmap.vietmapsdk.geometry.LatLng;
+import vn.vietmap.vietmapsdk.geometry.LatLngBounds;
 import vn.vietmap.vietmapsdk.location.LocationComponent;
+import vn.vietmap.vietmapsdk.location.LocationComponentActivationOptions;
 import vn.vietmap.vietmapsdk.location.engine.LocationEngine;
-import vn.vietmap.vietmapsdk.location.engine.LocationEngineCallback;
-import vn.vietmap.vietmapsdk.location.engine.LocationEngineDefault;
-import vn.vietmap.vietmapsdk.location.engine.LocationEngineRequest;
-import vn.vietmap.vietmapsdk.location.engine.LocationEngineResult;
 import vn.vietmap.vietmapsdk.location.modes.CameraMode;
 import vn.vietmap.vietmapsdk.location.modes.RenderMode;
 import vn.vietmap.vietmapsdk.maps.MapView;
+import vn.vietmap.vietmapsdk.maps.OnMapReadyCallback;
 import vn.vietmap.vietmapsdk.maps.Style;
 import vn.vietmap.vietmapsdk.maps.VietMapGL;
-import vn.vietmap.vietmapsdk.annotations.MarkerOptions;
-import vn.vietmap.vietmapsdk.annotations.Polyline;
-import vn.vietmap.vietmapsdk.annotations.PolylineOptions;
-import android.annotation.SuppressLint;
-import android.content.Intent;
-import android.provider.Settings;
-import android.location.LocationManager;
 
-import javax.annotation.Nullable;
+public class VietMapMapViewActivity extends AppCompatActivity
+        implements VietMapGL.OnMapClickListener, VietMapGL.OnMarkerClickListener {
 
-public class VietMapMapViewActivity extends AppCompatActivity {
-
-    private static final int RC_LOCATION = 101;
-    private static final long LOCATION_INTERVAL = 1000L;
+    private static final int REQ_LOC = 11;
 
     private MapView mapView;
     private VietMapGL vietMapGL;
     private LocationComponent locationComponent;
     private LocationEngine locationEngine;
+    private FusedLocationProviderClient fusedLocationClient;
 
-    private String API_KEY = BuildConfig.VIETMAP_API_KEY;;
+    private NavigationMapRoute navigationMapRoute;
+    private DirectionsRoute currentRoute;
 
-    private double STORE_LAT, STORE_LNG;
-    private Polyline routePolyline;
-    private LocationEngineRequest locationRequest;
-    private LocationEngineCallback<LocationEngineResult> locationCallback;
-    private LatLng storeLatLng;
-    private boolean hasRouted = false;
-    private boolean isRouting = false;
-    private boolean isRequestingLoc = false;
-    private Call currentRouteCall;
-    private View btnRouteView;
+    // UI panel
+    private LinearLayout storeInfoPanel;
+    private TextView txtStoreName, txtStoreAddr;
+    private Button btnFindRoute;
+
+    // Lưu marker<->store
+    private final Map<Long, Store> markerStoreMap = new HashMap<>();
+    private Store selectedStore = null;
+    private boolean mapReady = false;
+    private boolean styleLoaded = false;
+    private boolean permissionsGranted = false;
+    private static String API_KEY = BuildConfig.VIETMAP_API_KEY;
+
+    // ===== Demo store list =====
+    private List<Store> getDemoStores() {
+        List<Store> list = new ArrayList<>();
+        list.add(new Store("S1", "Cửa hàng EVShop Quận 1", "22 Lê Lợi, Q1, TP.HCM", 10.772153, 106.701977));
+        list.add(new Store("S2", "Cửa hàng EVShop Quận 3", "100 Cách Mạng Tháng 8, Q3", 10.777628, 106.684900));
+        list.add(new Store("S3", "Cửa hàng EVShop Quận 10", "285 CMT8, Q10", 10.778930, 106.666912));
+        return list;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // BẮT BUỘC: khởi tạo SDK trước super.onCreate
-        Vietmap.getInstance(this); // theo hướng dẫn chính thức. :contentReference[oaicite:1]{index=1}
+        Vietmap.getInstance(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_viet_map_map_view);
 
-        btnRouteView = findViewById(R.id.btnRoute);
-        View btnNav = findViewById(R.id.btnExternalNav);
-        if (btnRouteView != null) {
-            btnRouteView.setOnClickListener(v -> {
-                if (isRouting) return;               // đang xử lý thì bỏ qua
-                isRouting = true;
-                btnRouteView.setEnabled(false);      // khóa nút để không spam
-                hasRouted = false;
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-                LatLng quick = getCurrentLatLngQuick();
-                if (quick != null) {
-                    if (routePolyline != null) { try { routePolyline.remove(); } catch (Exception ignore) {} }
-                    drawRouteUserToStore(quick, storeLatLng);
-                } else {
-                    Toast.makeText(this, "Đang tìm vị trí hiện tại...", Toast.LENGTH_SHORT).show();
-                    startLocationFlowOrAsk(); // sẽ vẽ khi có vị trí
-                }
-            });
-        }
-
-        if (btnNav != null) btnNav.setOnClickListener(v -> openExternalGoogleMaps());
-
-        STORE_LAT = getIntent().getDoubleExtra("STORE_LAT", 0d);
-        STORE_LNG = getIntent().getDoubleExtra("STORE_LNG", 0d);
-
-        mapView = findViewById(R.id.vietmapView);
+        mapView = findViewById(R.id.vmMapView);
         mapView.onCreate(savedInstanceState);
 
-        mapView.getMapAsync(map -> {
-            vietMapGL = map;
+        storeInfoPanel = findViewById(R.id.storeInfoPanel);
+        txtStoreName = findViewById(R.id.txtStoreName);
+        txtStoreAddr = findViewById(R.id.txtStoreAddr);
+        btnFindRoute = findViewById(R.id.btnFindRoute);
 
-            // Áp dụng style VietMap có apikey (đúng mẫu tài liệu)
-            vietMapGL.setStyle(
-                    new Style.Builder().fromUri(
-                            "https://maps.vietmap.vn/api/maps/light/styles.json?apikey=" + API_KEY
-                    ),
-                    this::onStyleLoaded
-            );
-        });
-    }
-
-    private void onStyleLoaded(@NonNull Style style) {
-        locationEngine = LocationEngineDefault.INSTANCE.getDefaultLocationEngine(this);
-
-        enableLocationComponent(style);
-
-        storeLatLng = new LatLng(STORE_LAT, STORE_LNG);
-        vietMapGL.addMarker(new MarkerOptions().position(storeLatLng).title("Cửa hàng"));
-        vietMapGL.animateCamera(CameraUpdateFactory.newLatLngZoom(storeLatLng, 15));
-
-        // request cấu hình
-        locationRequest = new LocationEngineRequest.Builder(LOCATION_INTERVAL)
-                .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-                .build();
-
-        // giữ callback ở field để tránh GC
-        locationCallback = new LocationEngineCallback<LocationEngineResult>() {
-            @Override
-            public void onSuccess(LocationEngineResult result) {
-                android.location.Location loc = result.getLastLocation();
-                if (loc == null) return;
-                LatLng user = new LatLng(loc.getLatitude(), loc.getLongitude());
-                if (!hasRouted) { // vẽ tuyến 1 lần là đủ
-                    hasRouted = true;
-                    drawRouteUserToStore(user, storeLatLng);
-                }
-            }
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Toast.makeText(VietMapMapViewActivity.this,
-                        "Không lấy được vị trí hiện tại: " + e.getMessage(),
-                        Toast.LENGTH_SHORT).show();
-            }
-        };
-
-        // bắt đầu lấy vị trí & update
-        startLocationFlowOrAsk();
-
-        findViewById(R.id.btnRoute).setOnClickListener(v -> {
-            hasRouted = false;
-
-            // 1) Thử lấy ngay từ chấm xanh:
-            LatLng quick = getCurrentLatLngQuick();
-            if (quick != null) {
-                hasRouted = true;
-                // nếu đã có polyline cũ thì dọn trước
-                if (routePolyline != null) { try { routePolyline.remove(); } catch (Exception ignore) {} }
-                drawRouteUserToStore(quick, storeLatLng);
+        btnFindRoute.setOnClickListener(v -> {
+            if (selectedStore == null) return;
+            Point origin = getCurrentPointOrNull();
+            if (origin == null) {
+                Toast.makeText(this, "Chưa lấy được vị trí hiện tại", Toast.LENGTH_SHORT).show();
                 return;
             }
-
-            // 2) Chưa có thì mới rơi về flow xin GPS / request updates
-            Toast.makeText(this, "Đang tìm vị trí hiện tại...", Toast.LENGTH_SHORT).show();
-            startLocationFlowOrAsk(); // sẽ gọi callback và vẽ tuyến
+            Point dest = Point.fromLngLat(selectedStore.lng, selectedStore.lat);
+            fetchAndDrawRoute(origin, dest, true);
         });
-        findViewById(R.id.btnExternalNav).setOnClickListener(v -> openExternalGoogleMaps());
+
+        mapView.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(@NonNull VietMapGL map) {
+                vietMapGL = map;
+
+                vietMapGL.setStyle(new Style.Builder()
+                                .fromUri("https://maps.vietmap.vn/api/maps/light/styles.json?apikey=" + API_KEY),
+                        style -> {
+                            styleLoaded = true;
+
+                            initLocationEngine();
+                            // Chỉ bật location nếu có quyền
+                            if (hasLocationPermission()) {
+                                permissionsGranted = true;
+                                tryEnableLocationComponent();
+                            } else {
+                                permissionsGranted = false;
+                                requestLocationPermission();
+                            }
+
+                            addStoreMarkers(getDemoStores());
+                            moveCameraToUserOrDefault();
+                        });
+
+                vietMapGL.addOnMapClickListener(VietMapMapViewActivity.this);
+                vietMapGL.setOnMarkerClickListener(VietMapMapViewActivity.this);
+            }
+        });
+
+        // xin quyền nếu chưa có
+        if (!hasLocationPermission()) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                    REQ_LOC);
+        }
     }
 
-    private void openExternalGoogleMaps() {
-        String lat = String.valueOf(STORE_LAT);
-        String lng = String.valueOf(STORE_LNG);
+    private void initLocationEngine() {
+        locationEngine = LocationEngineProvider.getBestLocationEngine(this);
+    }
 
-        // Ưu tiên Intent điều hướng Google Maps
-        android.net.Uri gmm = android.net.Uri.parse("google.navigation:q=" + lat + "," + lng + "&mode=d");
-        Intent intent = new Intent(Intent.ACTION_VIEW, gmm);
-        intent.setPackage("com.google.android.apps.maps");
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-            return;
-        }
+    private void enableLocationComponent(@NonNull Style style) throws SecurityException {
+        if (!hasLocationPermission()) throw new SecurityException("Location permission missing");
 
-        // Fallback: Mở trình duyệt
-        android.net.Uri uriWeb = android.net.Uri.parse(
-                "https://www.google.com/maps/dir/?api=1&destination=" + lat + "," + lng + "&travelmode=driving"
+        locationComponent = vietMapGL.getLocationComponent();
+        if (locationComponent == null) return;
+
+        locationComponent.activateLocationComponent(
+                LocationComponentActivationOptions.builder(this, style).build()
         );
-        startActivity(new Intent(Intent.ACTION_VIEW, uriWeb));
+        locationComponent.setLocationComponentEnabled(true);
+        locationComponent.setCameraMode(CameraMode.TRACKING_GPS_NORTH, 750L, 18.0, 0.0, 0.0, null);
+        locationComponent.zoomWhileTracking(18.5);
+        locationComponent.setRenderMode(RenderMode.GPS);
+        locationComponent.setLocationEngine(locationEngine);
     }
 
-    @SuppressLint("MissingPermission")
-    private void startLocationFlowOrAsk() {
-        if (!ensureLocationPermissionOrRequest()) return;
-        if (!isLocationEnabled()) {
-            Toast.makeText(this, "Vui lòng bật Dịch vụ vị trí (GPS)", Toast.LENGTH_LONG).show();
-            startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
-            return;
-        }
-        if (isRequestingLoc) return;   // tránh request lặp
-        isRequestingLoc = true;
-
-        try {
-            locationEngine.getLastLocation(locationCallback);
-            locationEngine.requestLocationUpdates(locationRequest, locationCallback, getMainLooper());
-        } catch (SecurityException se) {
-            Toast.makeText(this, "Thiếu quyền vị trí", Toast.LENGTH_SHORT).show();
-            isRequestingLoc = false;
-            if (btnRouteView != null) btnRouteView.setEnabled(true);
-            isRouting = false;
-        }
-    }
-    @SuppressLint("MissingPermission")
-    private void enableLocationComponent(Style style) {
-        if (!ensureLocationPermissionOrRequest()) return;
-
-        try {
-            locationComponent = vietMapGL.getLocationComponent();
-            if (locationComponent == null) return;
-
-            locationComponent.activateLocationComponent(
-                    vn.vietmap.vietmapsdk.location.LocationComponentActivationOptions
-                            .builder(this, style).build()
-            );
-            locationComponent.setLocationComponentEnabled(true);
-            locationComponent.setCameraMode(
-                    CameraMode.TRACKING_GPS_NORTH,
-                    750L,
-                    18.0,
-                    0.0,
-                    0.0,
-                    null
-            );
-            locationComponent.setRenderMode(RenderMode.GPS);
-            locationComponent.zoomWhileTracking(18.5);
-            locationComponent.setLocationEngine(locationEngine);
-        } catch (SecurityException se) {
-            Toast.makeText(this, "Thiếu quyền vị trí", Toast.LENGTH_SHORT).show();
+    private void addStoreMarkers(List<Store> stores) {
+        for (Store s : stores) {
+            Marker m = vietMapGL.addMarker(new MarkerOptions()
+                    .position(new LatLng(s.lat, s.lng))
+                    .title(s.name)
+                    .snippet(s.address)
+                    .icon(new IconUtils().drawableToIcon(
+                            this,
+                            R.drawable.ic_launcher_foreground,
+                            ResourcesCompat.getColor(getResources(), R.color.black, getTheme())
+                    )));
+            markerStoreMap.put(m.getId(), s);
         }
     }
 
-    private boolean isLocationEnabled() {
-        LocationManager lm = (LocationManager) getSystemService(LOCATION_SERVICE);
-        return lm != null && (lm.isProviderEnabled(LocationManager.GPS_PROVIDER)
-                || lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER));
-    }
-    private boolean ensureLocationPermissionOrRequest() {
-        boolean fine = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED;
-        boolean coarse = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED;
+    private void moveCameraToUserOrDefault() {
+        LatLng target = new LatLng(10.776, 106.700); // fallback Q1
+        Location last = (locationComponent != null) ? locationComponent.getLastKnownLocation() : null;
+        if (last != null) target = new LatLng(last.getLatitude(), last.getLongitude());
 
-        if (!fine && !coarse) {
-            ActivityCompat.requestPermissions(
-                    this,
-                    new String[]{ Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION },
-                    RC_LOCATION
-            );
-            return false;
+        CameraPosition pos = new CameraPosition.Builder()
+                .target(target).zoom(15.5).tilt(0.0).build();
+        vietMapGL.animateCamera(CameraUpdateFactory.newCameraPosition(pos), 800);
+    }
+
+    // marker clicked
+    @Override
+    public boolean onMarkerClick(@NonNull Marker marker) {
+        Store s = markerStoreMap.get(marker.getId());
+        if (s != null) {
+            selectedStore = s;
+            txtStoreName.setText(s.name);
+            txtStoreAddr.setText(s.address);
+            storeInfoPanel.setVisibility(View.VISIBLE);
         }
-        return true;
+        return true; // đã xử lý
+    }
+
+    // map clicked: ẩn panel
+    @Override
+    public boolean onMapClick(@NonNull LatLng point) {
+        storeInfoPanel.setVisibility(View.GONE);
+        selectedStore = null;
+        return false;
     }
 
     private boolean hasLocationPermission() {
-        boolean fine = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED;
-        boolean coarse = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED;
-        if (!fine && !coarse) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
-                    RC_LOCATION);
-            return false;
-        }
-        return true;
+        return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
-    @SuppressLint("MissingPermission")
-    private void requestUserLocationAndRoute(LatLng store) {
-        if (!ensureLocationPermissionOrRequest()) return;
+    private void requestLocationPermission() {
+        ActivityCompat.requestPermissions(
+                this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                REQ_LOC
+        );
+    }
 
-        LocationEngineRequest req = new LocationEngineRequest.Builder(LOCATION_INTERVAL)
-                .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-                .build();
-
+    private void openAppSettings() {
         try {
-            locationEngine.getLastLocation(new LocationEngineCallback<LocationEngineResult>() {
-                @Override
-                public void onSuccess(LocationEngineResult result) {
-                    android.location.Location loc = result.getLastLocation();
-                    if (loc == null) {
-                        try {
-                            locationEngine.requestLocationUpdates(req, this, getMainLooper());
-                        } catch (SecurityException se) {
-                            Toast.makeText(VietMapMapViewActivity.this, "Thiếu quyền vị trí", Toast.LENGTH_SHORT).show();
-                        }
-                        return;
-                    }
-                    LatLng user = new LatLng(loc.getLatitude(), loc.getLongitude());
-                    drawRouteUserToStore(user, store);
-                }
-
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(VietMapMapViewActivity.this, "Không lấy được vị trí hiện tại", Toast.LENGTH_SHORT).show();
-                }
-            });
-        } catch (SecurityException se) {
-            Toast.makeText(this, "Thiếu quyền vị trí", Toast.LENGTH_SHORT).show();
+            Intent i = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+            i.setData(Uri.parse("package:" + getPackageName()));
+            startActivity(i);
+        } catch (Exception ignored) {
         }
     }
 
-    private void drawRouteUserToStore(LatLng user, LatLng store) {
-        // Gọi VietMap Route API (GET), dùng points_encoded=false để khỏi giải mã polyline. :contentReference[oaicite:2]{index=2}
-        String url = "https://maps.vietmap.vn/api/route?api-version=1.1"
-                + "&apikey=" + API_KEY
-                + "&point=" + user.getLatitude() + "," + user.getLongitude()
-                + "&point=" + store.getLatitude() + "," + store.getLongitude()
-                + "&vehicle=car&points_encoded=false";
-
-            OkHttpClient client = new OkHttpClient();
-            Request req = new Request.Builder().url(url).get().build();
-            client.newCall(req).enqueue(new Callback() {
-                @Override public void onFailure(@NonNull Call call, @NonNull IOException e) {
-                    runOnUiThread(() -> {
-                        Toast.makeText(VietMapMapViewActivity.this, "Route API lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        // mở lại nút
-                        if (btnRouteView != null) btnRouteView.setEnabled(true);
-                        isRouting = false;
-                    });
-                }
-
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                if (!response.isSuccessful()) {
-                    onFailure(call, new IOException("HTTP " + response.code()));
-                    return;
-                }
-                String body = response.body().string();
-                try {
-                    JSONObject root = new JSONObject(body);
-                    JSONArray paths = root.getJSONArray("paths");
-                    if (paths.length() == 0) {
-                        throw new Exception("Không có tuyến");
-                    }
-
-                    JSONObject first = paths.getJSONObject(0);
-                    JSONArray pts = first.getJSONArray("points"); // vì points_encoded=false ⇒ mảng [lat, lng]
-                    final List<LatLng> line = new ArrayList<>();
-                    for (int i = 0; i < pts.length(); i++) {
-                        JSONArray p = pts.getJSONArray(i);
-                        double lat = p.getDouble(0);
-                        double lng = p.getDouble(1);
-                        line.add(new LatLng(lat, lng));
-                    }
-
-                    final List<LatLng> simplified = downsample(line, 600);
-
-                    runOnUiThread(() -> {
-                        if (routePolyline != null) routePolyline.remove();
-                        routePolyline = vietMapGL.addPolyline(new PolylineOptions()
-                                .addAll(simplified)
-                                .color(Color.BLUE));
-
-                        vietMapGL.animateCamera(CameraUpdateFactory.newLatLngZoom(simplified.get(0), 15));
-
-                        // dừng nhận location nếu đã vẽ xong
-                        if (locationEngine != null && locationCallback != null) {
-                            try { locationEngine.removeLocationUpdates(locationCallback); } catch (Exception ignore) {}
-                        }
-                        isRequestingLoc = false;
-
-                        // mở lại nút
-                        if (btnRouteView != null) btnRouteView.setEnabled(true);
-                        isRouting = false;
-                    });
-
-                } catch (Exception ex) {
-                    runOnUiThread(() -> {
-                        Toast.makeText(VietMapMapViewActivity.this, "Parse route lỗi: " + ex.getMessage(), Toast.LENGTH_SHORT).show();
-                        if (btnRouteView != null) btnRouteView.setEnabled(true);
-                        isRouting = false;
-                        isRequestingLoc = false;
-                    });
-                }
+    private Point getCurrentPointOrNull() {
+        // Ưu tiên từ LocationComponent
+        try {
+            if (hasLocationPermission() && locationComponent != null && locationComponent.getLastKnownLocation() != null) {
+                Location l = locationComponent.getLastKnownLocation();
+                return Point.fromLngLat(l.getLongitude(), l.getLatitude());
             }
-        });
-    }
-
-    private List<LatLng> downsample(List<LatLng> src, int maxPts) {
-        if (src == null || src.size() <= maxPts) return src;
-        int step = Math.max(1, src.size() / maxPts); // giữ tối đa ~maxPts điểm
-        List<LatLng> out = new ArrayList<>();
-        for (int i = 0; i < src.size(); i += step) out.add(src.get(i));
-        if (!out.get(out.size() - 1).equals(src.get(src.size() - 1))) out.add(src.get(src.size() - 1));
-        return out;
-    }
-
-    // Lifecycle MapView
-    @Override protected void onStart() { super.onStart(); mapView.onStart(); }
-    @Override protected void onResume() { super.onResume(); mapView.onResume(); }
-    @Override protected void onPause() { super.onPause(); mapView.onPause(); }
-    @Override protected void onStop() {
-        super.onStop();
-        if (locationEngine != null && locationCallback != null) {
-            try { locationEngine.removeLocationUpdates(locationCallback); } catch (Exception ignore) {}
+        } catch (SecurityException ignored) {
+            permissionsGranted = false;
         }
-        mapView.onStop();
-    }
-    @Override public void onLowMemory() {
-        super.onLowMemory();
-        mapView.onLowMemory();
-    }
-    @Override protected void onDestroy() { super.onDestroy(); mapView.onDestroy(); }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == RC_LOCATION && hasLocationPermission()) {
-            if (vietMapGL != null) {
-                vietMapGL.getStyle(style -> {
-                    if (style != null) {
-                        enableLocationComponent(style);
-                        // QUAN TRỌNG: chạy lại flow lấy vị trí
-                        startLocationFlowOrAsk();
+        // Fallback fused (cũng phải bọc try/catch)
+        try {
+            final Point[] out = {null};
+            if (hasLocationPermission()) {
+                fusedLocationClient.getLastLocation().addOnSuccessListener(loc -> {
+                    if (loc != null) {
+                        out[0] = Point.fromLngLat(loc.getLongitude(), loc.getLatitude());
                     }
                 });
             }
+            return out[0];
+        } catch (SecurityException ignored) {
+            permissionsGranted = false;
+            return null;
         }
     }
 
-    @Nullable
-    private LatLng getCurrentLatLngQuick() {
-        try {
-            if (locationComponent != null && locationComponent.getLastKnownLocation() != null) {
-                android.location.Location l = locationComponent.getLastKnownLocation();
-                return new LatLng(l.getLatitude(), l.getLongitude());
-            }
-        } catch (Throwable ignore) {}
-        try {
-            android.location.LocationManager lm = (android.location.LocationManager) getSystemService(LOCATION_SERVICE);
-            if (lm != null) {
-                java.util.List<String> providers = lm.getProviders(true);
-                android.location.Location best = null;
-                for (String p : providers) {
-                    try {
-                        android.location.Location l = lm.getLastKnownLocation(p);
-                        if (l != null && (best == null || l.getTime() > best.getTime())) best = l;
-                    } catch (Throwable ignore) {}
-                }
-                if (best != null) return new LatLng(best.getLatitude(), best.getLongitude());
-            }
-        } catch (Throwable ignore) {}
+    private void fetchAndDrawRoute(Point origin, Point dest, boolean overview) {
+        // Khởi tạo lớp vẽ route nếu chưa có
+        if (navigationMapRoute == null) {
+            navigationMapRoute = new NavigationMapRoute(mapView, vietMapGL, /*layerAboveId*/ null);
+        } else {
+            navigationMapRoute.removeRoute();
+        }
 
-        return null;
+        NavigationRoute.builder(this)
+                .apikey(API_KEY)
+                .origin(origin)
+                .destination(dest)
+                .build()
+                .getRoute(new Callback<DirectionsResponse>() {
+                    @Override
+                    public void onResponse(@NonNull Call<DirectionsResponse> call, @NonNull Response<DirectionsResponse> response) {
+                        if (response.body() == null || response.body().routes() == null || response.body().routes().isEmpty()) {
+                            Toast.makeText(VietMapMapViewActivity.this, "Không tìm thấy tuyến phù hợp", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        currentRoute = response.body().routes().get(0);
+                        navigationMapRoute.addRoute(currentRoute);
+
+                        if (overview) {
+                            // fit bounds theo origin-dest
+                            List<LatLng> pts = new ArrayList<>();
+                            pts.add(new LatLng(origin.latitude(), origin.longitude()));
+                            pts.add(new LatLng(dest.latitude(), dest.longitude()));
+                            LatLngBounds b = new LatLngBounds.Builder().includes(pts).build();
+                            vietMapGL.animateCamera(
+                                    CameraUpdateFactory.newLatLngBounds(b, 80, 320, 80, 320),
+                                    800
+                            );
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(@NonNull Call<DirectionsResponse> call, @NonNull Throwable t) {
+                        Toast.makeText(VietMapMapViewActivity.this, "Lỗi lấy tuyến: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQ_LOC) {
+            permissionsGranted = hasLocationPermission();
+            if (permissionsGranted) {
+                // Nếu style đã load → bật location ngay
+                if (mapReady && styleLoaded) {
+                    tryEnableLocationComponent();
+                    moveCameraToUserOrDefault(); // zoom vào user
+                }
+            } else {
+                Toast.makeText(this, "Bạn đã từ chối quyền vị trí. Một số tính năng sẽ bị hạn chế.", Toast.LENGTH_LONG).show();
+                // Tuỳ chọn: hiển thị nút mở cài đặt nếu người dùng chọn “Don’t ask again”
+                // openAppSettings();
+            }
+        }
+    }
+
+    private void tryEnableLocationComponent() {
+        try {
+            Style style = vietMapGL.getStyle();
+            if (style == null) return;
+            enableLocationComponent(style);
+        } catch (SecurityException se) {
+            // Người dùng vừa rút quyền hoặc thiết bị chặn – xử lý an toàn
+            permissionsGranted = false;
+            Toast.makeText(this, "Không thể bật vị trí do thiếu quyền.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // ===== lifecycle =====
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (mapView != null) mapView.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mapView != null) mapView.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mapView != null) mapView.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mapView != null) mapView.onStop();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        if (mapView != null) mapView.onLowMemory();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mapView != null) mapView.onDestroy();
+    }
+
+    // ===== simple inner model (nếu cô không muốn tạo file riêng) =====
+    public static class Store {
+        public final String id, name, address;
+        public final double lat, lng;
+
+        public Store(String id, String name, String address, double lat, double lng) {
+            this.id = id;
+            this.name = name;
+            this.address = address;
+            this.lat = lat;
+            this.lng = lng;
+        }
     }
 }
