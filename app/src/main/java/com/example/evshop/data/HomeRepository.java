@@ -95,15 +95,15 @@ public class HomeRepository {
     }
 
 
-    private String demoImage(int i) {
+    private int demoImage(int i) {
 // royalty‑free demo images
-        String[] urls = new String[]{
-                String.valueOf(R.drawable.ev_scooter),
-                String.valueOf(R.drawable.ev_scooter),
-                String.valueOf(R.drawable.ev_scooter),
-                String.valueOf(R.drawable.ev_scooter)
+        int[] ids = new int[]{
+                R.drawable.ev_scooter,
+                R.drawable.ev_scooter2,
+                R.drawable.ev_scooter3,
+                R.drawable.xe1
         };
-        return urls[i % urls.length] + "?auto=format&fit=crop&w=800&q=60";
+        return ids[i % ids.length];
     }
 
 
