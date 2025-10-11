@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+    <TextView style="@style/TextAppearance.Material3.TitleLarge"
+        android:text="@string/sheet_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+
+    <TextView android:text="@string/sheet_sort"
+        android:layout_marginTop="12dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+
+    <RadioGroup android:id="@+id/rgSort"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <RadioButton android:id="@+id/rbPopular" android:text="@string/label_popular" android:layout_height="25dp" android:layout_width="150dp"/>
+        <RadioButton android:id="@+id/rbPriceAsc" android:text="@string/label_price_asc" android:layout_height="25dp" android:layout_width="150dp"/>
+
+        <RadioButton
+            android:id="@+id/rbPriceDesc"
+            android:layout_width="150dp"
+            android:layout_height="25dp"
+            android:text="@string/label_price_desc" />
+        <RadioButton android:id="@+id/rbRating" android:text="@string/label_rating" android:layout_height="25dp" android:layout_width="150dp"/>
+    </RadioGroup>
+
+
+    <TextView android:text="@string/sheet_filter"
+        android:layout_marginTop="8dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+
+    <TextView android:text="@string/filter_brand" android:layout_height="30dp" android:layout_width="40dp"/>
+    <LinearLayout android:id="@+id/brandContainer"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+
+    <TextView android:text="@string/filter_price" android:layout_height="30dp" android:layout_width="80dp"/>
+    <SeekBar android:id="@+id/seekPrice" android:max="200" android:layout_height="30dp" android:layout_width="80dp"/>
+    <TextView android:id="@+id/txtPriceValue" android:layout_height="30dp" android:layout_width="80dp"/>
+
+
+    <TextView android:text="@string/filter_rating" android:layout_height="30dp" android:layout_width="80dp"/>
+    <SeekBar android:id="@+id/seekRating" android:max="50" android:layout_height="30dp" android:layout_width="80dp"/>
+    <TextView android:id="@+id/txtRatingMin" android:layout_height="30dp" android:layout_width="80dp"/>
+
+
+    <LinearLayout
+        style="?android:attr/buttonBarStyle"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/btnApply"
+            style="?android:attr/buttonBarButtonStyle"
+            android:text="@string/apply"
+            android:layout_height="60dp"
+            android:layout_width="100dp" />
+
+        <Button
+            android:id="@+id/btnCancel"
+            style="?android:attr/buttonBarButtonStyle"
+            android:text="@string/cancel" android:layout_height="60dp" android:layout_width="80dp"/>
+    </LinearLayout>
+</LinearLayout>

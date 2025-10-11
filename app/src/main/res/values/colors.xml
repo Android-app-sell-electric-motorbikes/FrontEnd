@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
     <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="ev_white">#FFFFFFFF</color>
@@ -14,7 +12,16 @@
     <color name="ev_hint">#A9A9A9</color>
     <color name="ev_blue">#FF2196F3</color>
     <color name="ev_error">#FFFF5252</color>
-    <color name="red">#FF000D</color>
+    <color name="md_theme_primary">#1264D1</color>
+    <color name="md_theme_onPrimary">#FFFFFF</color>
+    <color name="md_bg">#FAFAFA</color>
+    <color name="md_card">#FFFFFF</color>
+    <color name="md_text_primary">#1A1A1A</color>
+    <color name="md_text_secondary">#666666</color>
+    <color name="purple_500">#6750A4</color>
+    <color name="teal_700">#006D77</color>
+    <color name="brand_chip_bg">#E8F5E9</color>
+    <color name="brand_chip_text">#1B5E20</color>
     <color name="gray_light">#E0E0E0</color>
     <color name="gray">#9E9E9E</color>
     <color name="gray_dark">#616161</color>

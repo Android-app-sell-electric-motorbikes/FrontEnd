@@ -1,4 +1,4 @@
-package com.example.evshop.models;
+package com.example.evshop.domain.models;
 
 public class ApiEnvelope<T> {
     public boolean isSuccess;
