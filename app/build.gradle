@@ -89,6 +89,15 @@ dependencies {
 // Facebook Shimmer
     implementation libs.shimmer
 
+    implementation libs.androidx.core.v1150
+    implementation libs.appcompat.v170
+    implementation libs.material.v1120
+    implementation libs.androidx.constraintlayout.v220
+    implementation libs.recyclerview
+    implementation libs.androidx.cardview
+    implementation libs.androidx.core
+    implementation libs.firebase.messaging
+
 }
 
 configurations.configureEach {
