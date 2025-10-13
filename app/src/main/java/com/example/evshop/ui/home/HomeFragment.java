@@ -18,10 +18,13 @@ import com.example.evshop.data.Analytics;
 import com.example.evshop.data.HomeRepository;
 import com.example.evshop.data.TokenManager;
 import com.example.evshop.databinding.FragmentHomeBinding;
+import com.example.evshop.ui.auth.LoginActivity;
+import com.example.evshop.ui.map.VietMapMapViewActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.badge.ExperimentalBadgeUtils;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.badge.BadgeUtils;
 
@@ -38,6 +41,8 @@ public class HomeFragment extends Fragment {
     private BadgeDrawable cartBadge;
     private Handler bannerHandler;
     private Runnable bannerRunnable;
+    private static final double STORE_LAT = 16.047079;  // ví dụ Đà Nẵng
+    private static final double STORE_LNG = 108.206230;
 
 
     @Inject
@@ -58,6 +63,8 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         vm = new ViewModelProvider(this).get(HomeViewModel.class);
+        MaterialButton btnMap = view.findViewById(R.id.btnMap);
+        Chip chipUser = view.findViewById(R.id.chipUser);
         setupToolbar();
         setupBanner();
         setupChips();
@@ -66,6 +73,10 @@ public class HomeFragment extends Fragment {
         observe();
         vm.refresh();
 
+        View.OnClickListener openMap = v -> openVietMapActivity();
+
+        btnMap.setOnClickListener(openMap);
+        chipUser.setOnClickListener(openMap);
         b.btnSignIn.setOnClickListener(v -> NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_loginFragment));
 
         updateAuthUi();
@@ -73,7 +84,13 @@ public class HomeFragment extends Fragment {
         openFilterSheet();
     }
 
-
+    private void openVietMapActivity() {
+        if (getContext() == null) return;
+        Intent i = new Intent(getContext(), VietMapMapViewActivity.class);
+        i.putExtra("STORE_LAT", STORE_LAT);
+        i.putExtra("STORE_LNG", STORE_LNG);
+        startActivity(i);
+    }
     private MaterialToolbar toolbar;
 
     @OptIn(markerClass = ExperimentalBadgeUtils.class)
@@ -92,7 +109,7 @@ public class HomeFragment extends Fragment {
             MenuItem loginItem = menu.findItem(R.id.login); // id của menu
             if (loginItem != null) {
                 loginItem.setOnMenuItemClickListener(mi -> {
-                    startActivity(new Intent(requireContext(), com.example.evshop.ui.LoginActivity.class));
+                    startActivity(new Intent(requireContext(), LoginActivity.class));
                     return true;
                 });
             }

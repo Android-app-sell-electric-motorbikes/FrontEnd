@@ -38,7 +38,6 @@
                     android:inputType="text"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- ===== AUTH PANEL (hiện khi CHƯA đăng nhập) ===== -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/panelAuth"
                 android:layout_width="match_parent"
@@ -46,8 +45,7 @@
                 android:layout_marginHorizontal="12dp"
                 android:layout_marginTop="8dp"
                 app:cardCornerRadius="16dp"
-                app:cardElevation="2dp"
-                tools:visibility="visible">
+                app:cardElevation="2dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -69,37 +67,56 @@
                         android:gravity="end"
                         android:layout_marginTop="8dp">
 
+                        <!-- Nút ngắn gọn hơn -->
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnSignIn"
                             style="@style/Widget.Material3.Button.OutlinedButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:minWidth="0dp"
+                            android:paddingHorizontal="12dp"
                             android:text="@string/login"/>
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnSignUp"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
+                            android:minWidth="0dp"
+                            android:paddingHorizontal="12dp"
                             android:layout_marginStart="8dp"
                             android:text="@string/register"/>
+
+                        <!-- Nút Xem bản đồ ở BÊN PHẢI cụm đăng nhập/đăng ký -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnMap"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
+                            android:minWidth="0dp"
+                            android:paddingHorizontal="8dp"
+                            android:text="@string/view_map"
+                            app:icon="@drawable/ic_round_map_24"
+                            app:iconPadding="4dp"
+                            app:iconGravity="textStart"/>
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
 
-            <!-- ===== CHIP USER (hiện khi ĐÃ đăng nhập) ===== -->
+            <!-- ===== CHIP USER (khi ĐÃ đăng nhập) ===== -->
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipUser"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="12dp"
                 android:layout_marginTop="8dp"
+                android:layout_gravity="end"
                 android:text="@string/welcome"
                 android:visibility="gone"
                 app:chipIcon="@drawable/ic_round_person_24"
                 app:iconStartPadding="8dp"
-                app:chipIconTint="@color/black"
-                tools:visibility="gone"/>
+                app:chipIconTint="@color/black"/>
 
 
             <!-- Banner / Carousel -->

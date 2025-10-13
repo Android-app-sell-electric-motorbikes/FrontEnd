@@ -1,5 +1,5 @@
 // ui/LoginActivity.java
-package com.example.evshop.ui;
+package com.example.evshop.ui.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,6 +14,7 @@ import com.example.evshop.data.TokenManager;
 import com.example.evshop.domain.models.ApiEnvelope;
 import com.example.evshop.domain.models.LoginRequest;
 import com.example.evshop.domain.models.LoginResult;
+import com.example.evshop.ui.main.MainActivity;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import retrofit2.Call;
