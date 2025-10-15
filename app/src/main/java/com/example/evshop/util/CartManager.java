@@ -22,7 +22,7 @@ public class CartManager {
 
     public void addToCart(Product product, int quantity) {
         for (CartItem item : cartItems) {
-            if (item.getProduct().id.equals(product.id)) {
+            if (item.getProduct().getId().equals(product.getId())) {
                 item.setQuantity(item.getQuantity() + quantity);
                 return;
             }
@@ -31,12 +31,12 @@ public class CartManager {
     }
 
     public void removeFromCart(String productId) {
-        cartItems.removeIf(item -> item.getProduct().id.equals(productId));
+        cartItems.removeIf(item -> item.getProduct().getId().equals(productId));
     }
 
     public void updateQuantity(String productId, int newQuantity) {
         for (CartItem item : cartItems) {
-            if (item.getProduct().id.equals(productId)) {
+            if (item.getProduct().getId().equals(productId)) {
                 item.setQuantity(newQuantity);
                 break;
             }
@@ -66,4 +66,13 @@ public class CartManager {
         }
         return count;
     }
+
+    public long getTotalPrice() {
+        long total = 0;
+        for (CartItem item : cartItems) {
+            total += item.getProduct().getPriceVnd() * item.getQuantity();
+        }
+        return total;
+    }
+
 }

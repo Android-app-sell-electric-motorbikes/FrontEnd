@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.evshop.R;
 import com.example.evshop.domain.models.CartItem;
+import com.example.evshop.ui.CartAdapter;
 import com.example.evshop.util.CartManager;
 
 import java.util.List;
@@ -57,4 +58,6 @@ public class CartFragment extends Fragment {
         long total = CartManager.getInstance().getTotalPrice();
         tvTotal.setText("Tổng cộng: " + total + "₫");
     }
+
+
 }

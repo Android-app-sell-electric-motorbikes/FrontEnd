@@ -10,7 +10,8 @@ public class CartItem {
         this.product = product;
         this.quantity = quantity;
 
-}
+    }
+
 
     public int getQuantity() {
         return quantity;
@@ -29,6 +30,6 @@ public class CartItem {
     }
 
     public long totalPrice() {
-        return product.priceVnd * quantity;
+        return product.getPriceVnd() * quantity;
     }
 }
