@@ -1,0 +1,24 @@
+package com.example.evshop.domain.models;
+
+public class Vehicle {
+    public String id;
+    public String vin;
+    public String imageUrl;
+    public String status;
+    public double costPrice;
+
+    public Version version;
+    public Color color;
+
+    public static class Version {
+        public String versionId;
+        public String versionName;
+        public String modelId;
+        public String modelName;
+    }
+
+    public static class Color {
+        public String colorId;
+        public String colorName;
+    }
+}

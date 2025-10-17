@@ -51,6 +51,7 @@ dependencies {
     implementation libs.javapoet
     implementation libs.play.services.maps
     implementation libs.play.services.location
+    implementation libs.identity.jvm
 
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
@@ -103,7 +104,7 @@ dependencies {
     implementation libs.shimmer
 
     implementation "androidx.recyclerview:recyclerview:1.2.1"
-    implementation "androidx.cardview:cardview:1,0,0"
+    implementation "androidx.cardview:cardview:1.0.0"
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
     implementation "com.google.android.gms:play-services-location:21.0.1"
     implementation "com.jakewharton:butterknife:10.2.3"
@@ -120,7 +121,7 @@ dependencies {
     implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.2.0'
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.google.code.gson:gson:2.10.1'
-    implementation 'com.squareup.retrofit2:converter-gson:2.0.0-beta4'
+    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation libs.maps.sdk.android.v410
     implementation 'com.github.vietmap-company:maps-sdk-plugin-localization-android:2.0.0'
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'

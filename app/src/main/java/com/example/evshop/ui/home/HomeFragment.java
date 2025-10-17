@@ -20,6 +20,7 @@ import com.example.evshop.data.TokenManager;
 import com.example.evshop.databinding.FragmentHomeBinding;
 import com.example.evshop.ui.auth.LoginActivity;
 import com.example.evshop.ui.map.VietMapMapViewActivity;
+import com.example.evshop.ui.vehicle.VehicleListActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.badge.ExperimentalBadgeUtils;
@@ -78,7 +79,12 @@ public class HomeFragment extends Fragment {
         btnMap.setOnClickListener(openMap);
         chipUser.setOnClickListener(openMap);
         b.btnSignIn.setOnClickListener(v -> NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_loginFragment));
-
+        b.btnViewAllLoggedIn.setOnClickListener(v -> {
+                    // TẠO MỘT INTENT ĐỂ MỞ VEHICLELISTACTIVITY
+                    Intent intent = new Intent(getActivity(), VehicleListActivity.class);
+                    // KHỞI CHẠY ACTIVITY MỚI
+                    startActivity(intent);
+                });
         updateAuthUi();
         toggleSearch();
         openFilterSheet();
@@ -249,6 +255,7 @@ public class HomeFragment extends Fragment {
                     ? "Xin chào, " + name
                     : getString(R.string.welcome));
             b.chipUser.setVisibility(View.VISIBLE);
+            b.btnViewAllLoggedIn.setVisibility(View.VISIBLE);
         } else {
             b.chipUser.setVisibility(View.GONE);
         }

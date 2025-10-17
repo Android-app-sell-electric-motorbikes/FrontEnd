@@ -68,6 +68,7 @@
                         android:layout_marginTop="8dp">
 
                         <!-- Nút ngắn gọn hơn -->
+
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnSignIn"
                             style="@style/Widget.Material3.Button.OutlinedButton"
@@ -117,7 +118,16 @@
                 app:chipIcon="@drawable/ic_round_person_24"
                 app:iconStartPadding="8dp"
                 app:chipIconTint="@color/black"/>
-
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnViewAllLoggedIn"
+                style="@style/Widget.Material3.Button.ElevatedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginTop="8dp"
+                android:text="Xem tất cả sản phẩm"
+                android:visibility="gone"
+                app:icon="@drawable/ic_round_grid_view_24" />
 
             <!-- Banner / Carousel -->
             <androidx.viewpager2.widget.ViewPager2

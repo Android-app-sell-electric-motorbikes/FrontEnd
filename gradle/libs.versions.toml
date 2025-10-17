@@ -30,6 +30,7 @@ vietmapServicesGeojsonAndroid = "1.0.0"
 vietmapServicesTurfAndroid = "1.0.2"
 viewpager2 = "1.1.0"
 playServicesMaps = "19.2.0"
+identityJvm = "202411.1"
 
 [libraries]
 appcompat-v170 = { module = "androidx.appcompat:appcompat", version.ref = "appcompatVersion" }
@@ -68,6 +69,7 @@ vietmap-services-geojson-android = { module = "com.github.vietmap-company:vietma
 vietmap-services-turf-android = { module = "com.github.vietmap-company:vietmap-services-turf-android", version.ref = "vietmapServicesTurfAndroid" }
 viewpager2 = { module = "androidx.viewpager2:viewpager2", version.ref = "viewpager2" }
 play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
+identity-jvm = { group = "com.android.identity", name = "identity-jvm", version.ref = "identityJvm" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
