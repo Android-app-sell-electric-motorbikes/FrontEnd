@@ -64,11 +64,11 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         if (h instanceof ProductVH) {
             Product p = data.get(position);
             ProductVH vh = (ProductVH) h;
-            Glide.with(vh.img.getContext()).load(p.imageUrl).into(vh.img);
-            vh.name.setText(p.name);
-            vh.brand.setText(p.brand);
-            vh.price.setText(Formatters.currency(p.priceVnd));
-            vh.rating.setText(String.format(Locale.getDefault(), "%.1f", p.rating));
+            Glide.with(vh.img.getContext()).load(p.getImageUrl()).into(vh.img);
+            vh.name.setText(p.getName());
+            vh.brand.setText(p.getBrand());
+            vh.price.setText(Formatters.currency(p.getPriceVnd()));
+            vh.rating.setText(String.format(Locale.getDefault(), "%.1f", p.getRating()));
             vh.itemView.setOnClickListener(v -> listener.onClick(p));
         } else if (h instanceof ErrorVH) {
             ((ErrorVH) h).btnRetry.setOnClickListener(v -> { if (retry!=null) retry.run(); });

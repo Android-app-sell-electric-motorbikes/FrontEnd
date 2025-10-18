@@ -103,6 +103,17 @@ dependencies {
 // Facebook Shimmer
     implementation libs.shimmer
 
+
+    implementation libs.androidx.core.v1150
+    implementation libs.appcompat.v170
+    implementation libs.material.v1120
+    implementation libs.androidx.constraintlayout.v220
+    implementation libs.recyclerview
+    implementation libs.androidx.cardview
+    implementation libs.androidx.core
+    implementation libs.firebase.messaging
+
+
     implementation "androidx.recyclerview:recyclerview:1.2.1"
     implementation "androidx.cardview:cardview:1.0.0"
     implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
@@ -125,6 +136,7 @@ dependencies {
     implementation libs.maps.sdk.android.v410
     implementation 'com.github.vietmap-company:maps-sdk-plugin-localization-android:2.0.0'
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
+
 }
 
 configurations.configureEach {

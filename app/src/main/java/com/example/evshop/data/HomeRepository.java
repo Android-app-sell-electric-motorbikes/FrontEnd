@@ -49,44 +49,45 @@ public class HomeRepository {
 
         for (int i = 0; i < 12; i++) {
             Product p = new Product();
-            p.id = "P" + page + "_" + i;
-            p.name = (i % 2 == 0 ? "EV " : "Moto ") + (100 + page * 10 + i);
-            p.brand = brands[i % brands.length];
-            p.imageUrl = demoImage(i);
-            p.priceVnd = 12_000_000L + (long) (i * 1_500_000L) + page * 500_000L;
-            p.rating = 3.0f + (i % 30) / 10f; // 3.0 .. 5.9
-            p.category = cats[(i % (cats.length - 1)) + 1];
+            p.setId("P" + page + "_" + i);
+            p.setName((i % 2 == 0 ? "EV " : "Moto ") + (100 + page * 10 + i));
+            p.setBrand(brands[i % brands.length]);
+            p.setImageUrl(demoImage(i));
+            p.setPriceVnd(12_000_000L + (long) (i * 1_500_000L) + page * 500_000L);
+            p.setRating(3.0f + (i % 30) / 10f); // 3.0 .. 5.9
+            p.setCategory(cats[(i % (cats.length - 1)) + 1]);
             all.add(p);
         }
+
 // Filter by category
         if (category != null && !category.equals("Tất cả")) {
-            all.removeIf(p -> !p.category.equalsIgnoreCase(category));
+            all.removeIf(p -> !p.getCategory().equalsIgnoreCase(category));
         }
 // Query
         if (query != null && !query.isEmpty()) {
             String q = query.toLowerCase(Locale.ROOT);
-            all.removeIf(p -> !(p.name.toLowerCase().contains(q) || p.brand.toLowerCase().contains(q)));
+            all.removeIf(p -> !(p.getName().toLowerCase().contains(q) || p.getBrand().toLowerCase().contains(q)));
         }
 // Filters
         if (filters != null) {
             if (filters.brands != null && !filters.brands.isEmpty()) {
-                all.removeIf(p -> !filters.brands.contains(p.brand));
+                all.removeIf(p -> !filters.brands.contains(p.getBrand()));
             }
-            all.removeIf(p -> p.priceVnd > filters.maxPriceVnd);
-            all.removeIf(p -> p.rating < filters.minRating);
+            all.removeIf(p -> p.getPriceVnd() > filters.maxPriceVnd);
+            all.removeIf(p -> p.getRating() < filters.minRating);
 
             Filters.Sort sort = (filters.sort != null) ? filters.sort : Filters.Sort.POPULAR;
             all.sort((a, b) -> {
                 switch (sort) {
                     case PRICE_ASC:
-                        return Long.compare(a.priceVnd, b.priceVnd);
+                        return Long.compare(a.getPriceVnd(), b.getPriceVnd());
                     case PRICE_DESC:
-                        return Long.compare(b.priceVnd, a.priceVnd);
+                        return Long.compare(b.getPriceVnd(), a.getPriceVnd());
                     case RATING:
-                        return Float.compare(b.rating, a.rating);
+                    return Float.compare(b.getRating(), a.getRating());
                     case POPULAR:
                     default:
-                        return a.id.compareTo(b.id);
+                        return a.getId().compareTo(b.getId());
                 }
             });
         }

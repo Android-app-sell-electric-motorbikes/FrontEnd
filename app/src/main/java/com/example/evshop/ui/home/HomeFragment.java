@@ -197,8 +197,8 @@ public class HomeFragment extends Fragment {
         b.rvProducts.setLayoutManager(glm);
 
         adapter = new ProductAdapter(p -> {
-            analytics.viewProduct(p.id);
-            Toast.makeText(getContext(), "Xem " + p.name, Toast.LENGTH_SHORT).show();
+            analytics.viewProduct(p.getId());
+            Toast.makeText(getContext(), "Xem " + p.getName(), Toast.LENGTH_SHORT).show();
             // TODO: Nav to product detail when available
             Intent intent = new Intent(requireContext(), com.example.evshop.ui.ProductDetailsActivity.class);
             intent.putExtra("product_name", p.name);
