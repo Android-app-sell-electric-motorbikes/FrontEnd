@@ -24,7 +24,7 @@ public class RetrofitClient {
     private static ApiService api;
 
     // SỬA LẠI ĐỂ NHẮM THẲNG VÀO CỔNG HTTPS CỦA SERVER LOCAL
-    private static final String BASE_URL = "https://10.0.2.2:7269";
+    private static final String BASE_URL = "https://api.electricvehiclesystem.click";
 
     public static ApiService getApi(Context ctx) {
         if (api == null) {

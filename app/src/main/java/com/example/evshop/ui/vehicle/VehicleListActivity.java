@@ -39,7 +39,7 @@ public class VehicleListActivity extends AppCompatActivity {
             public void onResponse(Call<ApiEnvelope<List<Vehicle>>> call, Response<ApiEnvelope<List<Vehicle>>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess) {
                     List<Vehicle> vehicles = response.body().result;
-                    adapter = new VehicleAdapter(vehicles);
+                    adapter = new VehicleAdapter(vehicles,VehicleListActivity.this);
                     recyclerView.setAdapter(adapter);
                 } else {
                     Toast.makeText(VehicleListActivity.this, "Không tải được dữ liệu", Toast.LENGTH_SHORT).show();

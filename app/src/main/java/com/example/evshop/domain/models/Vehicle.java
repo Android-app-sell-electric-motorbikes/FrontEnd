@@ -1,12 +1,13 @@
 package com.example.evshop.domain.models;
 
+import java.util.List;
+
 public class Vehicle {
     public String id;
     public String vin;
-    public String imageUrl;
     public String status;
     public double costPrice;
-
+    public List<String> imgUrl;
     public Version version;
     public Color color;
 

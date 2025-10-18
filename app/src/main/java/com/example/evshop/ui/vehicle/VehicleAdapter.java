@@ -1,5 +1,7 @@
 package com.example.evshop.ui.vehicle;
 
+import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,14 +15,17 @@ import com.example.evshop.R;
 import com.example.evshop.domain.models.Vehicle;
 import com.squareup.picasso.Picasso;
 
+import java.text.BreakIterator;
 import java.util.List;
 
 public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.ViewHolder> {
 
     private final List<Vehicle> vehicles;
+    private final Context context;
 
-    public VehicleAdapter(List<Vehicle> vehicles) {
+    public VehicleAdapter(List<Vehicle> vehicles, Context context) {
         this.vehicles = vehicles;
+        this.context = context;
     }
 
     @NonNull
@@ -33,13 +38,28 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Vehicle v = vehicles.get(position);
-        holder.txtModel.setText(v.version != null ? v.version.modelName : "N/A");
-        holder.txtColor.setText(v.color != null ? v.color.colorName : "N/A");
+        if(v == null){
+            Log.e("VehicleAdapter", "Vehicle object at position " + position + " is null.");
+            return;
+        }
+        // 1. Đặt tên và màu sắc
+        if(v.version != null) {
+            String fullName = v.version.modelName + " " + v.version.versionName;
+            holder.txtModel.setText(fullName);
+        }
+        // 2. Định dạng giá tiền
+        holder.txtPrice.setText(String.format("%,.0f đ",v.costPrice));
+        // 3. Tải hình ảnh bằng Picasso
+        List<String> images = v.imgUrl;
 
-        if (v.imageUrl != null && !v.imageUrl.isEmpty()) {
-            Picasso.get().load(v.imageUrl).into(holder.imgVehicle);
+        if(images != null && !images.isEmpty()){
+            String imageUrl = images.get(0);
+            Picasso.get()
+                    .load(imageUrl)
+                    .placeholder(R.drawable.ic_placeholder)
+                    .into(holder.imgVehicle);
         } else {
-            holder.imgVehicle.setImageResource(R.drawable.placeholder_vehicle);
+            holder.imgVehicle.setImageResource(R.drawable.ic_placeholder);
         }
     }
 
@@ -49,6 +69,7 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.ViewHold
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
+        TextView txtPrice;
         ImageView imgVehicle;
         TextView txtModel, txtColor;
 
@@ -57,6 +78,7 @@ public class VehicleAdapter extends RecyclerView.Adapter<VehicleAdapter.ViewHold
             imgVehicle = itemView.findViewById(R.id.imgVehicle);
             txtModel = itemView.findViewById(R.id.txtModel);
             txtColor = itemView.findViewById(R.id.txtColor);
+            txtPrice = itemView.findViewById(R.id.txtPrice);
         }
     }
 }
