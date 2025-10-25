@@ -20,6 +20,7 @@ import com.example.evshop.data.TokenManager;
 import com.example.evshop.databinding.FragmentHomeBinding;
 import com.example.evshop.ui.auth.LoginActivity;
 import com.example.evshop.ui.map.VietMapMapViewActivity;
+import com.example.evshop.ui.NotificationActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.badge.ExperimentalBadgeUtils;
@@ -62,26 +63,86 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        setHasOptionsMenu(true);  // Bật menu cho fragment
         vm = new ViewModelProvider(this).get(HomeViewModel.class);
-        MaterialButton btnMap = view.findViewById(R.id.btnMap);
-        Chip chipUser = view.findViewById(R.id.chipUser);
         setupToolbar();
         setupBanner();
         setupChips();
         setupGrid();
         setupSwipe();
+        setupQuickActions();
         observe();
         vm.refresh();
 
-        View.OnClickListener openMap = v -> openVietMapActivity();
-
-        btnMap.setOnClickListener(openMap);
-        chipUser.setOnClickListener(openMap);
-        b.btnSignIn.setOnClickListener(v -> NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_loginFragment));
-
         updateAuthUi();
-        toggleSearch();
+        setupSearchBar();
         openFilterSheet();
+    }
+
+    private void setupQuickActions() {
+        // Quick Cart Action
+        View quickCart = b.getRoot().findViewById(R.id.quickCart);
+        if (quickCart != null) {
+            quickCart.setOnClickListener(v -> 
+                NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_cartFragment)
+            );
+        }
+
+        // Quick Notification Action
+        View quickNotification = b.getRoot().findViewById(R.id.quickNotification);
+        if (quickNotification != null) {
+            quickNotification.setOnClickListener(v -> 
+                startActivity(new Intent(requireContext(), NotificationActivity.class))
+            );
+        }
+
+        // Quick Map Action & Button
+        MaterialButton btnMap = b.getRoot().findViewById(R.id.btnMap);
+        View quickMap = b.getRoot().findViewById(R.id.quickMap);
+        View.OnClickListener openMap = v -> openVietMapActivity();
+        
+        if (btnMap != null) btnMap.setOnClickListener(openMap);
+        if (quickMap != null) quickMap.setOnClickListener(openMap);
+
+        // Sign In Button
+        if (b.btnSignIn != null) {
+            b.btnSignIn.setOnClickListener(v -> 
+                NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_loginFragment)
+            );
+        }
+
+        // User Chip
+        if (b.chipUser != null) {
+            b.chipUser.setOnClickListener(openMap);
+        }
+    }
+
+    private void setupSearchBar() {
+        View searchCard = b.getRoot().findViewById(R.id.searchCard);
+        if (searchCard != null) {
+            searchCard.setOnClickListener(v -> toggleSearch());
+        }
+    }
+
+    private void toggleSearch() {
+        com.google.android.material.textfield.TextInputLayout tilSearch = 
+            b.getRoot().findViewById(R.id.tilSearch);
+        com.google.android.material.textfield.TextInputEditText etSearch = 
+            b.getRoot().findViewById(R.id.etSearch);
+            
+        if (tilSearch == null || etSearch == null) return;
+        
+        int vis = (tilSearch.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE;
+        tilSearch.setVisibility(vis);
+        if (vis == View.VISIBLE) {
+            etSearch.requestFocus();
+            etSearch.setOnEditorActionListener((tv, actionId, event) -> {
+                String q = tv.getText() != null ? tv.getText().toString() : "";
+                vm.setQuery(q);
+                tilSearch.setVisibility(View.GONE);
+                return true;
+            });
+        }
     }
 
     private void openVietMapActivity() {
@@ -104,12 +165,34 @@ public class HomeFragment extends Fragment {
         toolbar.setNavigationIcon(null);
         toolbar.setTitle(R.string.title_evshop);
 
+        // Inflate menu vào toolbar
+        toolbar.getMenu().clear();
+        toolbar.inflateMenu(R.menu.menu_home);
+
         Menu menu = toolbar.getMenu();
         if (menu != null) {
             MenuItem loginItem = menu.findItem(R.id.login); // id của menu
             if (loginItem != null) {
                 loginItem.setOnMenuItemClickListener(mi -> {
                     startActivity(new Intent(requireContext(), LoginActivity.class));
+                    return true;
+                });
+            }
+
+            // Xử lý click cho Cart
+            MenuItem cartItem = menu.findItem(R.id.action_cart);
+            if (cartItem != null) {
+                cartItem.setOnMenuItemClickListener(mi -> {
+                    NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_cartFragment);
+                    return true;
+                });
+            }
+
+            // Xử lý click cho Notification
+            MenuItem notificationItem = menu.findItem(R.id.action_notification);
+            if (notificationItem != null) {
+                notificationItem.setOnMenuItemClickListener(mi -> {
+                    startActivity(new Intent(requireContext(), NotificationActivity.class));
                     return true;
                 });
             }
@@ -133,35 +216,26 @@ public class HomeFragment extends Fragment {
     }
 
 
-    private void toggleSearch() {
-        int vis = (b.tilSearch.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE;
-        b.tilSearch.setVisibility(vis);
-        if (vis == View.VISIBLE) {
-            b.etSearch.requestFocus();
-            b.etSearch.setOnEditorActionListener((tv, actionId, event) -> {
-                String q = tv.getText() != null ? tv.getText().toString() : "";
-                vm.setQuery(q);
-                return true;
-            });
-        }
-    }
-
     private void setupBanner() {
+        androidx.viewpager2.widget.ViewPager2 viewPager = 
+            b.getRoot().findViewById(R.id.viewPager);
+        if (viewPager == null) return;
+        
         List<Integer> banners = Arrays.asList(
                 R.drawable.banner_xe3,
                 R.drawable.banner_xe5,
                 R.drawable.banner_xe6
         );
-        b.viewPager.setAdapter(new BannerAdapter(banners));
+        viewPager.setAdapter(new BannerAdapter(banners));
 
         bannerHandler = new Handler(Looper.getMainLooper());
         bannerRunnable = new Runnable() {
             @Override
             public void run() {
-                if (b.viewPager.getAdapter() == null || b.viewPager.getAdapter().getItemCount() == 0)
+                if (viewPager.getAdapter() == null || viewPager.getAdapter().getItemCount() == 0)
                     return;
-                int next = (b.viewPager.getCurrentItem() + 1) % b.viewPager.getAdapter().getItemCount();
-                b.viewPager.setCurrentItem(next, true);
+                int next = (viewPager.getCurrentItem() + 1) % viewPager.getAdapter().getItemCount();
+                viewPager.setCurrentItem(next, true);
                 bannerHandler.postDelayed(this, 3000);
             }
         };
@@ -175,29 +249,68 @@ public class HomeFragment extends Fragment {
                 getString(R.string.chip_offroad),
                 getString(R.string.chip_eco)
         };
-        b.chipGroup.setSingleSelection(true);
-        for (int i = 0; i < cats.length; i++) {
-            Chip chip = new Chip(requireContext());
-            chip.setText(cats[i]);
-            chip.setCheckable(true);
-            if (i == 0) chip.setChecked(true);
-            chip.setOnClickListener(v -> vm.setCategory(chip.getText().toString()));
-            b.chipGroup.addView(chip);
+        
+        View chipGroupView = b.getRoot().findViewById(R.id.chipGroup);
+        if (chipGroupView instanceof com.google.android.material.chip.ChipGroup) {
+            com.google.android.material.chip.ChipGroup chipGroup = (com.google.android.material.chip.ChipGroup) chipGroupView;
+            chipGroup.setSingleSelection(true);
+            
+            for (int i = 0; i < cats.length; i++) {
+                Chip chip = new Chip(requireContext());
+                chip.setText(cats[i]);
+                chip.setCheckable(true);
+                chip.setChipBackgroundColorResource(R.color.surface_variant);
+                chip.setTextColor(getResources().getColor(R.color.on_surface, null));
+                chip.setCheckedIconVisible(false);
+                
+                // Styling
+                chip.setChipStrokeWidth(0f);
+                chip.setTextSize(14);
+                chip.setMinHeight(48);
+                
+                if (i == 0) {
+                    chip.setChecked(true);
+                    chip.setChipBackgroundColorResource(R.color.accent_purple);
+                    chip.setTextColor(getResources().getColor(R.color.white, null));
+                }
+                
+                chip.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    if (isChecked) {
+                        chip.setChipBackgroundColorResource(R.color.accent_purple);
+                        chip.setTextColor(getResources().getColor(R.color.white, null));
+                        vm.setCategory(chip.getText().toString());
+                    } else {
+                        chip.setChipBackgroundColorResource(R.color.surface_variant);
+                        chip.setTextColor(getResources().getColor(R.color.on_surface, null));
+                    }
+                });
+                
+                chipGroup.addView(chip);
+            }
         }
     }
 
     private void setupGrid() {
+        RecyclerView rvProducts = b.getRoot().findViewById(R.id.rvProducts);
+        if (rvProducts == null) return;
+        
         GridLayoutManager glm = new GridLayoutManager(getContext(), 2);
-        b.rvProducts.setLayoutManager(glm);
+        glm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                return 1; // Each item takes 1 span
+            }
+        });
+        rvProducts.setLayoutManager(glm);
 
         adapter = new ProductAdapter(p -> {
             analytics.viewProduct(p.getId());
             Toast.makeText(getContext(), "Xem " + p.getName(), Toast.LENGTH_SHORT).show();
             // TODO: Nav to product detail when available
         });
-        b.rvProducts.setAdapter(adapter);
+        rvProducts.setAdapter(adapter);
 
-        b.rvProducts.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        rvProducts.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView rv, int dx, int dy) {
                 super.onScrolled(rv, dx, dy);
@@ -214,17 +327,29 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupSwipe() {
-        b.swipeRefresh.setOnRefreshListener(vm::refresh);
+        androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefresh = 
+            b.getRoot().findViewById(R.id.swipeRefresh);
+        if (swipeRefresh != null) {
+            swipeRefresh.setOnRefreshListener(vm::refresh);
+            swipeRefresh.setColorSchemeResources(
+                R.color.accent_purple,
+                R.color.accent_blue,
+                R.color.accent_green
+            );
+        }
     }
 
     private void observe() {
+        androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefresh = 
+            b.getRoot().findViewById(R.id.swipeRefresh);
+            
         vm.items.observe(getViewLifecycleOwner(), list -> {
             adapter.submit(list);
-            b.swipeRefresh.setRefreshing(false);
+            if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
         });
         vm.loading.observe(getViewLifecycleOwner(), isLoading -> {
             adapter.setLoading(Boolean.TRUE.equals(isLoading));
-            b.swipeRefresh.setRefreshing(Boolean.TRUE.equals(isLoading));
+            if (swipeRefresh != null) swipeRefresh.setRefreshing(Boolean.TRUE.equals(isLoading));
         });
         vm.error.observe(getViewLifecycleOwner(), isError -> {
             adapter.setError(Boolean.TRUE.equals(isError), vm::refresh);
@@ -235,16 +360,31 @@ public class HomeFragment extends Fragment {
         String token = tokenManager != null ? tokenManager.getAccessToken() : null;
         boolean loggedIn = token != null;
 
-        b.panelAuth.setVisibility(loggedIn ? View.GONE : View.VISIBLE);
+        if (b.panelAuth != null) {
+            b.panelAuth.setVisibility(loggedIn ? View.GONE : View.VISIBLE);
+        }
 
-        if (loggedIn) {
-            String name = com.example.evshop.util.JwtUtils.getDisplayName(token);
-            b.chipUser.setText(name != null && !name.isEmpty()
-                    ? "Xin chào, " + name
-                    : getString(R.string.welcome));
-            b.chipUser.setVisibility(View.VISIBLE);
-        } else {
-            b.chipUser.setVisibility(View.GONE);
+        // Update header username
+        TextView txtUserName = b.getRoot().findViewById(R.id.txtUserName);
+        if (txtUserName != null) {
+            if (loggedIn) {
+                String name = com.example.evshop.util.JwtUtils.getDisplayName(token);
+                txtUserName.setText(name != null && !name.isEmpty() ? name : "Khách hàng");
+            } else {
+                txtUserName.setText("Khách hàng");
+            }
+        }
+
+        if (b.chipUser != null) {
+            if (loggedIn) {
+                String name = com.example.evshop.util.JwtUtils.getDisplayName(token);
+                b.chipUser.setText(name != null && !name.isEmpty()
+                        ? "Xin chào, " + name
+                        : getString(R.string.welcome));
+                b.chipUser.setVisibility(View.VISIBLE);
+            } else {
+                b.chipUser.setVisibility(View.GONE);
+            }
         }
 
         if (toolbar != null && toolbar.getMenu() != null) {
