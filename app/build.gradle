@@ -44,82 +44,47 @@ android {
     }
 }
 
-
-hilt { enableAggregatingTask = false }
+hilt {
+    enableAggregatingTask = false
+}
 
 dependencies {
-    implementation libs.javapoet
-    implementation libs.play.services.maps
-    implementation libs.play.services.location
-    implementation libs.identity.jvm
+    // ---- CORE & UI LIBS (Sắp xếp lại) ----
+    implementation libs.core.ktx // Core-KTX
+    implementation libs.appcompat.v170 // Appcompat
+    implementation libs.material // Material Design
+    implementation libs.constraintlayout // ConstraintLayout
+    implementation libs.recyclerview // RecyclerView
+    implementation libs.swiperefreshlayout // SwipeRefreshLayout
+    implementation libs.androidx.cardview // CardView
+    implementation libs.viewpager2 // ViewPager2
+    implementation libs.shimmer // Facebook Shimmer for loading effects
 
-    testImplementation libs.junit
-    androidTestImplementation libs.ext.junit
-    androidTestImplementation libs.espresso.core
-
-    implementation libs.core.ktx
-
-    implementation libs.material
-    implementation libs.appcompat.v170
-    implementation libs.constraintlayout
-    implementation libs.recyclerview
-    implementation libs.swiperefreshlayout
-
-    // Navigation
+    // ---- NAVIGATION COMPONENT ----
     implementation libs.navigation.fragment
     implementation libs.navigation.ui
 
-
-// Lifecycle / LiveData / ViewModel
+    // ---- LIFECYCLE / VIEWMODEL / LIVEDATA ----
     implementation libs.lifecycle.livedata
     implementation libs.lifecycle.viewmodel
+    // implementation "androidx.lifecycle:lifecycle-extensions:2.2.0" // Ghi chú: Thư viện này đã bị deprecated, không nên dùng
 
-
-// Hilt (Java)
+    // ---- HILT (Dependency Injection) ----
     implementation libs.hilt.android
     annotationProcessor libs.hilt.compiler
 
-
-// Retrofit / OkHttp / Gson
+    // ---- NETWORKING (BỘ DUY NHẤT ĐÚNG) ----
     implementation libs.retrofit
     implementation libs.converter.gson
     implementation libs.okhttp
     implementation libs.logging.interceptor
 
-
-// Glide
+    // ---- IMAGE LOADING ----
     implementation libs.glide
     annotationProcessor libs.compiler
+    implementation 'com.squareup.picasso:picasso:2.8' // Ghi chú: Bạn nên chọn 1 trong 2: Glide hoặc Picasso
 
-
-// ViewPager2
-    implementation libs.viewpager2
-
-
-// SwipeRefresh
-    implementation libs.swiperefreshlayout
-
-
-// Facebook Shimmer
-    implementation libs.shimmer
-
-
-    implementation libs.androidx.core.v1150
-    implementation libs.appcompat.v170
-    implementation libs.material.v1120
-    implementation libs.androidx.constraintlayout.v220
-    implementation libs.recyclerview
-    implementation libs.androidx.cardview
-    implementation libs.androidx.core
-    implementation libs.firebase.messaging
-
-
-    implementation "androidx.recyclerview:recyclerview:1.2.1"
-    implementation "androidx.cardview:cardview:1.0.0"
-    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
-    implementation "com.google.android.gms:play-services-location:21.0.1"
-    implementation "com.jakewharton:butterknife:10.2.3"
-    implementation 'androidx.core:core-ktx:1.7.0'
+    // ---- VIETMAP ----
     implementation libs.maps.sdk.android.v260
     implementation 'com.github.vietmap-company:maps-sdk-navigation-ui-android:2.3.2'
     implementation 'com.github.vietmap-company:maps-sdk-navigation-android:2.3.3'
@@ -127,18 +92,26 @@ dependencies {
     implementation 'com.github.vietmap-company:vietmap-services-directions-models:1.0.1'
     implementation 'com.github.vietmap-company:vietmap-services-turf-android:1.0.2'
     implementation 'com.github.vietmap-company:vietmap-services-android:1.1.2'
-    implementation 'com.squareup.picasso:picasso:2.8'
     implementation 'com.github.vietmap-company:vietmap-services-geojson-android:1.0.0'
-    implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '3.2.0'
-    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
-    implementation 'com.google.code.gson:gson:2.10.1'
-    implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
-    implementation libs.maps.sdk.android.v410
     implementation 'com.github.vietmap-company:maps-sdk-plugin-localization-android:2.0.0'
-    implementation 'com.squareup.okhttp3:okhttp:4.9.3'
 
+    // ---- GOOGLE SERVICES ----
+    implementation libs.play.services.location
+    implementation libs.play.services.maps
+    implementation libs.firebase.messaging // Firebase Cloud Messaging
+    implementation libs.identity.jvm // Identity
+
+    // ---- TESTING ----
+    testImplementation libs.junit
+    androidTestImplementation libs.ext.junit
+    androidTestImplementation libs.espresso.core
+
+    // ---- KHÁC ----
+    implementation libs.javapoet // Thư viện này thường dùng cho code generation, Hilt cần nó.
+    // implementation "com.jakewharton:butterknife:10.2.3" // Ghi chú: Bạn đang dùng ViewBinding, không cần ButterKnife nữa.
 }
 
+// Giữ lại phần này nếu cần
 configurations.configureEach {
     resolutionStrategy.eachDependency { details ->
         if (details.requested.group == "com.squareup" && details.requested.name == "javapoet") {

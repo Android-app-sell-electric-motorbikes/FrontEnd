@@ -30,7 +30,6 @@
         <activity
             android:name=".VietMapNavigationV2"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
-
         <activity
             android:name=".ui.map.VietMapMapViewActivity"
             android:exported="false"
@@ -52,7 +51,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ui.vehicle.VehicleListActivity"
+            android:name=".ui.vehicle.TemplateVehicleListActivity"
             android:exported="false" />
     </application>
 

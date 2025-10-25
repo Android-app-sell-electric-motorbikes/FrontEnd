@@ -16,16 +16,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.evshop.R;
 import com.example.evshop.data.Analytics;
 import com.example.evshop.data.HomeRepository;
-import com.example.evshop.data.TokenManager;
+// import com.example.evshop.data.TokenManager; // <-- KHÔNG CẦN DÙNG TRỰC TIẾP NỮA
 import com.example.evshop.databinding.FragmentHomeBinding;
-import com.example.evshop.ui.auth.LoginActivity;
+import com.example.evshop.ui.auth.AuthViewModel; // <-- **BƯỚC 1: IMPORT AUTHVIEWMODEL**
 import com.example.evshop.ui.map.VietMapMapViewActivity;
-import com.example.evshop.ui.vehicle.VehicleListActivity;
+import com.example.evshop.ui.vehicle.TemplateVehicleListActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.badge.ExperimentalBadgeUtils;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.badge.BadgeUtils;
 
@@ -38,19 +37,18 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class HomeFragment extends Fragment {
     private FragmentHomeBinding b;
     private HomeViewModel vm;
+    private AuthViewModel authViewModel; // <-- **BƯỚC 2: KHAI BÁO AUTHVIEWMODEL**
     private ProductAdapter adapter;
     private BadgeDrawable cartBadge;
     private Handler bannerHandler;
     private Runnable bannerRunnable;
-    private static final double STORE_LAT = 16.047079;  // ví dụ Đà Nẵng
+    private static final double STORE_LAT = 16.047079;
     private static final double STORE_LNG = 108.206230;
 
 
     @Inject
     Analytics analytics;
-    @Inject
-    TokenManager tokenManager;
-
+    // @Inject TokenManager tokenManager; // <-- KHÔNG CẦN INJECT TOKENMANAGER NỮA
 
     @Nullable
     @Override
@@ -63,32 +61,68 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // --- **BƯỚC 3: KHỞI TẠO CÁC VIEWMODEL** ---
         vm = new ViewModelProvider(this).get(HomeViewModel.class);
-        MaterialButton btnMap = view.findViewById(R.id.btnMap);
-        Chip chipUser = view.findViewById(R.id.chipUser);
+        // Lấy AuthViewModel được chia sẻ từ Activity
+        authViewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
+
+        // -- Giữ lại các setup cũ của bạn --
         setupToolbar();
         setupBanner();
         setupChips();
         setupGrid();
         setupSwipe();
-        observe();
+        observe(); // Observe HomeViewModel
         vm.refresh();
 
-        View.OnClickListener openMap = v -> openVietMapActivity();
-
-        btnMap.setOnClickListener(openMap);
-        chipUser.setOnClickListener(openMap);
+        // Gán sự kiện cho các nút
         b.btnSignIn.setOnClickListener(v -> NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_loginFragment));
+        b.btnSignUp.setOnClickListener(v -> NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_registerFragment)); // Đi đến login trước
+        b.btnMap.setOnClickListener(v -> openVietMapActivity());
+        b.chipUser.setOnClickListener(v -> openVietMapActivity());
         b.btnViewAllLoggedIn.setOnClickListener(v -> {
-                    // TẠO MỘT INTENT ĐỂ MỞ VEHICLELISTACTIVITY
-                    Intent intent = new Intent(getActivity(), VehicleListActivity.class);
-                    // KHỞI CHẠY ACTIVITY MỚI
-                    startActivity(intent);
-                });
-        updateAuthUi();
-        toggleSearch();
-        openFilterSheet();
+            Intent intent = new Intent(getActivity(), TemplateVehicleListActivity.class);
+            startActivity(intent);
+        });
+
+
+        // --- **BƯỚC 4: LẮNG NGHE TRẠNG THÁI ĐĂNG NHẬP** ---
+        // Hàm observe() này sẽ thay thế cho việc gọi updateAuthUi() thủ công
+        authViewModel.isLoggedIn.observe(getViewLifecycleOwner(), this::updateUiBasedOnAuthState);
+
+        // Bạn có thể gọi các hàm khác ở đây nếu cần, ví dụ:
+        // toggleSearch();
+        // openFilterSheet();
     }
+
+    // --- **BƯỚC 5: HÀM CẬP NHẬT UI MỚI, THAY THẾ updateAuthUi()** ---
+    private void updateUiBasedOnAuthState(Boolean isLoggedIn) {
+        boolean loggedIn = isLoggedIn != null && isLoggedIn;
+
+        b.panelAuth.setVisibility(loggedIn ? View.GONE : View.VISIBLE);
+        b.chipUser.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
+        b.btnViewAllLoggedIn.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
+
+        if (loggedIn) {
+            // TODO: Nâng cấp để lấy tên người dùng từ một nguồn đáng tin cậy hơn (ví dụ: một User object trong AuthViewModel)
+            // Hiện tại, có thể tạm thời hiển thị một chuỗi chào mừng chung.
+            b.chipUser.setText(getString(R.string.welcome));
+        }
+
+        // Cập nhật menu trên toolbar (nếu có)
+        if (toolbar != null && toolbar.getMenu() != null) {
+            MenuItem loginItem = toolbar.getMenu().findItem(R.id.login);
+            MenuItem logoutItem = toolbar.getMenu().findItem(R.id.action_logout);
+            if (loginItem != null) loginItem.setVisible(!loggedIn);
+            if (logoutItem != null) logoutItem.setVisible(loggedIn);
+        }
+    }
+
+
+    // ===================================================================
+    // CÁC HÀM KHÁC CỦA BẠN (GIỮ NGUYÊN, KHÔNG CẦN THAY ĐỔI)
+    // ===================================================================
 
     private void openVietMapActivity() {
         if (getContext() == null) return;
@@ -97,41 +131,27 @@ public class HomeFragment extends Fragment {
         i.putExtra("STORE_LNG", STORE_LNG);
         startActivity(i);
     }
+
     private MaterialToolbar toolbar;
 
     @OptIn(markerClass = ExperimentalBadgeUtils.class)
     private void setupToolbar() {
-
         toolbar = requireActivity().findViewById(R.id.toolbar);
         if (toolbar == null) {
-            // Không có toolbar -> bỏ qua tất cả, tránh crash
             return;
         }
         toolbar.setNavigationIcon(null);
         toolbar.setTitle(R.string.title_evshop);
 
-        Menu menu = toolbar.getMenu();
-        if (menu != null) {
-            MenuItem loginItem = menu.findItem(R.id.login); // id của menu
-            if (loginItem != null) {
-                loginItem.setOnMenuItemClickListener(mi -> {
-                    startActivity(new Intent(requireContext(), LoginActivity.class));
-                    return true;
-                });
-            }
-        }
-
         cartBadge = BadgeDrawable.create(requireContext());
         cartBadge.setNumber(0);
         cartBadge.setVisible(true);
-        // Gắn badge vào icon menu "cart"
-        // (dùng post() để chắc chắn menu đã inflate xong)
+
         toolbar.post(() -> {
             if (toolbar.getMenu() != null && toolbar.getMenu().findItem(R.id.action_cart) != null) {
                 try {
                     BadgeUtils.attachBadgeDrawable(cartBadge, toolbar, R.id.action_cart);
                 } catch (Throwable t) {
-                    // Không cho app crash
                     t.printStackTrace();
                 }
             }
@@ -201,9 +221,9 @@ public class HomeFragment extends Fragment {
             Toast.makeText(getContext(), "Xem " + p.getName(), Toast.LENGTH_SHORT).show();
             // TODO: Nav to product detail when available
             Intent intent = new Intent(requireContext(), com.example.evshop.ui.ProductDetailsActivity.class);
-            intent.putExtra("product_name", p.name);
-            intent.putExtra("product_price", p.priceVnd);
-            intent.putExtra("product_image", p.imageUrl);
+            intent.putExtra("product_name", p.getName());
+            intent.putExtra("product_price", p.getPriceVnd());
+            intent.putExtra("product_image", p.getImageUrl());
             startActivity(intent);
 
         });
@@ -243,30 +263,8 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    private void updateAuthUi() {
-        String token = tokenManager != null ? tokenManager.getAccessToken() : null;
-        boolean loggedIn = token != null;
-
-        b.panelAuth.setVisibility(loggedIn ? View.GONE : View.VISIBLE);
-
-        if (loggedIn) {
-            String name = com.example.evshop.util.JwtUtils.getDisplayName(token);
-            b.chipUser.setText(name != null && !name.isEmpty()
-                    ? "Xin chào, " + name
-                    : getString(R.string.welcome));
-            b.chipUser.setVisibility(View.VISIBLE);
-            b.btnViewAllLoggedIn.setVisibility(View.VISIBLE);
-        } else {
-            b.chipUser.setVisibility(View.GONE);
-        }
-
-        if (toolbar != null && toolbar.getMenu() != null) {
-            MenuItem loginItem = toolbar.getMenu().findItem(R.id.login);
-            if (loginItem != null) loginItem.setVisible(!loggedIn);
-        }
-    }
-
     private void openFilterSheet() {
+        if (getContext() == null) return;
         BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
         View v = LayoutInflater.from(getContext()).inflate(R.layout.sheet_filter_sort, null);
         dialog.setContentView(v);
@@ -297,13 +295,8 @@ public class HomeFragment extends Fragment {
                 txtPrice.setText("≤ " + com.example.evshop.util.Formatters.currency(progress * 1_000_000L));
             }
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
         // Rating
@@ -317,13 +310,8 @@ public class HomeFragment extends Fragment {
                 txtRating.setText("≥ " + (progress / 10f));
             }
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
         v.findViewById(R.id.btnCancel).setOnClickListener(btn -> dialog.dismiss());
@@ -345,14 +333,14 @@ public class HomeFragment extends Fragment {
             dialog.dismiss();
         });
 
-        dialog.show();
+        // Chỉ show dialog này khi có lệnh, không tự động show khi vào màn hình
+        // dialog.show();
     }
 
     @OptIn(markerClass = ExperimentalBadgeUtils.class)
     private void incrementCartBadge() {
         if (cartBadge == null || toolbar == null) return;
         cartBadge.setNumber(cartBadge.getNumber() + 1);
-        // Bảo đảm đang được attach (không crash nếu thiếu cart)
         if (toolbar.getMenu() != null && toolbar.getMenu().findItem(R.id.action_cart) != null) {
             try {
                 BadgeUtils.attachBadgeDrawable(cartBadge, toolbar, R.id.action_cart);
@@ -365,6 +353,7 @@ public class HomeFragment extends Fragment {
     @OptIn(markerClass = ExperimentalBadgeUtils.class)
     @Override public void onResume() {
         super.onResume();
+        // Không cần gọi updateAuthUi() ở đây nữa vì LiveData đã tự động xử lý.
         if (toolbar != null) {
             toolbar.post(() -> {
                 if (toolbar.getMenu() != null && toolbar.getMenu().findItem(R.id.action_cart) != null && cartBadge != null) {
@@ -376,7 +365,6 @@ public class HomeFragment extends Fragment {
         if (bannerHandler != null && bannerRunnable != null) {
             bannerHandler.postDelayed(bannerRunnable, 3000);
         }
-        updateAuthUi();
     }
 
     @Override
