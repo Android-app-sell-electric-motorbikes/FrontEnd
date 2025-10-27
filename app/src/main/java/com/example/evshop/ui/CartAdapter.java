@@ -1,5 +1,7 @@
 package com.example.evshop.ui;
 
+import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.evshop.R;
 import com.example.evshop.domain.models.CartItem;
+import com.example.evshop.domain.models.Product;
 import com.example.evshop.util.CartManager;
 
 import java.util.List;
@@ -63,38 +66,56 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         }
 
         public void bind(CartItem item) {
-            imgProduct.setImageResource(item.getProduct().getImageUrl());
-            tvName.setText(item.getProduct().getName());
-            tvPrice.setText("Giá: " + item.getProduct().getPriceVnd() + "₫");
+            Product product = item.getProduct();
+            
+            imgProduct.setImageResource(product.getImageUrl());
+            tvName.setText(product.getName());
+            tvPrice.setText("Giá: " + product.getPriceVnd() + "₫");
             tvQuantity.setText(String.valueOf(item.getQuantity()));
-            tvTotal.setText("Tổng: " + (item.getProduct().getPriceVnd() * item.getQuantity()) + "₫");
+            tvTotal.setText("Tổng: " + (product.getPriceVnd() * item.getQuantity()) + "₫");
 
-            // Nút tăng
+            // ===== TÍNH NĂNG MỚI: Click vào item để xem chi tiết sản phẩm =====
+            itemView.setOnClickListener(v -> {
+                Context ctx = v.getContext();
+                Intent intent = new Intent(ctx, ProductDetailsActivity.class);
+                intent.putExtra("product_id", product.getId());
+                intent.putExtra("product_name", product.getName());
+                intent.putExtra("product_price", product.getPriceVnd());
+                intent.putExtra("product_rating", product.getRating());
+                intent.putExtra("product_image", product.getImageUrl());
+                ctx.startActivity(intent);
+            });
+
+            // Nút tăng số lượng
             btnPlus.setOnClickListener(v -> {
                 int newQuantity = item.getQuantity() + 1;
                 item.setQuantity(newQuantity);
-                CartManager.getInstance().updateQuantity(item.getProduct().getId(), item.getQuantity());
+                CartManager.getInstance().updateQuantity(product.getId(), newQuantity);
                 notifyItemChanged(getAdapterPosition());
                 onCartUpdated.run();
             });
 
-            // Nút giảm
+            // Nút giảm số lượng
             btnMinus.setOnClickListener(v -> {
                 if (item.getQuantity() > 1) {
                     int newQuantity = item.getQuantity() - 1;
                     item.setQuantity(newQuantity);
-                    CartManager.getInstance().updateQuantity(item.getProduct().getId(), item.getQuantity());
+                    CartManager.getInstance().updateQuantity(product.getId(), newQuantity);
                     notifyItemChanged(getAdapterPosition());
                     onCartUpdated.run();
                 }
             });
 
-            // Nút xoá
+            // Nút xóa sản phẩm khỏi giỏ hàng
             btnRemove.setOnClickListener(v -> {
-                CartManager.getInstance().removeFromCart(item.getProduct().getId());
-                cartItems.remove(getAdapterPosition());
-                notifyItemRemoved(getAdapterPosition());
-                onCartUpdated.run();
+                int position = getAdapterPosition();
+                if (position != RecyclerView.NO_POSITION) {
+                    CartManager.getInstance().removeFromCart(product.getId());
+                    cartItems.remove(position);
+                    notifyItemRemoved(position);
+                    notifyItemRangeChanged(position, cartItems.size());
+                    onCartUpdated.run();
+                }
             });
         }
     }

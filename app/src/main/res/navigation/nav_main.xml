@@ -19,6 +19,12 @@
     </fragment>
 
     <fragment
+        android:id="@+id/action_cart"
+        android:name="com.example.evshop.domain.models.CartFragment"
+        android:label="Giỏ hàng"
+        tools:layout="@layout/fragment_cart" />
+
+    <fragment
         android:id="@+id/loginFragment"
         android:name="com.example.evshop.ui.auth.LoginFragment"
         android:label="@string/login"

@@ -80,7 +80,10 @@ public class HomeFragment extends Fragment {
         b.btnSignIn.setOnClickListener(v -> NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_loginFragment));
         b.btnSignUp.setOnClickListener(v -> NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_registerFragment)); // Đi đến login trước
         b.btnMap.setOnClickListener(v -> openVietMapActivity());
-        b.chipUser.setOnClickListener(v -> openVietMapActivity());
+        
+        // Profile chip - hiển thị menu profile
+        b.chipUser.setOnClickListener(v -> showProfileMenu());
+        
         b.btnViewAllLoggedIn.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), TemplateVehicleListActivity.class);
             startActivity(intent);
@@ -335,6 +338,74 @@ public class HomeFragment extends Fragment {
 
         // Chỉ show dialog này khi có lệnh, không tự động show khi vào màn hình
         // dialog.show();
+    }
+
+    private void showProfileMenu() {
+        if (getContext() == null) return;
+        
+        BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
+        
+        LinearLayout layout = new LinearLayout(getContext());
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(48, 48, 48, 48);
+        
+        // Tiêu đề
+        TextView title = new TextView(getContext());
+        title.setText("Tài khoản");
+        title.setTextSize(22);
+        title.setTextColor(getResources().getColor(R.color.black, null));
+        title.setPadding(0, 0, 0, 32);
+        title.setTypeface(null, android.graphics.Typeface.BOLD);
+        layout.addView(title);
+        
+        // Nút View Profile (tạm thời)
+        com.google.android.material.button.MaterialButton btnProfile = 
+            new com.google.android.material.button.MaterialButton(getContext());
+        btnProfile.setText("Thông tin cá nhân");
+        btnProfile.setIcon(getResources().getDrawable(R.drawable.ic_round_person_24, null));
+        btnProfile.setOnClickListener(v -> {
+            Toast.makeText(getContext(), "Chức năng đang phát triển", Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
+        });
+        
+        LinearLayout.LayoutParams btnParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        btnParams.setMargins(0, 0, 0, 16);
+        btnProfile.setLayoutParams(btnParams);
+        layout.addView(btnProfile);
+        
+        // Nút View Map
+        com.google.android.material.button.MaterialButton btnMap = 
+            new com.google.android.material.button.MaterialButton(getContext());
+        btnMap.setText("Xem bản đồ");
+        btnMap.setIcon(getResources().getDrawable(R.drawable.ic_round_map_24, null));
+        btnMap.setOnClickListener(v -> {
+            openVietMapActivity();
+            dialog.dismiss();
+        });
+        btnMap.setLayoutParams(btnParams);
+        layout.addView(btnMap);
+        
+        // Nút Logout
+        com.google.android.material.button.MaterialButton btnLogout = 
+            new com.google.android.material.button.MaterialButton(getContext());
+        btnLogout.setText("Đăng xuất");
+        btnLogout.setIcon(getResources().getDrawable(R.drawable.ic_logout, null));
+        btnLogout.setTextColor(getResources().getColor(android.R.color.holo_red_dark, null));
+        btnLogout.setIconTint(android.content.res.ColorStateList.valueOf(
+            getResources().getColor(android.R.color.holo_red_dark, null)));
+        btnLogout.setOnClickListener(v -> {
+            authViewModel.logout();
+            Toast.makeText(getContext(), "Đã đăng xuất", Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
+        });
+        btnLogout.setLayoutParams(btnParams);
+        layout.addView(btnLogout);
+        
+        dialog.setContentView(layout);
+        dialog.show();
     }
 
     @OptIn(markerClass = ExperimentalBadgeUtils.class)

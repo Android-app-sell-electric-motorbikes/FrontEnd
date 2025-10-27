@@ -47,11 +47,26 @@ public class CartFragment extends Fragment {
 
         btnClear.setOnClickListener(v -> {
             CartManager.getInstance().clearCart();
-            adapter.notifyDataSetChanged();
-            updateTotal();
+            refreshCartData();
         });
 
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Refresh dữ liệu mỗi khi người dùng quay lại fragment này
+        refreshCartData();
+    }
+
+    private void refreshCartData() {
+        if (recyclerView == null) return; // Đảm bảo view đã được khởi tạo
+        
+        List<CartItem> updatedCartItems = CartManager.getInstance().getCartItems();
+        adapter = new CartAdapter(updatedCartItems, this::updateTotal);
+        recyclerView.setAdapter(adapter);
+        updateTotal();
     }
 
     private void updateTotal() {
