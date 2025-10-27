@@ -1,12 +1,10 @@
 // File: ApiService.java
 package com.example.evshop.data;
 
-import com.example.evshop.domain.models.Version;
 import com.example.evshop.domain.models.ApiEnvelope;
 import com.example.evshop.domain.models.LoginRequest;
 import com.example.evshop.domain.models.LoginResult;
 import com.example.evshop.domain.models.TemplateVehicle;
-// *** BƯỚC 1: THÊM IMPORT CHO LỚP VersionDetails MÀ BẠN ĐÃ TẠO ***
 import com.example.evshop.domain.models.VersionDetails;
 
 import java.util.List;
@@ -24,11 +22,20 @@ public interface ApiService {
         Call<ApiEnvelope<LoginResult>> login(@Body LoginRequest body);
 
         //---Vehicle----
+        // API lấy TẤT CẢ các xe, dùng cho màn hình chính
         @GET("api/EVTemplate/Get-all-template-vehicles")
         Call<ApiEnvelope<List<TemplateVehicle>>> getAllTemplateVehicles();
 
-        // API để lấy thông tin chi tiết của một phiên bản xe bằng ID
-        // *** BƯỚC 2: SỬ DỤNG LỚP VersionDetails ĐÃ ĐƯỢC IMPORT ***
+        /**
+         * =========================================================================
+         *  SỬA LẠI API LẤY CHI TIẾT XE THEO ĐÚNG LINK BẠN CUNG CẤP
+         * =========================================================================
+         * - Đường dẫn chính xác là "api/EVTemplate/get-template-by-id/{id}"
+         */
+        @GET("api/EVTemplate/get-template-by-id/{id}")
+        Call<ApiEnvelope<TemplateVehicle>> getVehicleById(@Path("id") String vehicleId);
+
+        // API để lấy thông tin chi tiết của một phiên bản xe (có thể dùng sau này)
         @GET("api/ElectricVehicleVersion/get-version-by-id/{versionId}")
         Call<ApiEnvelope<VersionDetails>> getVersionDetails(
                 @Path("versionId") String versionId

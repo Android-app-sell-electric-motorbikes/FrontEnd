@@ -1,35 +1,50 @@
 package com.example.evshop.ui.home;
 
 import android.content.Intent;
-import android.os.*;
-import android.view.*;
-import android.widget.*;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.CheckBox;
+import android.widget.LinearLayout;
+import android.widget.RadioGroup;
+import android.widget.SeekBar;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager; // <-- ĐÃ THAY ĐỔI
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.evshop.R;
 import com.example.evshop.data.Analytics;
-import com.example.evshop.data.HomeRepository;
-// import com.example.evshop.data.TokenManager; // <-- KHÔNG CẦN DÙNG TRỰC TIẾP NỮA
 import com.example.evshop.databinding.FragmentHomeBinding;
-import com.example.evshop.ui.auth.AuthViewModel; // <-- **BƯỚC 1: IMPORT AUTHVIEWMODEL**
+import com.example.evshop.ui.adapter.FeaturedVehicleAdapter; // <-- ĐÃ THAY ĐỔI
+import com.example.evshop.ui.auth.AuthViewModel;
 import com.example.evshop.ui.map.VietMapMapViewActivity;
 import com.example.evshop.ui.vehicle.TemplateVehicleListActivity;
+import com.example.evshop.ui.vehicle.VehicleDetailActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.badge.BadgeDrawable;
+import com.google.android.material.badge.BadgeUtils;
 import com.google.android.material.badge.ExperimentalBadgeUtils;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.chip.Chip;
-import com.google.android.material.badge.BadgeUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import javax.inject.Inject;
+
 import dagger.hilt.android.AndroidEntryPoint;
 
 
@@ -37,8 +52,8 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class HomeFragment extends Fragment {
     private FragmentHomeBinding b;
     private HomeViewModel vm;
-    private AuthViewModel authViewModel; // <-- **BƯỚC 2: KHAI BÁO AUTHVIEWMODEL**
-    private ProductAdapter adapter;
+    private AuthViewModel authViewModel;
+    private FeaturedVehicleAdapter featuredVehicleAdapter; // <-- ĐÃ SỬA TÊN ADAPTER
     private BadgeDrawable cartBadge;
     private Handler bannerHandler;
     private Runnable bannerRunnable;
@@ -48,7 +63,6 @@ public class HomeFragment extends Fragment {
 
     @Inject
     Analytics analytics;
-    // @Inject TokenManager tokenManager; // <-- KHÔNG CẦN INJECT TOKENMANAGER NỮA
 
     @Nullable
     @Override
@@ -62,23 +76,19 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // --- **BƯỚC 3: KHỞI TẠO CÁC VIEWMODEL** ---
         vm = new ViewModelProvider(this).get(HomeViewModel.class);
-        // Lấy AuthViewModel được chia sẻ từ Activity
         authViewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
 
-        // -- Giữ lại các setup cũ của bạn --
         setupToolbar();
         setupBanner();
         setupChips();
-        setupGrid();
-        setupSwipe();
-        observe(); // Observe HomeViewModel
+        setupFeaturedVehicleList(); // <-- ĐÃ ĐỔI TÊN HÀM CHO ĐÚNG
+        setupSwipeRefresh();
+        observeViewModel();
         vm.refresh();
 
-        // Gán sự kiện cho các nút
         b.btnSignIn.setOnClickListener(v -> NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_loginFragment));
-        b.btnSignUp.setOnClickListener(v -> NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_registerFragment)); // Đi đến login trước
+        b.btnSignUp.setOnClickListener(v -> NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_registerFragment));
         b.btnMap.setOnClickListener(v -> openVietMapActivity());
         b.chipUser.setOnClickListener(v -> openVietMapActivity());
         b.btnViewAllLoggedIn.setOnClickListener(v -> {
@@ -86,17 +96,78 @@ public class HomeFragment extends Fragment {
             startActivity(intent);
         });
 
-
-        // --- **BƯỚC 4: LẮNG NGHE TRẠNG THÁI ĐĂNG NHẬP** ---
-        // Hàm observe() này sẽ thay thế cho việc gọi updateAuthUi() thủ công
         authViewModel.isLoggedIn.observe(getViewLifecycleOwner(), this::updateUiBasedOnAuthState);
-
-        // Bạn có thể gọi các hàm khác ở đây nếu cần, ví dụ:
-        // toggleSearch();
-        // openFilterSheet();
     }
 
-    // --- **BƯỚC 5: HÀM CẬP NHẬT UI MỚI, THAY THẾ updateAuthUi()** ---
+    private void setupSwipeRefresh() {
+        b.swipeRefresh.setOnRefreshListener(vm::refresh);
+        authViewModel.isLoggedIn.observe(getViewLifecycleOwner(), isLoggedIn -> {
+            b.swipeRefresh.setEnabled(isLoggedIn != null && isLoggedIn);
+        });
+    }
+
+    // =================================================================================
+    //  PHẦN CHỈNH SỬA QUAN TRỌNG NHẤT
+    // =================================================================================
+    private void setupFeaturedVehicleList() {
+        // 1. Dùng LinearLayoutManager để hiển thị danh sách dọc
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
+        b.rvFeaturedVehicles.setLayoutManager(layoutManager);
+
+        // 2. Tắt cuộn lồng nhau để toàn bộ màn hình cuộn mượt mà
+        b.rvFeaturedVehicles.setNestedScrollingEnabled(false);
+
+        // 3. Khởi tạo FeaturedVehicleAdapter
+        featuredVehicleAdapter = new FeaturedVehicleAdapter(template -> {
+            // ==========================================================
+            // THAY ĐỔI LOGIC CLICK TẠI ĐÂY
+            // ==========================================================
+
+            // 1. Lấy Context một cách an toàn
+            if (getContext() == null) {
+                return;
+            }
+
+            // 2. Tạo một Intent để mở VehicleDetailActivity
+            Intent intent = new Intent(getContext(), VehicleDetailActivity.class);
+
+            // 3. Đặt ID của chiếc xe vào Intent. Dùng "VEHICLE_ID" làm chìa khóa (key).
+            intent.putExtra("VEHICLE_ID", template.getId());
+
+            // 4. Bắt đầu Activity mới
+            startActivity(intent);
+
+            // analytics.viewProduct(template.getId()); // Bạn có thể kích hoạt lại nếu cần
+        });
+
+        // 4. Gán adapter cho RecyclerView
+        b.rvFeaturedVehicles.setAdapter(featuredVehicleAdapter);
+    }
+
+    private void observeViewModel() {
+        // Lắng nghe LiveData chứa danh sách XE NỔI BẬT
+        vm.featuredVehicles.observe(getViewLifecycleOwner(), vehicles -> {
+            if (vehicles != null) {
+                // Sử dụng phương thức setVehicles của FeaturedVehicleAdapter
+                featuredVehicleAdapter.setVehicles(vehicles);
+                b.tvFeaturedVehiclesTitle.setVisibility(vehicles.isEmpty() ? View.GONE : View.VISIBLE);
+                b.rvFeaturedVehicles.setVisibility(vehicles.isEmpty() ? View.GONE : View.VISIBLE);
+            }
+        });
+
+        vm.loading.observe(getViewLifecycleOwner(), isLoading -> {
+            if (isLoading != null) {
+                b.swipeRefresh.setRefreshing(isLoading);
+            }
+        });
+
+        vm.error.observe(getViewLifecycleOwner(), error -> {
+            if (error != null && error) {
+                Toast.makeText(getContext(), "Lỗi khi tải dữ liệu", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     private void updateUiBasedOnAuthState(Boolean isLoggedIn) {
         boolean loggedIn = isLoggedIn != null && isLoggedIn;
 
@@ -105,12 +176,9 @@ public class HomeFragment extends Fragment {
         b.btnViewAllLoggedIn.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
 
         if (loggedIn) {
-            // TODO: Nâng cấp để lấy tên người dùng từ một nguồn đáng tin cậy hơn (ví dụ: một User object trong AuthViewModel)
-            // Hiện tại, có thể tạm thời hiển thị một chuỗi chào mừng chung.
             b.chipUser.setText(getString(R.string.welcome));
         }
 
-        // Cập nhật menu trên toolbar (nếu có)
         if (toolbar != null && toolbar.getMenu() != null) {
             MenuItem loginItem = toolbar.getMenu().findItem(R.id.login);
             MenuItem logoutItem = toolbar.getMenu().findItem(R.id.action_logout);
@@ -121,7 +189,7 @@ public class HomeFragment extends Fragment {
 
 
     // ===================================================================
-    // CÁC HÀM KHÁC CỦA BẠN (GIỮ NGUYÊN, KHÔNG CẦN THAY ĐỔI)
+    // CÁC HÀM KHÁC GIỮ NGUYÊN (KHÔNG THAY ĐỔI)
     // ===================================================================
 
     private void openVietMapActivity() {
@@ -212,68 +280,15 @@ public class HomeFragment extends Fragment {
         }
     }
 
-    private void setupGrid() {
-        GridLayoutManager glm = new GridLayoutManager(getContext(), 2);
-        b.rvProducts.setLayoutManager(glm);
-
-        adapter = new ProductAdapter(p -> {
-            analytics.viewProduct(p.getId());
-            Toast.makeText(getContext(), "Xem " + p.getName(), Toast.LENGTH_SHORT).show();
-            // TODO: Nav to product detail when available
-            Intent intent = new Intent(requireContext(), com.example.evshop.ui.ProductDetailsActivity.class);
-            intent.putExtra("product_name", p.getName());
-            intent.putExtra("product_price", p.getPriceVnd());
-            intent.putExtra("product_image", p.getImageUrl());
-            startActivity(intent);
-
-        });
-        b.rvProducts.setAdapter(adapter);
-
-        b.rvProducts.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView rv, int dx, int dy) {
-                super.onScrolled(rv, dx, dy);
-                if (dy > 0) {
-                    int visible = glm.getChildCount();
-                    int total = glm.getItemCount();
-                    int first = glm.findFirstVisibleItemPosition();
-                    if (visible + first >= total - 2) {
-                        vm.loadMore();
-                    }
-                }
-            }
-        });
-    }
-
-    private void setupSwipe() {
-        b.swipeRefresh.setOnRefreshListener(vm::refresh);
-    }
-
-    private void observe() {
-        vm.items.observe(getViewLifecycleOwner(), list -> {
-            adapter.submit(list);
-            b.swipeRefresh.setRefreshing(false);
-        });
-        vm.loading.observe(getViewLifecycleOwner(), isLoading -> {
-            adapter.setLoading(Boolean.TRUE.equals(isLoading));
-            b.swipeRefresh.setRefreshing(Boolean.TRUE.equals(isLoading));
-        });
-        vm.error.observe(getViewLifecycleOwner(), isError -> {
-            adapter.setError(Boolean.TRUE.equals(isError), vm::refresh);
-        });
-    }
-
     private void openFilterSheet() {
         if (getContext() == null) return;
         BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
         View v = LayoutInflater.from(getContext()).inflate(R.layout.sheet_filter_sort, null);
         dialog.setContentView(v);
 
-        // Sort
         RadioGroup rg = v.findViewById(R.id.rgSort);
         rg.check(R.id.rbPopular);
 
-        // Brands (mock)
         LinearLayout brandContainer = v.findViewById(R.id.brandContainer);
         String[] brands = {"VoltX", "EVM", "GreenGo", "Thunder", "EcoRide"};
         List<CheckBox> brandChecks = new ArrayList<>();
@@ -284,11 +299,10 @@ public class HomeFragment extends Fragment {
             brandChecks.add(cb);
         }
 
-        // Price
         SeekBar seekPrice = v.findViewById(R.id.seekPrice);
         TextView txtPrice = v.findViewById(R.id.txtPriceValue);
         seekPrice.setProgress(150);
-        txtPrice.setText("≤ " + com.example.evshop.util.Formatters.currency(150_000_000));
+        txtPrice.setText("≤ " + com.example.evshop.util.Formatters.currency(150_000_000L));
         seekPrice.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -299,7 +313,6 @@ public class HomeFragment extends Fragment {
             @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
-        // Rating
         SeekBar seekRating = v.findViewById(R.id.seekRating);
         TextView txtRating = v.findViewById(R.id.txtRatingMin);
         seekRating.setProgress(30);
@@ -316,12 +329,13 @@ public class HomeFragment extends Fragment {
 
         v.findViewById(R.id.btnCancel).setOnClickListener(btn -> dialog.dismiss());
         v.findViewById(R.id.btnApply).setOnClickListener(btn -> {
-            HomeRepository.Filters f = new HomeRepository.Filters();
+            HomeViewModel.Filters f = new HomeViewModel.Filters();
             int checked = rg.getCheckedRadioButtonId();
-            if (checked == R.id.rbPriceAsc) f.sort = HomeRepository.Filters.Sort.PRICE_ASC;
-            else if (checked == R.id.rbPriceDesc) f.sort = HomeRepository.Filters.Sort.PRICE_DESC;
-            else if (checked == R.id.rbRating) f.sort = HomeRepository.Filters.Sort.RATING;
-            else f.sort = HomeRepository.Filters.Sort.POPULAR;
+
+            if (checked == R.id.rbPriceAsc) f.sort = HomeViewModel.Filters.Sort.PRICE_ASC;
+            else if (checked == R.id.rbPriceDesc) f.sort = HomeViewModel.Filters.Sort.PRICE_DESC;
+            else if (checked == R.id.rbRating) f.sort = HomeViewModel.Filters.Sort.RATING;
+            else f.sort = HomeViewModel.Filters.Sort.POPULAR;
 
             for (CheckBox cb : brandChecks)
                 if (cb.isChecked()) f.brands.add(cb.getText().toString());
@@ -332,10 +346,8 @@ public class HomeFragment extends Fragment {
             analytics.applyFilter("sort=" + f.sort + ", brands=" + f.brands + ", price<=" + f.maxPriceVnd + ", rating>=" + f.minRating);
             dialog.dismiss();
         });
-
-        // Chỉ show dialog này khi có lệnh, không tự động show khi vào màn hình
-        // dialog.show();
     }
+
 
     @OptIn(markerClass = ExperimentalBadgeUtils.class)
     private void incrementCartBadge() {
@@ -353,7 +365,6 @@ public class HomeFragment extends Fragment {
     @OptIn(markerClass = ExperimentalBadgeUtils.class)
     @Override public void onResume() {
         super.onResume();
-        // Không cần gọi updateAuthUi() ở đây nữa vì LiveData đã tự động xử lý.
         if (toolbar != null) {
             toolbar.post(() -> {
                 if (toolbar.getMenu() != null && toolbar.getMenu().findItem(R.id.action_cart) != null && cartBadge != null) {

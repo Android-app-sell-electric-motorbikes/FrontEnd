@@ -12,6 +12,5 @@ import javax.inject.Singleton;
 @Module
 @InstallIn(SingletonComponent.class)
 public class AppModule {
-    @Provides @Singleton public HomeRepository provideHomeRepository() { return new HomeRepository(); }
     @Provides @Singleton public Analytics provideAnalytics() { return new Analytics(); }
 }

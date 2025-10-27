@@ -49,7 +49,7 @@ public class TemplateVehicleAdapter extends RecyclerView.Adapter<TemplateVehicle
 
     public void onDetailsFetched(int position, VersionDetails details) {
         if (details != null && position < vehicles.size()) {
-            String versionId = vehicles.get(position).getVersion().getId();
+            String versionId = vehicles.get(position).getVersion().getVersionName();
             if (versionId != null) {
                 fetchedDetails.put(versionId, details);
                 notifyItemChanged(position);
@@ -72,7 +72,7 @@ public class TemplateVehicleAdapter extends RecyclerView.Adapter<TemplateVehicle
         }
 
         // *** BƯỚC KIỂM TRA ĐẦU TIÊN: Lấy versionId và log ra ngay lập tức ***
-        final String versionId = vehicle.getVersion().getId();
+        final String versionId = vehicle.getVersion().getVersionId();
         Log.d("ADAPTER_DEBUG", "Binding item vị trí " + position + ". Lấy được versionId: " + versionId);
 
         // Nếu versionId bị null ở đây, mọi thứ phía sau sẽ không hoạt động.
@@ -113,6 +113,7 @@ public class TemplateVehicleAdapter extends RecyclerView.Adapter<TemplateVehicle
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
+        // SỬA LỖI: Khai báo tất cả các View ở đây, như là các trường của lớp
         final ImageView imgVehicle;
         final TextView txtModel, txtColor, txtPrice;
         final FrameLayout detailsContainer;
@@ -124,6 +125,7 @@ public class TemplateVehicleAdapter extends RecyclerView.Adapter<TemplateVehicle
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             context = itemView.getContext();
+            // Bây giờ, các dòng findViewById sẽ gán giá trị cho các trường đã khai báo ở trên
             imgVehicle = itemView.findViewById(R.id.imgVehicle);
             txtModel = itemView.findViewById(R.id.txtModel);
             txtColor = itemView.findViewById(R.id.txtColor);
@@ -139,6 +141,7 @@ public class TemplateVehicleAdapter extends RecyclerView.Adapter<TemplateVehicle
         }
 
         void bindBasicInfo(TemplateVehicle vehicle) {
+            // Các biến đã được nhận diện và có thể sử dụng ở đây
             txtModel.setText(vehicle.getVersion().getVersionName());
             txtColor.setText(vehicle.getColor().getColorName());
             NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
@@ -152,8 +155,10 @@ public class TemplateVehicleAdapter extends RecyclerView.Adapter<TemplateVehicle
         }
 
         void updateDetailsView(boolean isExpanded, VersionDetails details) {
+            // Các biến đã được nhận diện và có thể sử dụng ở đây
             detailsContainer.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
             if (!isExpanded) return;
+
             if (details == null) {
                 detailsProgressBar.setVisibility(View.VISIBLE);
                 layoutDetailsContent.setVisibility(View.INVISIBLE);
@@ -168,4 +173,6 @@ public class TemplateVehicleAdapter extends RecyclerView.Adapter<TemplateVehicle
             }
         }
     }
+
 }
+

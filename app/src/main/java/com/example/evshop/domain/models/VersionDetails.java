@@ -27,6 +27,14 @@ public class VersionDetails {
 
     @SerializedName("description")
     private String description;
+    @SerializedName("batteryCapacity")
+    private int batteryCapacity;
+
+    @SerializedName("weight")
+    private int weight;
+
+    @SerializedName("height")
+    private int height;
 
     // --- Getters ---
     public String getId() { return id; }
@@ -36,4 +44,8 @@ public class VersionDetails {
     public int getTopSpeed() { return topSpeed; }
     public int getProductionYear() { return productionYear; }
     public String getDescription() { return description; }
+    public int getBatteryCapacity() { return batteryCapacity; }
+    public int getWeight() { return weight; }
+
+    public int getHeight() { return height; }
 }
