@@ -45,7 +45,7 @@ public class NetworkModule {
     @Provides @Singleton
     public Retrofit provideRetrofit(OkHttpClient client, Gson gson){
         return new Retrofit.Builder()
-                .baseUrl("https://api.metrohcmc.xyz/")
+                .baseUrl("https://api.electricvehiclesystem.click/")
                 .client(client)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
