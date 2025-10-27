@@ -5,7 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
+import com.example.evshop.R;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -38,6 +38,11 @@ public class LoginFragment extends Fragment {
             String email = String.valueOf(b.etEmail.getText());
             String pass  = String.valueOf(b.etPassword.getText());
             vm.login(email, pass);
+        });
+
+        b.tvSignup.setOnClickListener(v -> {
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_loginFragment_to_registerFragment);
         });
 
         vm.getState().observe(getViewLifecycleOwner(), st -> {

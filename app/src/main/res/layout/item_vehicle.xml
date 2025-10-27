@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="4dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginBottom="4dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="4dp">
+
+    <!--
+        Thay đổi quan trọng:
+        Bỏ clickable và focusable ở đây, để CardView tự xử lý.
+        Thêm background để hiệu ứng gợn sóng hoạt động tốt hơn.
+     -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/root_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground">
+
+        <!-- Phần thông tin cơ bản không thay đổi -->
+        <ImageView
+            android:id="@+id/imgVehicle"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:importantForAccessibility="no"
+            android:scaleType="centerCrop"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:src="@tools:sample/avatars" />
+
+        <TextView
+            android:id="@+id/txtModel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/imgVehicle"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="VoltX Urban Rider V2" />
+
+        <TextView
+            android:id="@+id/txtColor"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            app:layout_constraintStart_toEndOf="@id/imgVehicle"
+            app:layout_constraintTop_toBottomOf="@id/txtModel"
+            tools:text="Xanh Dương" />
+
+        <TextView
+            android:id="@+id/txtPrice"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:textColor="?attr/colorPrimary"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/imgVehicle"
+            app:layout_constraintTop_toBottomOf="@id/txtColor"
+            tools:text="25.000.000 ₫" />
+
+        <!--
+            Container chứa phần chi tiết.
+            Vẫn giữ clickable/focusable là false để đảm bảo không chặn click.
+        -->
+        <FrameLayout
+            android:id="@+id/details_container"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:focusable="false"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/imgVehicle"
+            tools:visibility="visible">
+
+            <ProgressBar
+                android:id="@+id/details_progress_bar"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:padding="16dp" />
+
+            <LinearLayout
+                android:id="@+id/layout_details_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:visibility="invisible"
+                tools:visibility="visible">
+
+                <TextView
+                    android:id="@+id/txtDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:textStyle="italic"
+                    tools:text="Phiên bản thành phố, nhỏ gọn, dễ điều khiển và tiết kiệm điện năng." />
+
+                <TextView
+                    android:id="@+id/txtMotorPower"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:text="Công suất: 2000W" />
+
+                <TextView
+                    android:id="@+id/txtRange"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:text="Quãng đường: 90km" />
+
+                <TextView
+                    android:id="@+id/txtTopSpeed"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:text="Tốc độ: 65km/h" />
+
+                <TextView
+                    android:id="@+id/txtProductionYear"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:text="Năm SX: 2024" />
+
+            </LinearLayout>
+        </FrameLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>

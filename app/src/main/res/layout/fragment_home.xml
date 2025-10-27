@@ -1,385 +1,171 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/swipeRefresh"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/surface_variant">
+    android:layout_height="match_parent">
 
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRefresh"
+
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-        <androidx.core.widget.NestedScrollView
+
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fillViewport="true">
+            android:layout_height="wrap_content">
 
-            <LinearLayout
+
+            <!-- Inline Search bar (toggle visibility) -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilSearch"
+                style="@style/Widget.Material3.TextInputLayout.FilledBox.Dense"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <!-- ============== HEADER WITH GRADIENT ============== -->
-                <RelativeLayout
+                android:visibility="gone"
+                android:padding="12dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etSearch"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/bg_gradient_header"
-                    android:paddingTop="16dp"
-                    android:paddingBottom="32dp"
-                    android:paddingHorizontal="20dp">
+                    android:hint="@string/hint_search"
+                    android:imeOptions="actionSearch"
+                    android:importantForAutofill="no"
+                    android:inputType="text"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- Welcome Text / User Chip -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/panelAuth"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginTop="8dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/txtAuthTitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/notify_login_or_register"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"/>
+
                     <LinearLayout
-                        android:id="@+id/headerTop"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="16dp">
-
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:id="@+id/txtWelcome"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Xin chào 👋"
-                                android:textColor="@color/white"
-                                android:textSize="16sp"
-                                android:textStyle="normal"/>
-
-                            <TextView
-                                android:id="@+id/txtUserName"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Khách hàng"
-                                android:textColor="@color/white"
-                                android:textSize="22sp"
-                                android:textStyle="bold"
-                                android:layout_marginTop="4dp"/>
-                        </LinearLayout>
-
-                        <!-- Quick Actions Icons (placeholder for future) -->
-                    </LinearLayout>
-
-                    <!-- Search Bar -->
-                    <com.google.android.material.card.MaterialCardView
-                        android:id="@+id/searchCard"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/headerTop"
-                        app:cardCornerRadius="16dp"
-                        app:cardElevation="4dp"
-                        app:cardBackgroundColor="@color/white">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:padding="14dp"
-                            android:gravity="center_vertical">
-
-                            <ImageView
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:src="@drawable/ic_search_24"
-                                android:contentDescription="@string/menu_search"
-                                app:tint="@color/gray"/>
-
-                            <TextView
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="@string/hint_search"
-                                android:textColor="@color/gray"
-                                android:textSize="15sp"
-                                android:layout_marginStart="12dp"/>
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
-
-                    <!-- Hidden Search Input -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/tilSearch"
-                        style="@style/Widget.Material3.TextInputLayout.FilledBox.Dense"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_below="@id/searchCard"
-                        android:visibility="gone"
+                        android:gravity="end"
                         android:layout_marginTop="8dp">
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etSearch"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="@string/hint_search"
-                            android:imeOptions="actionSearch"
-                            android:importantForAutofill="no"
-                            android:inputType="text"/>
-                    </com.google.android.material.textfield.TextInputLayout>
-                </RelativeLayout>
 
-                <!-- ============== AUTH PANEL (Not Logged In) ============== -->
-                <com.google.android.material.card.MaterialCardView
-                    android:id="@+id/panelAuth"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="16dp"
-                    android:layout_marginTop="-16dp"
-                    app:cardCornerRadius="20dp"
-                    app:cardElevation="6dp"
-                    app:cardBackgroundColor="@color/white"
-                    android:visibility="gone">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:padding="20dp">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="🎉 Đăng nhập để nhận ưu đãi"
-                            android:textColor="@color/on_surface"
-                            android:textSize="16sp"
-                            android:textStyle="bold"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Mua sắm nhanh hơn và theo dõi đơn hàng"
-                            android:textColor="@color/on_surface_variant"
-                            android:textSize="14sp"
-                            android:layout_marginTop="8dp"/>
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:layout_marginTop="16dp"
-                            android:gravity="center">
-
-                            <com.google.android.material.button.MaterialButton
-                                android:id="@+id/btnSignIn"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="@string/login"
-                                android:textSize="15sp"
-                                app:cornerRadius="12dp"
-                                android:paddingVertical="12dp"/>
-
-                            <com.google.android.material.button.MaterialButton
-                                android:id="@+id/btnSignUp"
-                                style="@style/Widget.Material3.Button.OutlinedButton"
-                                android:layout_width="0dp"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                android:text="@string/register"
-                                android:textSize="15sp"
-                                app:cornerRadius="12dp"
-                                android:paddingVertical="12dp"
-                                android:layout_marginStart="12dp"/>
-                        </LinearLayout>
-                    </LinearLayout>
-                </com.google.android.material.card.MaterialCardView>
-
-                <!-- User Chip (When logged in) -->
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/chipUser"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="16dp"
-                    android:layout_marginTop="8dp"
-                    android:layout_gravity="end"
-                    android:text="@string/welcome"
-                    android:visibility="gone"
-                    app:chipIcon="@drawable/ic_round_person_24"
-                    app:iconStartPadding="8dp"/>
-
-                <!-- ============== QUICK ACTIONS ============== -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="16dp"
-                    android:paddingVertical="16dp"
-                    android:gravity="center">
-
-                    <!-- Cart Quick Action -->
-                    <LinearLayout
-                        android:id="@+id/quickCart"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:background="@drawable/bg_quick_action"
-                        android:padding="16dp"
-                        android:gravity="center"
-                        android:layout_marginEnd="8dp">
-
-                        <ImageView
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:src="@drawable/ic_cart_24"
-                            android:contentDescription="@string/menu_cart"
-                            app:tint="@color/accent_blue"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Giỏ hàng"
-                            android:textColor="@color/on_surface"
-                            android:textSize="13sp"
-                            android:layout_marginTop="8dp"
-                            android:textStyle="bold"/>
-                    </LinearLayout>
-
-                    <!-- Notification Quick Action -->
-                    <LinearLayout
-                        android:id="@+id/quickNotification"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:background="@drawable/bg_quick_action"
-                        android:padding="16dp"
-                        android:gravity="center"
-                        android:layout_marginEnd="8dp">
-
-                        <ImageView
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:src="@drawable/ic_notifications_24"
-                            android:contentDescription="Thông báo"
-                            app:tint="@color/accent_purple"/>
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Thông báo"
-                            android:textColor="@color/on_surface"
-                            android:textSize="13sp"
-                            android:layout_marginTop="8dp"
-                            android:textStyle="bold"/>
-                    </LinearLayout>
-
-                    <!-- Map Quick Action -->
-                    <LinearLayout
-                        android:id="@+id/quickMap"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:background="@drawable/bg_quick_action"
-                        android:padding="16dp"
-                        android:gravity="center">
+                        <!-- Nút ngắn gọn hơn -->
 
                         <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnMap"
-                            style="@style/Widget.Material3.Button.IconButton"
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            app:icon="@drawable/ic_round_map_24"
-                            app:iconTint="@color/accent_green"
-                            app:iconSize="24dp"
-                            app:iconGravity="textStart"
-                            android:insetTop="0dp"
-                            android:insetBottom="0dp"/>
-
-                        <TextView
+                            android:id="@+id/btnSignIn"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Bản đồ"
-                            android:textColor="@color/on_surface"
-                            android:textSize="13sp"
-                            android:layout_marginTop="8dp"
-                            android:textStyle="bold"/>
+                            android:minWidth="0dp"
+                            android:paddingHorizontal="12dp"
+                            android:text="@string/login"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnSignUp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:minWidth="0dp"
+                            android:paddingHorizontal="12dp"
+                            android:layout_marginStart="8dp"
+                            android:text="@string/register"/>
+
+                        <!-- Nút Xem bản đồ ở BÊN PHẢI cụm đăng nhập/đăng ký -->
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnMap"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="20dp"
+                            android:minWidth="0dp"
+                            android:paddingHorizontal="8dp"
+                            android:text="@string/view_map"
+                            app:icon="@drawable/ic_round_map_24"
+                            app:iconPadding="4dp"
+                            app:iconGravity="textStart"/>
                     </LinearLayout>
                 </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
-                <!-- ============== BANNER SECTION ============== -->
-                <com.google.android.material.card.MaterialCardView
-                    android:layout_width="match_parent"
+
+            <!-- ===== CHIP USER (khi ĐÃ đăng nhập) ===== -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipUser"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginTop="8dp"
+                android:layout_gravity="end"
+                android:text="@string/welcome"
+                android:visibility="gone"
+                app:chipIcon="@drawable/ic_round_person_24"
+                app:iconStartPadding="8dp"
+                app:chipIconTint="@color/black"/>
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnViewAllLoggedIn"
+                style="@style/Widget.Material3.Button.ElevatedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="12dp"
+                android:layout_marginTop="8dp"
+                android:text="Xem tất cả sản phẩm"
+                android:visibility="gone"
+                app:icon="@drawable/ic_round_grid_view_24" />
+
+            <!-- Banner / Carousel -->
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/viewPager"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:contentDescription="@string/banner_promotion"
+                android:importantForAccessibility="no"/>
+
+
+            <!-- Category Chips -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fillViewport="false"
+                android:padding="8dp">
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chipGroup"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="16dp"
-                    android:layout_marginTop="8dp"
-                    app:cardCornerRadius="20dp"
-                    app:cardElevation="4dp">
+                    app:singleSelection="true"
+                    app:selectionRequired="true"/>
+            </HorizontalScrollView>
 
-                    <androidx.viewpager2.widget.ViewPager2
-                        android:id="@+id/viewPager"
-                        android:layout_width="match_parent"
-                        android:layout_height="200dp"
-                        android:contentDescription="@string/banner_promotion"/>
-                </com.google.android.material.card.MaterialCardView>
 
-                <!-- ============== CATEGORIES SECTION ============== -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginTop="24dp"
-                    android:paddingHorizontal="16dp">
+            <!-- Grid -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvProducts"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:nestedScrollingEnabled="false"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                android:paddingHorizontal="8dp"
+                android:paddingBottom="16dp"
+                android:clipToPadding="false"/>
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Danh mục sản phẩm"
-                        android:textColor="@color/on_surface"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="12dp"/>
 
-                    <HorizontalScrollView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:scrollbars="none">
-
-                        <com.google.android.material.chip.ChipGroup
-                            android:id="@+id/chipGroup"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            app:singleSelection="true"
-                            app:selectionRequired="true"
-                            app:chipSpacing="8dp"/>
-                    </HorizontalScrollView>
-                </LinearLayout>
-
-                <!-- ============== PRODUCTS GRID ============== -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginTop="20dp"
-                    android:paddingHorizontal="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Xe điện nổi bật"
-                        android:textColor="@color/on_surface"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:layout_marginBottom="12dp"/>
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rvProducts"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:nestedScrollingEnabled="false"
-                        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                        app:spanCount="2"
-                        android:clipToPadding="false"
-                        android:paddingBottom="16dp"/>
-                </LinearLayout>
-            </LinearLayout>
-        </androidx.core.widget.NestedScrollView>
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+            <!-- Empty / Error containers will be injected as adapter items -->
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

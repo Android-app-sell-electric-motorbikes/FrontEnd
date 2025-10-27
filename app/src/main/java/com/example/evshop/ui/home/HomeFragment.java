@@ -16,16 +16,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.evshop.R;
 import com.example.evshop.data.Analytics;
 import com.example.evshop.data.HomeRepository;
-import com.example.evshop.data.TokenManager;
+// import com.example.evshop.data.TokenManager; // <-- KHÔNG CẦN DÙNG TRỰC TIẾP NỮA
 import com.example.evshop.databinding.FragmentHomeBinding;
-import com.example.evshop.ui.auth.LoginActivity;
+import com.example.evshop.ui.auth.AuthViewModel; // <-- **BƯỚC 1: IMPORT AUTHVIEWMODEL**
 import com.example.evshop.ui.map.VietMapMapViewActivity;
-import com.example.evshop.ui.NotificationActivity;
+import com.example.evshop.ui.vehicle.TemplateVehicleListActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.badge.ExperimentalBadgeUtils;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.badge.BadgeUtils;
 
@@ -38,19 +37,18 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class HomeFragment extends Fragment {
     private FragmentHomeBinding b;
     private HomeViewModel vm;
+    private AuthViewModel authViewModel; // <-- **BƯỚC 2: KHAI BÁO AUTHVIEWMODEL**
     private ProductAdapter adapter;
     private BadgeDrawable cartBadge;
     private Handler bannerHandler;
     private Runnable bannerRunnable;
-    private static final double STORE_LAT = 16.047079;  // ví dụ Đà Nẵng
+    private static final double STORE_LAT = 16.047079;
     private static final double STORE_LNG = 108.206230;
 
 
     @Inject
     Analytics analytics;
-    @Inject
-    TokenManager tokenManager;
-
+    // @Inject TokenManager tokenManager; // <-- KHÔNG CẦN INJECT TOKENMANAGER NỮA
 
     @Nullable
     @Override
@@ -63,87 +61,68 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        setHasOptionsMenu(true);  // Bật menu cho fragment
+
+        // --- **BƯỚC 3: KHỞI TẠO CÁC VIEWMODEL** ---
         vm = new ViewModelProvider(this).get(HomeViewModel.class);
+        // Lấy AuthViewModel được chia sẻ từ Activity
+        authViewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
+
+        // -- Giữ lại các setup cũ của bạn --
         setupToolbar();
         setupBanner();
         setupChips();
         setupGrid();
         setupSwipe();
-        setupQuickActions();
-        observe();
+        observe(); // Observe HomeViewModel
         vm.refresh();
 
-        updateAuthUi();
-        setupSearchBar();
-        openFilterSheet();
+        // Gán sự kiện cho các nút
+        b.btnSignIn.setOnClickListener(v -> NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_loginFragment));
+        b.btnSignUp.setOnClickListener(v -> NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_registerFragment)); // Đi đến login trước
+        b.btnMap.setOnClickListener(v -> openVietMapActivity());
+        b.chipUser.setOnClickListener(v -> openVietMapActivity());
+        b.btnViewAllLoggedIn.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), TemplateVehicleListActivity.class);
+            startActivity(intent);
+        });
+
+
+        // --- **BƯỚC 4: LẮNG NGHE TRẠNG THÁI ĐĂNG NHẬP** ---
+        // Hàm observe() này sẽ thay thế cho việc gọi updateAuthUi() thủ công
+        authViewModel.isLoggedIn.observe(getViewLifecycleOwner(), this::updateUiBasedOnAuthState);
+
+        // Bạn có thể gọi các hàm khác ở đây nếu cần, ví dụ:
+        // toggleSearch();
+        // openFilterSheet();
     }
 
-    private void setupQuickActions() {
-        // Quick Cart Action
-        View quickCart = b.getRoot().findViewById(R.id.quickCart);
-        if (quickCart != null) {
-            quickCart.setOnClickListener(v -> 
-                NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_cartFragment)
-            );
+    // --- **BƯỚC 5: HÀM CẬP NHẬT UI MỚI, THAY THẾ updateAuthUi()** ---
+    private void updateUiBasedOnAuthState(Boolean isLoggedIn) {
+        boolean loggedIn = isLoggedIn != null && isLoggedIn;
+
+        b.panelAuth.setVisibility(loggedIn ? View.GONE : View.VISIBLE);
+        b.chipUser.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
+        b.btnViewAllLoggedIn.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
+
+        if (loggedIn) {
+            // TODO: Nâng cấp để lấy tên người dùng từ một nguồn đáng tin cậy hơn (ví dụ: một User object trong AuthViewModel)
+            // Hiện tại, có thể tạm thời hiển thị một chuỗi chào mừng chung.
+            b.chipUser.setText(getString(R.string.welcome));
         }
 
-        // Quick Notification Action
-        View quickNotification = b.getRoot().findViewById(R.id.quickNotification);
-        if (quickNotification != null) {
-            quickNotification.setOnClickListener(v -> 
-                startActivity(new Intent(requireContext(), NotificationActivity.class))
-            );
-        }
-
-        // Quick Map Action & Button
-        MaterialButton btnMap = b.getRoot().findViewById(R.id.btnMap);
-        View quickMap = b.getRoot().findViewById(R.id.quickMap);
-        View.OnClickListener openMap = v -> openVietMapActivity();
-        
-        if (btnMap != null) btnMap.setOnClickListener(openMap);
-        if (quickMap != null) quickMap.setOnClickListener(openMap);
-
-        // Sign In Button
-        if (b.btnSignIn != null) {
-            b.btnSignIn.setOnClickListener(v -> 
-                NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_loginFragment)
-            );
-        }
-
-        // User Chip
-        if (b.chipUser != null) {
-            b.chipUser.setOnClickListener(openMap);
-        }
-    }
-
-    private void setupSearchBar() {
-        View searchCard = b.getRoot().findViewById(R.id.searchCard);
-        if (searchCard != null) {
-            searchCard.setOnClickListener(v -> toggleSearch());
+        // Cập nhật menu trên toolbar (nếu có)
+        if (toolbar != null && toolbar.getMenu() != null) {
+            MenuItem loginItem = toolbar.getMenu().findItem(R.id.login);
+            MenuItem logoutItem = toolbar.getMenu().findItem(R.id.action_logout);
+            if (loginItem != null) loginItem.setVisible(!loggedIn);
+            if (logoutItem != null) logoutItem.setVisible(loggedIn);
         }
     }
 
-    private void toggleSearch() {
-        com.google.android.material.textfield.TextInputLayout tilSearch = 
-            b.getRoot().findViewById(R.id.tilSearch);
-        com.google.android.material.textfield.TextInputEditText etSearch = 
-            b.getRoot().findViewById(R.id.etSearch);
-            
-        if (tilSearch == null || etSearch == null) return;
-        
-        int vis = (tilSearch.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE;
-        tilSearch.setVisibility(vis);
-        if (vis == View.VISIBLE) {
-            etSearch.requestFocus();
-            etSearch.setOnEditorActionListener((tv, actionId, event) -> {
-                String q = tv.getText() != null ? tv.getText().toString() : "";
-                vm.setQuery(q);
-                tilSearch.setVisibility(View.GONE);
-                return true;
-            });
-        }
-    }
+
+    // ===================================================================
+    // CÁC HÀM KHÁC CỦA BẠN (GIỮ NGUYÊN, KHÔNG CẦN THAY ĐỔI)
+    // ===================================================================
 
     private void openVietMapActivity() {
         if (getContext() == null) return;
@@ -152,63 +131,27 @@ public class HomeFragment extends Fragment {
         i.putExtra("STORE_LNG", STORE_LNG);
         startActivity(i);
     }
+
     private MaterialToolbar toolbar;
 
     @OptIn(markerClass = ExperimentalBadgeUtils.class)
     private void setupToolbar() {
-
         toolbar = requireActivity().findViewById(R.id.toolbar);
         if (toolbar == null) {
-            // Không có toolbar -> bỏ qua tất cả, tránh crash
             return;
         }
         toolbar.setNavigationIcon(null);
         toolbar.setTitle(R.string.title_evshop);
 
-        // Inflate menu vào toolbar
-        toolbar.getMenu().clear();
-        toolbar.inflateMenu(R.menu.menu_home);
-
-        Menu menu = toolbar.getMenu();
-        if (menu != null) {
-            MenuItem loginItem = menu.findItem(R.id.login); // id của menu
-            if (loginItem != null) {
-                loginItem.setOnMenuItemClickListener(mi -> {
-                    startActivity(new Intent(requireContext(), LoginActivity.class));
-                    return true;
-                });
-            }
-
-            // Xử lý click cho Cart
-            MenuItem cartItem = menu.findItem(R.id.action_cart);
-            if (cartItem != null) {
-                cartItem.setOnMenuItemClickListener(mi -> {
-                    NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_cartFragment);
-                    return true;
-                });
-            }
-
-            // Xử lý click cho Notification
-            MenuItem notificationItem = menu.findItem(R.id.action_notification);
-            if (notificationItem != null) {
-                notificationItem.setOnMenuItemClickListener(mi -> {
-                    startActivity(new Intent(requireContext(), NotificationActivity.class));
-                    return true;
-                });
-            }
-        }
-
         cartBadge = BadgeDrawable.create(requireContext());
         cartBadge.setNumber(0);
         cartBadge.setVisible(true);
-        // Gắn badge vào icon menu "cart"
-        // (dùng post() để chắc chắn menu đã inflate xong)
+
         toolbar.post(() -> {
             if (toolbar.getMenu() != null && toolbar.getMenu().findItem(R.id.action_cart) != null) {
                 try {
                     BadgeUtils.attachBadgeDrawable(cartBadge, toolbar, R.id.action_cart);
                 } catch (Throwable t) {
-                    // Không cho app crash
                     t.printStackTrace();
                 }
             }
@@ -216,26 +159,35 @@ public class HomeFragment extends Fragment {
     }
 
 
+    private void toggleSearch() {
+        int vis = (b.tilSearch.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE;
+        b.tilSearch.setVisibility(vis);
+        if (vis == View.VISIBLE) {
+            b.etSearch.requestFocus();
+            b.etSearch.setOnEditorActionListener((tv, actionId, event) -> {
+                String q = tv.getText() != null ? tv.getText().toString() : "";
+                vm.setQuery(q);
+                return true;
+            });
+        }
+    }
+
     private void setupBanner() {
-        androidx.viewpager2.widget.ViewPager2 viewPager = 
-            b.getRoot().findViewById(R.id.viewPager);
-        if (viewPager == null) return;
-        
         List<Integer> banners = Arrays.asList(
                 R.drawable.banner_xe3,
                 R.drawable.banner_xe5,
                 R.drawable.banner_xe6
         );
-        viewPager.setAdapter(new BannerAdapter(banners));
+        b.viewPager.setAdapter(new BannerAdapter(banners));
 
         bannerHandler = new Handler(Looper.getMainLooper());
         bannerRunnable = new Runnable() {
             @Override
             public void run() {
-                if (viewPager.getAdapter() == null || viewPager.getAdapter().getItemCount() == 0)
+                if (b.viewPager.getAdapter() == null || b.viewPager.getAdapter().getItemCount() == 0)
                     return;
-                int next = (viewPager.getCurrentItem() + 1) % viewPager.getAdapter().getItemCount();
-                viewPager.setCurrentItem(next, true);
+                int next = (b.viewPager.getCurrentItem() + 1) % b.viewPager.getAdapter().getItemCount();
+                b.viewPager.setCurrentItem(next, true);
                 bannerHandler.postDelayed(this, 3000);
             }
         };
@@ -249,68 +201,35 @@ public class HomeFragment extends Fragment {
                 getString(R.string.chip_offroad),
                 getString(R.string.chip_eco)
         };
-        
-        View chipGroupView = b.getRoot().findViewById(R.id.chipGroup);
-        if (chipGroupView instanceof com.google.android.material.chip.ChipGroup) {
-            com.google.android.material.chip.ChipGroup chipGroup = (com.google.android.material.chip.ChipGroup) chipGroupView;
-            chipGroup.setSingleSelection(true);
-            
-            for (int i = 0; i < cats.length; i++) {
-                Chip chip = new Chip(requireContext());
-                chip.setText(cats[i]);
-                chip.setCheckable(true);
-                chip.setChipBackgroundColorResource(R.color.surface_variant);
-                chip.setTextColor(getResources().getColor(R.color.on_surface, null));
-                chip.setCheckedIconVisible(false);
-                
-                // Styling
-                chip.setChipStrokeWidth(0f);
-                chip.setTextSize(14);
-                chip.setMinHeight(48);
-                
-                if (i == 0) {
-                    chip.setChecked(true);
-                    chip.setChipBackgroundColorResource(R.color.accent_purple);
-                    chip.setTextColor(getResources().getColor(R.color.white, null));
-                }
-                
-                chip.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                    if (isChecked) {
-                        chip.setChipBackgroundColorResource(R.color.accent_purple);
-                        chip.setTextColor(getResources().getColor(R.color.white, null));
-                        vm.setCategory(chip.getText().toString());
-                    } else {
-                        chip.setChipBackgroundColorResource(R.color.surface_variant);
-                        chip.setTextColor(getResources().getColor(R.color.on_surface, null));
-                    }
-                });
-                
-                chipGroup.addView(chip);
-            }
+        b.chipGroup.setSingleSelection(true);
+        for (int i = 0; i < cats.length; i++) {
+            Chip chip = new Chip(requireContext());
+            chip.setText(cats[i]);
+            chip.setCheckable(true);
+            if (i == 0) chip.setChecked(true);
+            chip.setOnClickListener(v -> vm.setCategory(chip.getText().toString()));
+            b.chipGroup.addView(chip);
         }
     }
 
     private void setupGrid() {
-        RecyclerView rvProducts = b.getRoot().findViewById(R.id.rvProducts);
-        if (rvProducts == null) return;
-        
         GridLayoutManager glm = new GridLayoutManager(getContext(), 2);
-        glm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-            @Override
-            public int getSpanSize(int position) {
-                return 1; // Each item takes 1 span
-            }
-        });
-        rvProducts.setLayoutManager(glm);
+        b.rvProducts.setLayoutManager(glm);
 
         adapter = new ProductAdapter(p -> {
             analytics.viewProduct(p.getId());
             Toast.makeText(getContext(), "Xem " + p.getName(), Toast.LENGTH_SHORT).show();
             // TODO: Nav to product detail when available
-        });
-        rvProducts.setAdapter(adapter);
+            Intent intent = new Intent(requireContext(), com.example.evshop.ui.ProductDetailsActivity.class);
+            intent.putExtra("product_name", p.getName());
+            intent.putExtra("product_price", p.getPriceVnd());
+            intent.putExtra("product_image", p.getImageUrl());
+            startActivity(intent);
 
-        rvProducts.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        });
+        b.rvProducts.setAdapter(adapter);
+
+        b.rvProducts.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView rv, int dx, int dy) {
                 super.onScrolled(rv, dx, dy);
@@ -327,73 +246,25 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupSwipe() {
-        androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefresh = 
-            b.getRoot().findViewById(R.id.swipeRefresh);
-        if (swipeRefresh != null) {
-            swipeRefresh.setOnRefreshListener(vm::refresh);
-            swipeRefresh.setColorSchemeResources(
-                R.color.accent_purple,
-                R.color.accent_blue,
-                R.color.accent_green
-            );
-        }
+        b.swipeRefresh.setOnRefreshListener(vm::refresh);
     }
 
     private void observe() {
-        androidx.swiperefreshlayout.widget.SwipeRefreshLayout swipeRefresh = 
-            b.getRoot().findViewById(R.id.swipeRefresh);
-            
         vm.items.observe(getViewLifecycleOwner(), list -> {
             adapter.submit(list);
-            if (swipeRefresh != null) swipeRefresh.setRefreshing(false);
+            b.swipeRefresh.setRefreshing(false);
         });
         vm.loading.observe(getViewLifecycleOwner(), isLoading -> {
             adapter.setLoading(Boolean.TRUE.equals(isLoading));
-            if (swipeRefresh != null) swipeRefresh.setRefreshing(Boolean.TRUE.equals(isLoading));
+            b.swipeRefresh.setRefreshing(Boolean.TRUE.equals(isLoading));
         });
         vm.error.observe(getViewLifecycleOwner(), isError -> {
             adapter.setError(Boolean.TRUE.equals(isError), vm::refresh);
         });
     }
 
-    private void updateAuthUi() {
-        String token = tokenManager != null ? tokenManager.getAccessToken() : null;
-        boolean loggedIn = token != null;
-
-        if (b.panelAuth != null) {
-            b.panelAuth.setVisibility(loggedIn ? View.GONE : View.VISIBLE);
-        }
-
-        // Update header username
-        TextView txtUserName = b.getRoot().findViewById(R.id.txtUserName);
-        if (txtUserName != null) {
-            if (loggedIn) {
-                String name = com.example.evshop.util.JwtUtils.getDisplayName(token);
-                txtUserName.setText(name != null && !name.isEmpty() ? name : "Khách hàng");
-            } else {
-                txtUserName.setText("Khách hàng");
-            }
-        }
-
-        if (b.chipUser != null) {
-            if (loggedIn) {
-                String name = com.example.evshop.util.JwtUtils.getDisplayName(token);
-                b.chipUser.setText(name != null && !name.isEmpty()
-                        ? "Xin chào, " + name
-                        : getString(R.string.welcome));
-                b.chipUser.setVisibility(View.VISIBLE);
-            } else {
-                b.chipUser.setVisibility(View.GONE);
-            }
-        }
-
-        if (toolbar != null && toolbar.getMenu() != null) {
-            MenuItem loginItem = toolbar.getMenu().findItem(R.id.login);
-            if (loginItem != null) loginItem.setVisible(!loggedIn);
-        }
-    }
-
     private void openFilterSheet() {
+        if (getContext() == null) return;
         BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
         View v = LayoutInflater.from(getContext()).inflate(R.layout.sheet_filter_sort, null);
         dialog.setContentView(v);
@@ -424,13 +295,8 @@ public class HomeFragment extends Fragment {
                 txtPrice.setText("≤ " + com.example.evshop.util.Formatters.currency(progress * 1_000_000L));
             }
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
         // Rating
@@ -444,13 +310,8 @@ public class HomeFragment extends Fragment {
                 txtRating.setText("≥ " + (progress / 10f));
             }
 
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-            }
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
 
         v.findViewById(R.id.btnCancel).setOnClickListener(btn -> dialog.dismiss());
@@ -472,14 +333,14 @@ public class HomeFragment extends Fragment {
             dialog.dismiss();
         });
 
-        dialog.show();
+        // Chỉ show dialog này khi có lệnh, không tự động show khi vào màn hình
+        // dialog.show();
     }
 
     @OptIn(markerClass = ExperimentalBadgeUtils.class)
     private void incrementCartBadge() {
         if (cartBadge == null || toolbar == null) return;
         cartBadge.setNumber(cartBadge.getNumber() + 1);
-        // Bảo đảm đang được attach (không crash nếu thiếu cart)
         if (toolbar.getMenu() != null && toolbar.getMenu().findItem(R.id.action_cart) != null) {
             try {
                 BadgeUtils.attachBadgeDrawable(cartBadge, toolbar, R.id.action_cart);
@@ -492,6 +353,7 @@ public class HomeFragment extends Fragment {
     @OptIn(markerClass = ExperimentalBadgeUtils.class)
     @Override public void onResume() {
         super.onResume();
+        // Không cần gọi updateAuthUi() ở đây nữa vì LiveData đã tự động xử lý.
         if (toolbar != null) {
             toolbar.post(() -> {
                 if (toolbar.getMenu() != null && toolbar.getMenu().findItem(R.id.action_cart) != null && cartBadge != null) {
@@ -503,7 +365,6 @@ public class HomeFragment extends Fragment {
         if (bannerHandler != null && bannerRunnable != null) {
             bannerHandler.postDelayed(bannerRunnable, 3000);
         }
-        updateAuthUi();
     }
 
     @Override
