@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    
+    <!-- Background Circle with Gradient -->
+    <path
+        android:pathData="M60,10 A50,50 0 1,1 60,110 A50,50 0 1,1 60,10 Z"
+        android:fillColor="#4A90E2"/>
+    
+    <!-- Lightning Bolt (Electric Symbol) -->
+    <path
+        android:pathData="M65,30 L50,60 L60,60 L55,90 L75,55 L65,55 Z"
+        android:fillColor="#FFFFFF"
+        android:strokeWidth="2"
+        android:strokeColor="#FFFFFF"/>
+    
+    <!-- EV Text -->
+    <path
+        android:pathData="M35,65 L35,85 M35,65 L45,65 M35,75 L43,75 M35,85 L45,85"
+        android:strokeWidth="3"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"
+        android:fillColor="@android:color/transparent"/>
+    
+    <path
+        android:pathData="M75,65 L75,85 M75,65 L82,75 L75,75 M82,75 L82,85"
+        android:strokeWidth="3"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"
+        android:fillColor="@android:color/transparent"/>
+</vector>
+

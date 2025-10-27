@@ -35,6 +35,18 @@
             android:name=".ui.map.VietMapMapViewActivity"
             android:exported="false"
             android:hardwareAccelerated="true"/>
+        <!-- Splash Activity - LAUNCHER -->
+        <activity
+            android:name=".ui.SplashActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Evshop.Splash"
+            android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <activity
             android:name=".ui.auth.LoginActivity"
             android:exported="false"
@@ -45,12 +57,7 @@
             android:theme="@style/Theme.Material3.DayNight.NoActionBar"/>
         <activity
             android:name=".ui.main.MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:exported="false" />
         <activity
             android:name=".ui.vehicle.TemplateVehicleListActivity"
             android:exported="false" />

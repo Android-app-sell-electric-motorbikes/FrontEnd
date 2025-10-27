@@ -5,19 +5,22 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.evshop.R;
 import com.example.evshop.domain.models.CartItem;
 import com.example.evshop.domain.models.Product;
 import com.example.evshop.util.CartManager;
 
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
 
@@ -51,7 +54,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     class CartViewHolder extends RecyclerView.ViewHolder {
         ImageView imgProduct;
         TextView tvName, tvPrice, tvQuantity, tvTotal;
-        Button btnMinus, btnPlus, btnRemove;
+        ImageButton btnMinus, btnPlus, btnRemove;
 
         public CartViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -67,12 +70,25 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
         public void bind(CartItem item) {
             Product product = item.getProduct();
+            NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
             
-            imgProduct.setImageResource(product.getImageUrl());
+            // Load image: Kiểm tra xem dùng URL string hay drawable resource
+            if (product.hasImageUrlString()) {
+                // Load từ URL (data từ API)
+                Glide.with(itemView.getContext())
+                    .load(product.getImageUrlString())
+                    .placeholder(R.drawable.ic_placeholder)
+                    .error(R.drawable.ic_placeholder)
+                    .into(imgProduct);
+            } else {
+                // Load từ drawable resource (mock data)
+                imgProduct.setImageResource(product.getImageUrl());
+            }
+            
             tvName.setText(product.getName());
-            tvPrice.setText("Giá: " + product.getPriceVnd() + "₫");
+            tvPrice.setText(formatter.format(product.getPriceVnd()) + "₫");
             tvQuantity.setText(String.valueOf(item.getQuantity()));
-            tvTotal.setText("Tổng: " + (product.getPriceVnd() * item.getQuantity()) + "₫");
+            tvTotal.setText(formatter.format(product.getPriceVnd() * item.getQuantity()) + "₫");
 
             // ===== TÍNH NĂNG MỚI: Click vào item để xem chi tiết sản phẩm =====
             itemView.setOnClickListener(v -> {

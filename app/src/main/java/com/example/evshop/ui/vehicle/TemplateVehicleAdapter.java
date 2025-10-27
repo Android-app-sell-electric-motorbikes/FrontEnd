@@ -5,18 +5,25 @@ import android.content.Context;
 import android.util.Log; // <-- Quan trọng
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;import android.widget.FrameLayout;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.evshop.R;
+import com.example.evshop.domain.models.Product;
 import com.example.evshop.domain.models.TemplateVehicle;
 import com.example.evshop.domain.models.VersionDetails;
+import com.example.evshop.util.CartManager;
+import com.example.evshop.util.ProductConverter;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -88,6 +95,7 @@ public class TemplateVehicleAdapter extends RecyclerView.Adapter<TemplateVehicle
 
         holder.bindBasicInfo(vehicle);
         holder.updateDetailsView(isExpanded, details);
+        holder.setupAddToCartButton(vehicle);  // Setup Add to Cart button
 
         holder.itemView.setOnClickListener(v -> {
             Log.d("ADAPTER_DEBUG", "CLICKED vào item có versionId: " + versionId); // Log khi click
@@ -119,6 +127,7 @@ public class TemplateVehicleAdapter extends RecyclerView.Adapter<TemplateVehicle
         final ProgressBar detailsProgressBar;
         final LinearLayout layoutDetailsContent;
         final TextView txtDescription, txtMotorPower, txtRange, txtTopSpeed, txtProductionYear;
+        final Button btnAddToCart;
         private final Context context;
 
         ViewHolder(@NonNull View itemView) {
@@ -136,6 +145,7 @@ public class TemplateVehicleAdapter extends RecyclerView.Adapter<TemplateVehicle
             txtRange = itemView.findViewById(R.id.txtRange);
             txtTopSpeed = itemView.findViewById(R.id.txtTopSpeed);
             txtProductionYear = itemView.findViewById(R.id.txtProductionYear);
+            btnAddToCart = itemView.findViewById(R.id.btnAddToCart);
         }
 
         void bindBasicInfo(TemplateVehicle vehicle) {
@@ -165,6 +175,26 @@ public class TemplateVehicleAdapter extends RecyclerView.Adapter<TemplateVehicle
                 txtRange.setText(String.format(Locale.US, "Quãng đường: %dkm", details.getRangePerCharge()));
                 txtTopSpeed.setText(String.format(Locale.US, "Tốc độ: %dkm/h", details.getTopSpeed()));
                 txtProductionYear.setText(String.format(Locale.US, "Năm SX: %d", details.getProductionYear()));
+            }
+        }
+
+        void setupAddToCartButton(TemplateVehicle vehicle) {
+            if (btnAddToCart != null) {
+                btnAddToCart.setOnClickListener(v -> {
+                    // Convert TemplateVehicle -> Product với ID thật từ API
+                    Product product = ProductConverter.fromTemplateVehicle(vehicle);
+                    
+                    if (product != null && product.getId() != null) {
+                        // Add vào cart với ID thật từ API
+                        CartManager.getInstance().addToCart(product, 1);
+                        
+                        Log.d("CART_DEBUG", "Đã thêm vào cart - ID: " + product.getId() + ", Name: " + product.getName());
+                        Toast.makeText(context, "Đã thêm " + product.getName() + " vào giỏ hàng!", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Log.e("CART_DEBUG", "Lỗi: Product hoặc ID bị null");
+                        Toast.makeText(context, "Lỗi: Không thể thêm sản phẩm vào giỏ", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         }
     }

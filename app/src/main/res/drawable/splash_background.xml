@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background with gradient -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:angle="135"
+                android:startColor="#667eea"
+                android:centerColor="#5a67d8"
+                android:endColor="#764ba2"
+                android:type="linear" />
+        </shape>
+    </item>
+    
+    <!-- Logo in center -->
+    <item
+        android:drawable="@drawable/ic_ev_logo"
+        android:gravity="center"
+        android:width="120dp"
+        android:height="120dp"/>
+    
+</layer-list>
+

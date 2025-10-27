@@ -4,8 +4,9 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,14 +18,18 @@ import com.example.evshop.R;
 import com.example.evshop.domain.models.CartItem;
 import com.example.evshop.ui.CartAdapter;
 import com.example.evshop.util.CartManager;
+import com.google.android.material.button.MaterialButton;
 
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 
 public class CartFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private TextView tvTotal;
-    private Button btnClear;
+    private MaterialButton btnClear, btnCheckout;
+    private LinearLayout emptyCartLayout;
     private CartAdapter adapter;
 
     @Nullable
@@ -36,6 +41,8 @@ public class CartFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerCart);
         tvTotal = view.findViewById(R.id.tvTotal);
         btnClear = view.findViewById(R.id.btnClearCart);
+        btnCheckout = view.findViewById(R.id.btnCheckout);
+        emptyCartLayout = view.findViewById(R.id.emptyCartLayout);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
@@ -48,6 +55,14 @@ public class CartFragment extends Fragment {
         btnClear.setOnClickListener(v -> {
             CartManager.getInstance().clearCart();
             refreshCartData();
+        });
+
+        btnCheckout.setOnClickListener(v -> {
+            if (CartManager.getInstance().getCartItems().isEmpty()) {
+                Toast.makeText(getContext(), "Giỏ hàng trống!", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getContext(), "Chức năng thanh toán đang phát triển", Toast.LENGTH_SHORT).show();
+            }
         });
 
         return view;
@@ -67,11 +82,22 @@ public class CartFragment extends Fragment {
         adapter = new CartAdapter(updatedCartItems, this::updateTotal);
         recyclerView.setAdapter(adapter);
         updateTotal();
+        updateEmptyState();
     }
 
     private void updateTotal() {
         long total = CartManager.getInstance().getTotalPrice();
-        tvTotal.setText("Tổng cộng: " + total + "₫");
+        NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
+        tvTotal.setText(formatter.format(total) + "₫");
+        updateEmptyState();
+    }
+
+    private void updateEmptyState() {
+        if (emptyCartLayout == null) return;
+        
+        boolean isEmpty = CartManager.getInstance().getCartItems().isEmpty();
+        emptyCartLayout.setVisibility(isEmpty ? View.VISIBLE : View.GONE);
+        recyclerView.setVisibility(isEmpty ? View.GONE : View.VISIBLE);
     }
 
 

@@ -27,7 +27,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
 
     // --- SỬA: Khai báo tất cả các view cần dùng ở cấp độ class ---
     private ViewPager2 viewPager;
-    private ImageButton btnPrev, btnNext;
+    private ImageButton btnPrev, btnNext, btnBack;
     private TextView txtName, txtPrice;
     private RatingBar ratingBar;
     private EditText quantityInput;
@@ -65,6 +65,7 @@ public class ProductDetailsActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.viewPager);
         btnPrev = findViewById(R.id.btnPrev);
         btnNext = findViewById(R.id.btnNext);
+        btnBack = findViewById(R.id.btnBack);
         txtName = findViewById(R.id.product_title);
         txtPrice = findViewById(R.id.product_price);
         ratingBar = findViewById(R.id.product_rating);
@@ -72,6 +73,9 @@ public class ProductDetailsActivity extends AppCompatActivity {
         btnPlus = findViewById(R.id.btn_plus);
         btnMinus = findViewById(R.id.btn_minus);
         btnAddToCart = findViewById(R.id.add_to_cart_button);
+        
+        // Setup nút back
+        btnBack.setOnClickListener(v -> finish());
     }
 
     private void displayProductInfo() {
@@ -154,4 +158,5 @@ public class ProductDetailsActivity extends AppCompatActivity {
             return 1; // Nếu người dùng nhập chữ, mặc định là 1
         }
     }
+
 }

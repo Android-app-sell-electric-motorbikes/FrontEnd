@@ -137,6 +137,16 @@
                     android:layout_height="wrap_content"
                     tools:text="Năm SX: 2024" />
 
+                <!-- Add to Cart Button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAddToCart"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Thêm vào giỏ hàng"
+                    app:icon="@drawable/ic_cart_24"
+                    app:iconGravity="start" />
+
             </LinearLayout>
         </FrameLayout>
 

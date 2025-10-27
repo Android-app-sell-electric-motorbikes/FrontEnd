@@ -4,7 +4,8 @@ public class Product {
         private String id;
         private String name;
         private String brand;
-        private int imageUrl;
+        private int imageUrl;          // Cho mock data (drawable resource)
+        private String imageUrlString;  // Cho data từ API (URL string)
         private long priceVnd;
         private float rating;
         private String category;
@@ -12,11 +13,25 @@ public class Product {
         public Product() {
         }
 
+        // Constructor cho mock data (dùng drawable)
         public Product(String id, String name, String brand, int imageUrl, long priceVnd, float rating, String category) {
             this.id = id;
             this.name = name;
             this.brand = brand;
             this.imageUrl = imageUrl;
+            this.imageUrlString = null;
+            this.priceVnd = priceVnd;
+            this.rating = rating;
+            this.category = category;
+        }
+
+        // Constructor mới cho data từ API (dùng URL string)
+        public Product(String id, String name, String brand, String imageUrlString, long priceVnd, float rating, String category) {
+            this.id = id;
+            this.name = name;
+            this.brand = brand;
+            this.imageUrl = 0;  // Không dùng drawable
+            this.imageUrlString = imageUrlString;
             this.priceVnd = priceVnd;
             this.rating = rating;
             this.category = category;
@@ -52,6 +67,19 @@ public class Product {
 
         public void setImageUrl(int imageUrl) {
             this.imageUrl = imageUrl;
+        }
+
+        public String getImageUrlString() {
+            return imageUrlString;
+        }
+
+        public void setImageUrlString(String imageUrlString) {
+            this.imageUrlString = imageUrlString;
+        }
+
+        // Helper method: Kiểm tra xem có đang dùng URL string không
+        public boolean hasImageUrlString() {
+            return imageUrlString != null && !imageUrlString.isEmpty();
         }
 
         public long getPriceVnd() {

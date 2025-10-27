@@ -6,13 +6,29 @@
     android:layout_height="match_parent"
     android:background="#F8F9FD">
 
+    <!-- Nút Back -->
+    <ImageButton
+        android:id="@+id/btnBack"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="16dp"
+        android:background="@drawable/bg_circle_gray"
+        android:src="@drawable/ic_arrow_left"
+        android:contentDescription="Quay lại"
+        android:elevation="8dp"
+        android:padding="12dp"
+        android:scaleType="centerInside"/>
+
     <!-- Nội dung chính -->
     <ScrollView
         android:id="@+id/scroll_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/bottom_bar"
-        android:padding="16dp"
+        android:layout_below="@id/btnBack"
+        android:paddingHorizontal="16dp"
+        android:paddingTop="0dp"
+        android:paddingBottom="16dp"
         android:overScrollMode="never">
 
         <LinearLayout
