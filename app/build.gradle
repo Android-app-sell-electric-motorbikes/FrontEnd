@@ -1,3 +1,5 @@
+// build.gradle (Module :app)
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.hilt.android)
@@ -49,15 +51,15 @@ hilt {
 }
 
 dependencies {
-    // ---- CORE & UI LIBS (Sắp xếp lại) ----
-    implementation libs.core.ktx // Core-KTX
-    implementation libs.appcompat.v170 // Appcompat
-    implementation libs.material // Material Design
-    implementation libs.constraintlayout // ConstraintLayout
-    implementation libs.recyclerview // RecyclerView
-    implementation libs.swiperefreshlayout // SwipeRefreshLayout
-    implementation libs.androidx.cardview // CardView
-    implementation libs.viewpager2 // ViewPager2
+    // ---- CORE & UI LIBS ----
+    implementation libs.core.ktx
+    implementation libs.appcompat.v170
+    implementation libs.material
+    implementation libs.constraintlayout
+    implementation libs.recyclerview
+    implementation libs.swiperefreshlayout
+    implementation libs.androidx.cardview
+    implementation libs.viewpager2
     implementation libs.shimmer // Facebook Shimmer for loading effects
 
     // ---- NAVIGATION COMPONENT ----
@@ -67,22 +69,28 @@ dependencies {
     // ---- LIFECYCLE / VIEWMODEL / LIVEDATA ----
     implementation libs.lifecycle.livedata
     implementation libs.lifecycle.viewmodel
-    // implementation "androidx.lifecycle:lifecycle-extensions:2.2.0" // Ghi chú: Thư viện này đã bị deprecated, không nên dùng
 
     // ---- HILT (Dependency Injection) ----
     implementation libs.hilt.android
+    implementation libs.androidx.window
     annotationProcessor libs.hilt.compiler
 
-    // ---- NETWORKING (BỘ DUY NHẤT ĐÚNG) ----
-    implementation libs.retrofit
-    implementation libs.converter.gson
-    implementation libs.okhttp
-    implementation libs.logging.interceptor
+    // ===================================================================
+    // *** SỬA LỖI MẠNG: DÙNG PHIÊN BẢN ỔN ĐỊNH ***
+    // Thay thế Retrofit 3.0.0-alpha và OkHttp 5.x.x
+    def retrofitVersion = "2.9.0" // Phiên bản ổn định, được tin dùng
+    def okhttpVersion = "4.12.0"  // Phiên bản OkHttp tương thích
+
+    implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
+    implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
+    implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion" // Rất quan trọng để debug
+    // ===================================================================
 
     // ---- IMAGE LOADING ----
     implementation libs.glide
     annotationProcessor libs.compiler
-    implementation 'com.squareup.picasso:picasso:2.8' // Ghi chú: Bạn nên chọn 1 trong 2: Glide hoặc Picasso
+    // Đã xóa 'com.squareup.picasso:picasso:2.8' để tránh trùng lặp. Nên chọn một thư viện tải ảnh.
 
     // ---- VIETMAP ----
     implementation libs.maps.sdk.android.v260
@@ -95,11 +103,11 @@ dependencies {
     implementation 'com.github.vietmap-company:vietmap-services-geojson-android:1.0.0'
     implementation 'com.github.vietmap-company:maps-sdk-plugin-localization-android:2.0.0'
 
-    // ---- GOOGLE SERVICES ----
+    // ---- GOOGLE SERVICES & FIREBASE ----
     implementation libs.play.services.location
     implementation libs.play.services.maps
-    implementation libs.firebase.messaging // Firebase Cloud Messaging
-    implementation libs.identity.jvm // Identity
+    implementation libs.firebase.messaging
+    implementation libs.identity.jvm
 
     // ---- TESTING ----
     testImplementation libs.junit
@@ -108,7 +116,6 @@ dependencies {
 
     // ---- KHÁC ----
     implementation libs.javapoet // Thư viện này thường dùng cho code generation, Hilt cần nó.
-    // implementation "com.jakewharton:butterknife:10.2.3" // Ghi chú: Bạn đang dùng ViewBinding, không cần ButterKnife nữa.
 }
 
 // Giữ lại phần này nếu cần

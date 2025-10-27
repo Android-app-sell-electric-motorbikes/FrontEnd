@@ -1,130 +1,170 @@
+// File: TemplateVehicleAdapter.java
 package com.example.evshop.ui.vehicle;
 
-import android.util.Log;
+import android.content.Context;
+import android.util.Log; // <-- Quan trọng
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+import android.view.ViewGroup;import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.evshop.R;
-// Import model TemplateVehicle mà chúng ta đã tạo
 import com.example.evshop.domain.models.TemplateVehicle;
-import com.squareup.picasso.Picasso;
+import com.example.evshop.domain.models.VersionDetails;
 
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class TemplateVehicleAdapter extends RecyclerView.Adapter<TemplateVehicleAdapter.ViewHolder> {
 
-    private final List<TemplateVehicle> vehicles;
-
-    /**
-     * Constructor của Adapter.
-     * @param vehicles Danh sách ban đầu (thường là một danh sách rỗng).
-     */
-    public TemplateVehicleAdapter(List<TemplateVehicle> vehicles) {
-        this.vehicles = vehicles;
+    public interface OnItemClickListener {
+        void onFetchDetails(int position, String versionId);
     }
 
-    /**
-     * Hàm này được gọi từ Activity/Fragment để cập nhật dữ liệu mới cho Adapter
-     * sau khi gọi API thành công.
-     * @param newVehicles Danh sách xe mới lấy từ API.
-     */
+    private List<TemplateVehicle> vehicles = new ArrayList<>();
+    private final OnItemClickListener listener;
+    private final Map<String, Boolean> expandedState = new HashMap<>();
+    private final Map<String, VersionDetails> fetchedDetails = new HashMap<>();
+
+    public TemplateVehicleAdapter(OnItemClickListener listener) {
+        this.listener = listener;
+    }
+
     public void updateVehicles(List<TemplateVehicle> newVehicles) {
-        this.vehicles.clear();
-        this.vehicles.addAll(newVehicles);
-        notifyDataSetChanged(); // Rất quan trọng: Báo cho RecyclerView biết dữ liệu đã thay đổi để vẽ lại UI.
+        this.vehicles = newVehicles;
+        expandedState.clear();
+        fetchedDetails.clear();
+        notifyDataSetChanged();
+    }
+
+    public void onDetailsFetched(int position, VersionDetails details) {
+        if (details != null && position < vehicles.size()) {
+            String versionId = vehicles.get(position).getVersion().getId();
+            if (versionId != null) {
+                fetchedDetails.put(versionId, details);
+                notifyItemChanged(position);
+            }
+        }
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Tạo ra View cho mỗi item từ file layout item_vehicle.xml
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_vehicle, parent, false);
         return new ViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        // Lấy dữ liệu của item tại vị trí `position`
         TemplateVehicle vehicle = vehicles.get(position);
-        if (vehicle == null) {
-            Log.e("TemplateVehicleAdapter", "Dữ liệu xe tại vị trí " + position + " là null.");
+        if (vehicle == null || vehicle.getVersion() == null) {
             return;
         }
 
-        // Bắt đầu gán dữ liệu vào các View trong ViewHolder
-        holder.bind(vehicle);
+        // *** BƯỚC KIỂM TRA ĐẦU TIÊN: Lấy versionId và log ra ngay lập tức ***
+        final String versionId = vehicle.getVersion().getId();
+        Log.d("ADAPTER_DEBUG", "Binding item vị trí " + position + ". Lấy được versionId: " + versionId);
+
+        // Nếu versionId bị null ở đây, mọi thứ phía sau sẽ không hoạt động.
+        if (versionId == null) {
+            Log.e("ADAPTER_DEBUG", "LỖI NGHIÊM TRỌNG: versionId tại vị trí " + position + " là NULL. Vui lòng kiểm tra Model Version.java và JSON API danh sách.");
+            // Không làm gì thêm để tránh crash
+            holder.itemView.setOnClickListener(null); // Vô hiệu hóa click cho item lỗi
+            return;
+        }
+
+        final boolean isExpanded = expandedState.getOrDefault(versionId, false);
+        final VersionDetails details = fetchedDetails.get(versionId);
+
+        holder.bindBasicInfo(vehicle);
+        holder.updateDetailsView(isExpanded, details);
+
+        holder.itemView.setOnClickListener(v -> {
+            Log.d("ADAPTER_DEBUG", "CLICKED vào item có versionId: " + versionId); // Log khi click
+            boolean newExpandedState = !isExpanded;
+            expandedState.put(versionId, newExpandedState);
+
+            if (newExpandedState && details == null) {
+                Log.d("ADAPTER_DEBUG", "==> Thỏa mãn điều kiện: Mở rộng, chưa có chi tiết. Sẽ gọi onFetchDetails.");
+                if (listener != null) {
+                    listener.onFetchDetails(position, versionId);
+                }
+            } else {
+                Log.d("ADAPTER_DEBUG", "==> Không thỏa mãn điều kiện gọi API. IsExpanded=" + isExpanded + ", Details!=null?" + (details != null));
+            }
+
+            notifyItemChanged(position);
+        });
     }
 
     @Override
     public int getItemCount() {
-        // Trả về tổng số item trong danh sách
-        return vehicles != null ? vehicles.size() : 0;
+        return vehicles.size();
     }
 
-    /**
-     * Lớp ViewHolder chứa các View của một item trong danh sách.
-     * Việc này giúp tối ưu hiệu năng bằng cách không cần gọi findViewById() nhiều lần.
-     */
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        final TextView txtPrice;
+    static class ViewHolder extends RecyclerView.ViewHolder {
         final ImageView imgVehicle;
-        final TextView txtModel;
-        final TextView txtColor;
+        final TextView txtModel, txtColor, txtPrice;
+        final FrameLayout detailsContainer;
+        final ProgressBar detailsProgressBar;
+        final LinearLayout layoutDetailsContent;
+        final TextView txtDescription, txtMotorPower, txtRange, txtTopSpeed, txtProductionYear;
+        private final Context context;
 
-        public ViewHolder(@NonNull View itemView) {
+        ViewHolder(@NonNull View itemView) {
             super(itemView);
-            // Ánh xạ các View từ layout item_vehicle.xml
+            context = itemView.getContext();
             imgVehicle = itemView.findViewById(R.id.imgVehicle);
             txtModel = itemView.findViewById(R.id.txtModel);
             txtColor = itemView.findViewById(R.id.txtColor);
             txtPrice = itemView.findViewById(R.id.txtPrice);
+            detailsContainer = itemView.findViewById(R.id.details_container);
+            detailsProgressBar = itemView.findViewById(R.id.details_progress_bar);
+            layoutDetailsContent = itemView.findViewById(R.id.layout_details_content);
+            txtDescription = itemView.findViewById(R.id.txtDescription);
+            txtMotorPower = itemView.findViewById(R.id.txtMotorPower);
+            txtRange = itemView.findViewById(R.id.txtRange);
+            txtTopSpeed = itemView.findViewById(R.id.txtTopSpeed);
+            txtProductionYear = itemView.findViewById(R.id.txtProductionYear);
         }
 
-        /**
-         * Gán dữ liệu từ một đối tượng TemplateVehicle vào các View.
-         * @param vehicle Đối tượng xe cần hiển thị.
-         */
-        void bind(TemplateVehicle vehicle) {
-            // 1. Hiển thị tên xe (Model + Version)
-            if (vehicle.getVersion() != null) {
-                String fullName = vehicle.getVersion().getVersionName();//+ " " + vehicle.getVersion().getModelName();
-                txtModel.setText(fullName);
-            } else {
-                txtModel.setText("Không có tên");
-            }
-
-            // 2. Hiển thị màu sắc
-            if (vehicle.getColor() != null) {
-                txtColor.setText(vehicle.getColor().getColorName());
-            } else {
-                txtColor.setText(""); // Ẩn đi nếu không có màu
-            }
-
-            // 3. Định dạng và hiển thị giá tiền
-            // Sử dụng NumberFormat để có định dạng tiền tệ đẹp và đúng chuẩn (ví dụ: 5.242.422 ₫)
+        void bindBasicInfo(TemplateVehicle vehicle) {
+            txtModel.setText(vehicle.getVersion().getVersionName());
+            txtColor.setText(vehicle.getColor().getColorName());
             NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
             txtPrice.setText(currencyFormatter.format(vehicle.getPrice()));
-
-            // 4. Tải hình ảnh bằng Picasso
             List<String> images = vehicle.getImgUrl();
             if (images != null && !images.isEmpty()) {
-                String imageUrl = images.get(0); // Lấy ảnh đầu tiên trong danh sách
-                Picasso.get()
-                        .load(imageUrl)
-                        .placeholder(R.drawable.ic_placeholder) // Ảnh hiển thị trong lúc đang tải
-                        .error(R.drawable.ic_placeholder)       // Ảnh hiển thị nếu tải lỗi
-                        .into(imgVehicle);
+                Glide.with(context).load(images.get(0)).placeholder(R.drawable.ic_placeholder).error(R.drawable.ic_placeholder).into(imgVehicle);
             } else {
-                // Nếu không có URL ảnh, hiển thị một ảnh mặc định
                 imgVehicle.setImageResource(R.drawable.ic_placeholder);
+            }
+        }
+
+        void updateDetailsView(boolean isExpanded, VersionDetails details) {
+            detailsContainer.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
+            if (!isExpanded) return;
+            if (details == null) {
+                detailsProgressBar.setVisibility(View.VISIBLE);
+                layoutDetailsContent.setVisibility(View.INVISIBLE);
+            } else {
+                detailsProgressBar.setVisibility(View.GONE);
+                layoutDetailsContent.setVisibility(View.VISIBLE);
+                txtDescription.setText(details.getDescription());
+                txtMotorPower.setText(String.format(Locale.US, "Công suất: %dW", details.getMotorPower()));
+                txtRange.setText(String.format(Locale.US, "Quãng đường: %dkm", details.getRangePerCharge()));
+                txtTopSpeed.setText(String.format(Locale.US, "Tốc độ: %dkm/h", details.getTopSpeed()));
+                txtProductionYear.setText(String.format(Locale.US, "Năm SX: %d", details.getProductionYear()));
             }
         }
     }

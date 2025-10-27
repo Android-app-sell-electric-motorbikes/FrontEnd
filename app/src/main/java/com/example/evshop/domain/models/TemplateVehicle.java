@@ -1,55 +1,77 @@
-// Thay thế toàn bộ nội dung file TemplateVehicle.java bằng code này
+// File: TemplateVehicle.java
+// Đường dẫn: app/src/main/java/com/example/evshop/domain/models/TemplateVehicle.java
+
 package com.example.evshop.domain.models;
 
 import com.google.gson.annotations.SerializedName;
 import java.util.List;
 
-// Lớp chính, đại diện cho mỗi object trong mảng "result"
 public class TemplateVehicle {
 
+    // ... các trường khác như id, color, price...
     @SerializedName("id")
     private String id;
 
+    // ========================================================
+    // *** THAY ĐỔI QUAN TRỌNG NHẤT TẠI ĐÂY ***
+    // Thay thế VersionInfo bằng Version để có đầy đủ thông tin, bao gồm cả ID
     @SerializedName("version")
-    private VersionInfo version; // Đổi tên class con để dễ phân biệt
+    private Version version; // <--- SỬA TỪ VersionInfo THÀNH Version
 
     @SerializedName("color")
-    private ColorInfo color;     // Đổi tên class con để dễ phân biệt
+    private Color color;
 
     @SerializedName("price")
-    private long price;
+    private double price;
 
     @SerializedName("imgUrl")
     private List<String> imgUrl;
-
-    // --- Getters để truy cập dữ liệu ---
-    public String getId() { return id; }
-    public VersionInfo getVersion() { return version; }
-    public ColorInfo getColor() { return color; }
-    public long getPrice() { return price; }
-    public List<String> getImgUrl() { return imgUrl; }
+    // ========================================================
 
 
-    // Lớp con cho đối tượng "version"
-    public static class VersionInfo {
-        @SerializedName("versionName")
-        private String versionName;
-
-        @SerializedName("modelName")
-        private String modelName;
-
-        // --- Getters ---
-        public String getVersionName() { return versionName; }
-        public String getModelName() { return modelName; }
+    // --- Getters ---
+    public String getId() {
+        return id;
     }
 
+    // Sửa cả phương thức getter tương ứng
+    public Version getVersion() { // <--- SỬA TỪ VersionInfo THÀNH Version
+        return version;
+    }
 
-    // Lớp con cho đối tượng "color"
-    public static class ColorInfo {
+    public Color getColor() {
+        return color;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public List<String> getImgUrl() {
+        return imgUrl;
+    }
+
+    // Bạn có thể không cần lớp Color và VersionInfo nữa nếu không dùng ở đâu khác
+    // Tuy nhiên, cứ để lại chúng để tránh phát sinh lỗi ở những chỗ khác nếu có.
+
+    // Lớp nội bộ Color (nếu bạn có)
+    public static class Color {
         @SerializedName("colorName")
         private String colorName;
 
-        // --- Getters ---
-        public String getColorName() { return colorName; }
+        public String getColorName() {
+            return colorName;
+        }
     }
+
+    // Lớp VersionInfo có thể không còn cần thiết
+    // public static class VersionInfo {
+    //    @SerializedName("versionName")
+    //    private String versionName;
+    //
+    //    public String getVersionName() {
+    //        return versionName;
+    //    }
+    // }
 }
+

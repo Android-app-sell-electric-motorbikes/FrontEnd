@@ -41,6 +41,7 @@ vietmapServicesTurfAndroid = "1.0.2"
 viewpager2 = "1.1.0"
 playServicesMaps = "19.2.0"
 identityJvm = "202411.1"
+window = "1.5.0"
 
 [libraries]
 androidx-cardview = { module = "androidx.cardview:cardview", version.ref = "cardview" }
@@ -87,6 +88,7 @@ vietmap-services-turf-android = { module = "com.github.vietmap-company:vietmap-s
 viewpager2 = { module = "androidx.viewpager2:viewpager2", version.ref = "viewpager2" }
 play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 identity-jvm = { group = "com.android.identity", name = "identity-jvm", version.ref = "identityJvm" }
+androidx-window = { group = "androidx.window", name = "window", version.ref = "window" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
