@@ -21,13 +21,13 @@ import androidx.annotation.OptIn;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
-import androidx.recyclerview.widget.LinearLayoutManager; // <-- ĐÃ THAY ĐỔI
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.evshop.R;
 import com.example.evshop.data.Analytics;
 import com.example.evshop.databinding.FragmentHomeBinding;
-import com.example.evshop.ui.adapter.FeaturedVehicleAdapter; // <-- ĐÃ THAY ĐỔI
+import com.example.evshop.ui.adapter.FeaturedVehicleAdapter;
 import com.example.evshop.ui.auth.AuthViewModel;
 import com.example.evshop.ui.map.VietMapMapViewActivity;
 import com.example.evshop.ui.vehicle.TemplateVehicleListActivity;
@@ -53,7 +53,7 @@ public class HomeFragment extends Fragment {
     private FragmentHomeBinding b;
     private HomeViewModel vm;
     private AuthViewModel authViewModel;
-    private FeaturedVehicleAdapter featuredVehicleAdapter; // <-- ĐÃ SỬA TÊN ADAPTER
+    private FeaturedVehicleAdapter featuredVehicleAdapter;
     private BadgeDrawable cartBadge;
     private Handler bannerHandler;
     private Runnable bannerRunnable;
@@ -82,7 +82,7 @@ public class HomeFragment extends Fragment {
         setupToolbar();
         setupBanner();
         setupChips();
-        setupFeaturedVehicleList(); // <-- ĐÃ ĐỔI TÊN HÀM CHO ĐÚNG
+        setupFeaturedVehicleList();
         setupSwipeRefresh();
         observeViewModel();
         vm.refresh();
@@ -106,50 +106,28 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    // =================================================================================
-    //  PHẦN CHỈNH SỬA QUAN TRỌNG NHẤT
-    // =================================================================================
     private void setupFeaturedVehicleList() {
-        // 1. Dùng LinearLayoutManager để hiển thị danh sách dọc
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
         b.rvFeaturedVehicles.setLayoutManager(layoutManager);
-
-        // 2. Tắt cuộn lồng nhau để toàn bộ màn hình cuộn mượt mà
         b.rvFeaturedVehicles.setNestedScrollingEnabled(false);
 
-        // 3. Khởi tạo FeaturedVehicleAdapter
         featuredVehicleAdapter = new FeaturedVehicleAdapter(template -> {
-            // ==========================================================
-            // THAY ĐỔI LOGIC CLICK TẠI ĐÂY
-            // ==========================================================
-
-            // 1. Lấy Context một cách an toàn
             if (getContext() == null) {
                 return;
             }
-
-            // 2. Tạo một Intent để mở VehicleDetailActivity
             Intent intent = new Intent(getContext(), VehicleDetailActivity.class);
-
-            // 3. Đặt ID của chiếc xe vào Intent. Dùng "VEHICLE_ID" làm chìa khóa (key).
             intent.putExtra("VEHICLE_ID", template.getId());
-
-            // 4. Bắt đầu Activity mới
             startActivity(intent);
-
-            // analytics.viewProduct(template.getId()); // Bạn có thể kích hoạt lại nếu cần
         });
 
-        // 4. Gán adapter cho RecyclerView
         b.rvFeaturedVehicles.setAdapter(featuredVehicleAdapter);
     }
 
     private void observeViewModel() {
         // Lắng nghe LiveData chứa danh sách XE NỔI BẬT
-        vm.featuredVehicles.observe(getViewLifecycleOwner(), vehicles -> {
+        vm.getFeaturedVehicles().observe(getViewLifecycleOwner(), vehicles -> {
             if (vehicles != null) {
-                // Sử dụng phương thức setVehicles của FeaturedVehicleAdapter
-                featuredVehicleAdapter.setVehicles(vehicles);
+                featuredVehicleAdapter.submitList(vehicles);
                 b.tvFeaturedVehiclesTitle.setVisibility(vehicles.isEmpty() ? View.GONE : View.VISIBLE);
                 b.rvFeaturedVehicles.setVisibility(vehicles.isEmpty() ? View.GONE : View.VISIBLE);
             }
@@ -187,11 +165,6 @@ public class HomeFragment extends Fragment {
         }
     }
 
-
-    // ===================================================================
-    // CÁC HÀM KHÁC GIỮ NGUYÊN (KHÔNG THAY ĐỔI)
-    // ===================================================================
-
     private void openVietMapActivity() {
         if (getContext() == null) return;
         Intent i = new Intent(getContext(), VietMapMapViewActivity.class);
@@ -224,20 +197,6 @@ public class HomeFragment extends Fragment {
                 }
             }
         });
-    }
-
-
-    private void toggleSearch() {
-        int vis = (b.tilSearch.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE;
-        b.tilSearch.setVisibility(vis);
-        if (vis == View.VISIBLE) {
-            b.etSearch.requestFocus();
-            b.etSearch.setOnEditorActionListener((tv, actionId, event) -> {
-                String q = tv.getText() != null ? tv.getText().toString() : "";
-                vm.setQuery(q);
-                return true;
-            });
-        }
     }
 
     private void setupBanner() {
@@ -275,7 +234,8 @@ public class HomeFragment extends Fragment {
             chip.setText(cats[i]);
             chip.setCheckable(true);
             if (i == 0) chip.setChecked(true);
-            chip.setOnClickListener(v -> vm.setCategory(chip.getText().toString()));
+            // Tạm thời vô hiệu hóa để tránh gọi hàm không tồn tại
+            // chip.setOnClickListener(v -> vm.setCategory(chip.getText().toString()));
             b.chipGroup.addView(chip);
         }
     }
@@ -329,6 +289,8 @@ public class HomeFragment extends Fragment {
 
         v.findViewById(R.id.btnCancel).setOnClickListener(btn -> dialog.dismiss());
         v.findViewById(R.id.btnApply).setOnClickListener(btn -> {
+            // Tạm thời vô hiệu hóa để tránh lỗi
+            /*
             HomeViewModel.Filters f = new HomeViewModel.Filters();
             int checked = rg.getCheckedRadioButtonId();
 
@@ -344,22 +306,9 @@ public class HomeFragment extends Fragment {
 
             vm.applyFilters(f);
             analytics.applyFilter("sort=" + f.sort + ", brands=" + f.brands + ", price<=" + f.maxPriceVnd + ", rating>=" + f.minRating);
+            */
             dialog.dismiss();
         });
-    }
-
-
-    @OptIn(markerClass = ExperimentalBadgeUtils.class)
-    private void incrementCartBadge() {
-        if (cartBadge == null || toolbar == null) return;
-        cartBadge.setNumber(cartBadge.getNumber() + 1);
-        if (toolbar.getMenu() != null && toolbar.getMenu().findItem(R.id.action_cart) != null) {
-            try {
-                BadgeUtils.attachBadgeDrawable(cartBadge, toolbar, R.id.action_cart);
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
-        }
     }
 
     @OptIn(markerClass = ExperimentalBadgeUtils.class)
