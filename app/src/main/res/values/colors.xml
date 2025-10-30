@@ -25,5 +25,7 @@
     <color name="gray_light">#E0E0E0</color>
     <color name="gray">#9E9E9E</color>
     <color name="gray_dark">#616161</color>
+    <color name="admin_background_color">#F5F5F5</color> <!-- Màu xám rất nhạt -->
+
 </resources>
     

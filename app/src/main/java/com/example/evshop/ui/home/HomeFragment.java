@@ -2,67 +2,45 @@ package com.example.evshop.ui.home;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CheckBox;
-import android.widget.LinearLayout;
-import android.widget.RadioGroup;
-import android.widget.SeekBar;
-import android.widget.TextView;
+import android.widget.PopupMenu;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.OptIn;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.evshop.R;
-import com.example.evshop.data.Analytics;
 import com.example.evshop.databinding.FragmentHomeBinding;
-import com.example.evshop.ui.adapter.FeaturedVehicleAdapter;
+import com.example.evshop.databinding.ItemBannerBinding;
+import com.example.evshop.domain.models.TemplateVehicle;
+import com.example.evshop.ui.adapter.VehicleAdapter;
 import com.example.evshop.ui.auth.AuthViewModel;
-import com.example.evshop.ui.map.VietMapMapViewActivity;
+// *** BƯỚC 1: IMPORT MAINACTIVITY ***
+import com.example.evshop.ui.main.MainActivity;
 import com.example.evshop.ui.vehicle.TemplateVehicleListActivity;
 import com.example.evshop.ui.vehicle.VehicleDetailActivity;
-import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.badge.BadgeDrawable;
-import com.google.android.material.badge.BadgeUtils;
-import com.google.android.material.badge.ExperimentalBadgeUtils;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.chip.Chip;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import dagger.hilt.android.AndroidEntryPoint;
-
 
 @AndroidEntryPoint
 public class HomeFragment extends Fragment {
+
     private FragmentHomeBinding b;
-    private HomeViewModel vm;
     private AuthViewModel authViewModel;
-    private FeaturedVehicleAdapter featuredVehicleAdapter;
-    private BadgeDrawable cartBadge;
-    private Handler bannerHandler;
-    private Runnable bannerRunnable;
-    private static final double STORE_LAT = 16.047079;
-    private static final double STORE_LNG = 108.206230;
-
-
-    @Inject
-    Analytics analytics;
+    private NavController navController;
+    private HomeViewModel homeViewModel;
+    private VehicleAdapter vehicleAdapter;
 
     @Nullable
     @Override
@@ -71,267 +49,136 @@ public class HomeFragment extends Fragment {
         return b.getRoot();
     }
 
-
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        vm = new ViewModelProvider(this).get(HomeViewModel.class);
+        navController = Navigation.findNavController(view);
+        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         authViewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
 
-        setupToolbar();
         setupBanner();
-        setupChips();
-        setupFeaturedVehicleList();
-        setupSwipeRefresh();
-        observeViewModel();
-        vm.refresh();
+        setupRecyclerView();
+        observeHomeViewModel();
+        observeLoginState(); // <-- Logic chính nằm ở đây
+        setupClickListeners();
 
-        b.btnSignIn.setOnClickListener(v -> NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_loginFragment));
-        b.btnSignUp.setOnClickListener(v -> NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_registerFragment));
-        b.btnMap.setOnClickListener(v -> openVietMapActivity());
-        b.chipUser.setOnClickListener(v -> openVietMapActivity());
-        b.btnViewAllLoggedIn.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), TemplateVehicleListActivity.class);
-            startActivity(intent);
-        });
-
-        authViewModel.isLoggedIn.observe(getViewLifecycleOwner(), this::updateUiBasedOnAuthState);
+        homeViewModel.refresh();
     }
 
-    private void setupSwipeRefresh() {
-        b.swipeRefresh.setOnRefreshListener(vm::refresh);
-        authViewModel.isLoggedIn.observe(getViewLifecycleOwner(), isLoggedIn -> {
-            b.swipeRefresh.setEnabled(isLoggedIn != null && isLoggedIn);
-        });
-    }
+    // *** BƯỚC 2: CẬP NHẬT HÀM NÀY ***
+    private void observeLoginState() {
+        authViewModel.getIsLoggedInState().observe(getViewLifecycleOwner(), isLoggedIn -> {
+            boolean loggedIn = isLoggedIn != null && isLoggedIn;
 
-    private void setupFeaturedVehicleList() {
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
-        b.rvFeaturedVehicles.setLayoutManager(layoutManager);
-        b.rvFeaturedVehicles.setNestedScrollingEnabled(false);
-
-        featuredVehicleAdapter = new FeaturedVehicleAdapter(template -> {
-            if (getContext() == null) {
-                return;
+            // Cập nhật giao diện của HomeFragment
+            b.panelAuth.setVisibility(loggedIn ? View.GONE : View.VISIBLE);
+            b.chipUser.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
+            b.viewPager.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
+            b.btnViewAllLoggedIn.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
+            if (loggedIn) {
+                b.chipUser.setText("Tài khoản");
             }
+
+            // Ra lệnh cho MainActivity ẩn/hiện Toolbar
+            if (getActivity() instanceof MainActivity) {
+                ((MainActivity) getActivity()).showToolbar(loggedIn);
+            }
+        });
+    }
+
+    // *** BƯỚC 3: CẬP NHẬT HÀM NÀY ĐỂ ĐẢM BẢO AN TOÀN ***
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Khi rời khỏi HomeFragment, hãy đảm bảo Toolbar hiện lại
+        // để không ảnh hưởng đến các màn hình khác.
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).showToolbar(true);
+        }
+        b = null;
+    }
+
+
+    // --- CÁC HÀM CÒN LẠI GIỮ NGUYÊN, KHÔNG CẦN SỬA ---
+
+    private void setupBanner() {
+        List<Integer> bannerImages = Arrays.asList(
+                R.drawable.banner_xe3,
+                R.drawable.banner_xe6,
+                R.drawable.banner_xe5
+        );
+        BannerAdapter bannerAdapter = new BannerAdapter(bannerImages);
+        b.viewPager.setAdapter(bannerAdapter);
+    }
+
+    private void setupRecyclerView() {
+        VehicleAdapter.OnVehicleClickListener listener = template -> {
+            if (getContext() == null) return;
             Intent intent = new Intent(getContext(), VehicleDetailActivity.class);
             intent.putExtra("VEHICLE_ID", template.getId());
             startActivity(intent);
-        });
-
-        b.rvFeaturedVehicles.setAdapter(featuredVehicleAdapter);
-    }
-
-    private void observeViewModel() {
-        // Lắng nghe LiveData chứa danh sách XE NỔI BẬT
-        vm.getFeaturedVehicles().observe(getViewLifecycleOwner(), vehicles -> {
-            if (vehicles != null) {
-                featuredVehicleAdapter.submitList(vehicles);
-                b.tvFeaturedVehiclesTitle.setVisibility(vehicles.isEmpty() ? View.GONE : View.VISIBLE);
-                b.rvFeaturedVehicles.setVisibility(vehicles.isEmpty() ? View.GONE : View.VISIBLE);
-            }
-        });
-
-        vm.loading.observe(getViewLifecycleOwner(), isLoading -> {
-            if (isLoading != null) {
-                b.swipeRefresh.setRefreshing(isLoading);
-            }
-        });
-
-        vm.error.observe(getViewLifecycleOwner(), error -> {
-            if (error != null && error) {
-                Toast.makeText(getContext(), "Lỗi khi tải dữ liệu", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private void updateUiBasedOnAuthState(Boolean isLoggedIn) {
-        boolean loggedIn = isLoggedIn != null && isLoggedIn;
-
-        b.panelAuth.setVisibility(loggedIn ? View.GONE : View.VISIBLE);
-        b.chipUser.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
-        b.btnViewAllLoggedIn.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
-
-        if (loggedIn) {
-            b.chipUser.setText(getString(R.string.welcome));
-        }
-
-        if (toolbar != null && toolbar.getMenu() != null) {
-            MenuItem loginItem = toolbar.getMenu().findItem(R.id.login);
-            MenuItem logoutItem = toolbar.getMenu().findItem(R.id.action_logout);
-            if (loginItem != null) loginItem.setVisible(!loggedIn);
-            if (logoutItem != null) logoutItem.setVisible(loggedIn);
-        }
-    }
-
-    private void openVietMapActivity() {
-        if (getContext() == null) return;
-        Intent i = new Intent(getContext(), VietMapMapViewActivity.class);
-        i.putExtra("STORE_LAT", STORE_LAT);
-        i.putExtra("STORE_LNG", STORE_LNG);
-        startActivity(i);
-    }
-
-    private MaterialToolbar toolbar;
-
-    @OptIn(markerClass = ExperimentalBadgeUtils.class)
-    private void setupToolbar() {
-        toolbar = requireActivity().findViewById(R.id.toolbar);
-        if (toolbar == null) {
-            return;
-        }
-        toolbar.setNavigationIcon(null);
-        toolbar.setTitle(R.string.title_evshop);
-
-        cartBadge = BadgeDrawable.create(requireContext());
-        cartBadge.setNumber(0);
-        cartBadge.setVisible(true);
-
-        toolbar.post(() -> {
-            if (toolbar.getMenu() != null && toolbar.getMenu().findItem(R.id.action_cart) != null) {
-                try {
-                    BadgeUtils.attachBadgeDrawable(cartBadge, toolbar, R.id.action_cart);
-                } catch (Throwable t) {
-                    t.printStackTrace();
-                }
-            }
-        });
-    }
-
-    private void setupBanner() {
-        List<Integer> banners = Arrays.asList(
-                R.drawable.banner_xe3,
-                R.drawable.banner_xe5,
-                R.drawable.banner_xe6
-        );
-        b.viewPager.setAdapter(new BannerAdapter(banners));
-
-        bannerHandler = new Handler(Looper.getMainLooper());
-        bannerRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (b.viewPager.getAdapter() == null || b.viewPager.getAdapter().getItemCount() == 0)
-                    return;
-                int next = (b.viewPager.getCurrentItem() + 1) % b.viewPager.getAdapter().getItemCount();
-                b.viewPager.setCurrentItem(next, true);
-                bannerHandler.postDelayed(this, 3000);
-            }
         };
+        vehicleAdapter = new VehicleAdapter(listener);
+        b.rvFeaturedVehicles.setLayoutManager(new LinearLayoutManager(getContext()));
+        b.rvFeaturedVehicles.setAdapter(vehicleAdapter);
+        b.rvFeaturedVehicles.setNestedScrollingEnabled(false);
     }
 
-    private void setupChips() {
-        String[] cats = {
-                getString(R.string.chip_all),
-                getString(R.string.chip_city),
-                getString(R.string.chip_sport),
-                getString(R.string.chip_offroad),
-                getString(R.string.chip_eco)
-        };
-        b.chipGroup.setSingleSelection(true);
-        for (int i = 0; i < cats.length; i++) {
-            Chip chip = new Chip(requireContext());
-            chip.setText(cats[i]);
-            chip.setCheckable(true);
-            if (i == 0) chip.setChecked(true);
-            // Tạm thời vô hiệu hóa để tránh gọi hàm không tồn tại
-            // chip.setOnClickListener(v -> vm.setCategory(chip.getText().toString()));
-            b.chipGroup.addView(chip);
-        }
-    }
-
-    private void openFilterSheet() {
-        if (getContext() == null) return;
-        BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
-        View v = LayoutInflater.from(getContext()).inflate(R.layout.sheet_filter_sort, null);
-        dialog.setContentView(v);
-
-        RadioGroup rg = v.findViewById(R.id.rgSort);
-        rg.check(R.id.rbPopular);
-
-        LinearLayout brandContainer = v.findViewById(R.id.brandContainer);
-        String[] brands = {"VoltX", "EVM", "GreenGo", "Thunder", "EcoRide"};
-        List<CheckBox> brandChecks = new ArrayList<>();
-        for (String br : brands) {
-            CheckBox cb = new CheckBox(getContext());
-            cb.setText(br);
-            brandContainer.addView(cb);
-            brandChecks.add(cb);
-        }
-
-        SeekBar seekPrice = v.findViewById(R.id.seekPrice);
-        TextView txtPrice = v.findViewById(R.id.txtPriceValue);
-        seekPrice.setProgress(150);
-        txtPrice.setText("≤ " + com.example.evshop.util.Formatters.currency(150_000_000L));
-        seekPrice.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                txtPrice.setText("≤ " + com.example.evshop.util.Formatters.currency(progress * 1_000_000L));
-            }
-
-            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+    private void observeHomeViewModel() {
+        homeViewModel.loading.observe(getViewLifecycleOwner(), isLoading -> {
+            if (isLoading != null) b.swipeRefresh.setRefreshing(isLoading);
         });
-
-        SeekBar seekRating = v.findViewById(R.id.seekRating);
-        TextView txtRating = v.findViewById(R.id.txtRatingMin);
-        seekRating.setProgress(30);
-        txtRating.setText("≥ 3.0");
-        seekRating.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                txtRating.setText("≥ " + (progress / 10f));
-            }
-
-            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
+        homeViewModel.getFeaturedVehicles().observe(getViewLifecycleOwner(), vehicles -> {
+            if (vehicles != null) vehicleAdapter.submitList(vehicles);
         });
-
-        v.findViewById(R.id.btnCancel).setOnClickListener(btn -> dialog.dismiss());
-        v.findViewById(R.id.btnApply).setOnClickListener(btn -> {
-            // Tạm thời vô hiệu hóa để tránh lỗi
-            /*
-            HomeViewModel.Filters f = new HomeViewModel.Filters();
-            int checked = rg.getCheckedRadioButtonId();
-
-            if (checked == R.id.rbPriceAsc) f.sort = HomeViewModel.Filters.Sort.PRICE_ASC;
-            else if (checked == R.id.rbPriceDesc) f.sort = HomeViewModel.Filters.Sort.PRICE_DESC;
-            else if (checked == R.id.rbRating) f.sort = HomeViewModel.Filters.Sort.RATING;
-            else f.sort = HomeViewModel.Filters.Sort.POPULAR;
-
-            for (CheckBox cb : brandChecks)
-                if (cb.isChecked()) f.brands.add(cb.getText().toString());
-            f.maxPriceVnd = seekPrice.getProgress() * 1_000_000L;
-            f.minRating = seekRating.getProgress() / 10f;
-
-            vm.applyFilters(f);
-            analytics.applyFilter("sort=" + f.sort + ", brands=" + f.brands + ", price<=" + f.maxPriceVnd + ", rating>=" + f.minRating);
-            */
-            dialog.dismiss();
+        homeViewModel.error.observe(getViewLifecycleOwner(), hasError -> {
+            if (hasError != null && hasError) Toast.makeText(getContext(), "Lỗi tải dữ liệu", Toast.LENGTH_SHORT).show();
         });
     }
 
-    @OptIn(markerClass = ExperimentalBadgeUtils.class)
-    @Override public void onResume() {
-        super.onResume();
-        if (toolbar != null) {
-            toolbar.post(() -> {
-                if (toolbar.getMenu() != null && toolbar.getMenu().findItem(R.id.action_cart) != null && cartBadge != null) {
-                    try { BadgeUtils.attachBadgeDrawable(cartBadge, toolbar, R.id.action_cart); }
-                    catch (Throwable t) { t.printStackTrace(); }
+    private void setupClickListeners() {
+        b.swipeRefresh.setOnRefreshListener(() -> homeViewModel.refresh());
+        b.btnSignIn.setOnClickListener(v -> navController.navigate(R.id.action_homeFragment_to_loginFragment));
+        b.btnSignUp.setOnClickListener(v -> navController.navigate(R.id.action_homeFragment_to_registerFragment));
+        b.chipUser.setOnClickListener(v -> {
+            PopupMenu popupMenu = new PopupMenu(getContext(), b.chipUser);
+            popupMenu.getMenu().add("Tài khoản của tôi");
+            popupMenu.getMenu().add("Đăng xuất");
+            popupMenu.setOnMenuItemClickListener(item -> {
+                if ("Đăng xuất".equals(item.getTitle().toString())) {
+                    authViewModel.logout();
+                    return true;
                 }
+                return false;
             });
-        }
-        if (bannerHandler != null && bannerRunnable != null) {
-            bannerHandler.postDelayed(bannerRunnable, 3000);
-        }
+            popupMenu.show();
+        });
+        b.btnViewAllLoggedIn.setOnClickListener(v -> {
+            if (getContext() == null) return;
+            Intent intent = new Intent(getContext(), TemplateVehicleListActivity.class);
+            startActivity(intent);
+        });
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        if (bannerHandler != null && bannerRunnable != null) {
-            bannerHandler.removeCallbacks(bannerRunnable);
+    public static class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.BannerViewHolder> {
+        private final List<Integer> images;
+        public BannerAdapter(List<Integer> images) { this.images = images; }
+        @NonNull @Override
+        public BannerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new BannerViewHolder(ItemBannerBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+        }
+        @Override
+        public void onBindViewHolder(@NonNull BannerViewHolder holder, int position) {
+            holder.binding.imgBanner.setImageResource(images.get(position));
+        }
+        @Override public int getItemCount() { return images.size(); }
+        static class BannerViewHolder extends RecyclerView.ViewHolder {
+            ItemBannerBinding binding;
+            public BannerViewHolder(ItemBannerBinding binding) {
+                super(binding.getRoot());
+                this.binding = binding;
+            }
         }
     }
 }

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- Giữ lại một nút duy nhất trên Toolbar để làm điểm neo cho PopupMenu -->
+    <item
+        android:id="@+id/action_admin_account_menu"
+        android:title="Tài khoản"
+        android:icon="@drawable/ic_round_person_24"
+        app:showAsAction="always" /> <!-- "always" để đảm bảo nó luôn hiện dưới dạng icon -->
+
+</menu>

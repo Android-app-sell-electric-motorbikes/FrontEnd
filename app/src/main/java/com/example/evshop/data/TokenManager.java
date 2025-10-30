@@ -1,17 +1,22 @@
 package com.example.evshop.data;
 
 import android.content.Context;
-import android.content.Intent; // <-- THÊM DÒNG NÀY
 import android.content.SharedPreferences;
-import com.example.evshop.ui.auth.LoginActivity; // <-- THÊM DÒNG NÀY
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
+import dagger.hilt.android.qualifiers.ApplicationContext;
+
+// Sử dụng Singleton để đảm bảo chỉ có một TokenManager trong toàn ứng dụng
+@Singleton
 public class TokenManager {
     private final SharedPreferences prefs;
-    private final Context context; // <-- SỬA: Thêm Context
 
-    public TokenManager(Context ctx) {
-        this.context = ctx.getApplicationContext(); // <-- SỬA: Thêm dòng này
-        prefs = this.context.getSharedPreferences("auth", Context.MODE_PRIVATE);
+    // Yêu cầu Hilt cung cấp ApplicationContext một cách an toàn
+    @Inject
+    public TokenManager(@ApplicationContext Context context) {
+        prefs = context.getSharedPreferences("auth", Context.MODE_PRIVATE);
     }
 
     public void saveAccessToken(String t) {
@@ -30,23 +35,10 @@ public class TokenManager {
         return prefs.getString("refresh_token", null);
     }
 
+    // Hàm này sẽ được gọi khi cần xóa token
     public void clear() {
         prefs.edit().clear().apply();
     }
 
-
-    public void logout() {
-        this.clear();
-        // 2. Tạo Intent để quay về màn hình Login
-        Intent intent = new Intent(context, LoginActivity.class);
-        // 3. Thêm các cờ (flags) để xóa hết các Activity khác trong stack
-        // và đảm bảo người dùng không thể nhấn "Back" để quay lại màn hình cũ.
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
-
-        // 4. Bắt đầu LoginActivity
-        context.startActivity(intent);
-    }
-    // ========================================================
+    // KHÔNG CÒN HÀM LOGOUT Ở ĐÂY NỮA
 }
