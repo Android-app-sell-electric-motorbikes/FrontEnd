@@ -22,6 +22,9 @@ public class AuthRepository {
 
     private final MutableLiveData<Boolean> isLoggedInState = new MutableLiveData<>();
 
+    // ⚠️ TEST MODE: Bật để test UI mà không cần đăng nhập
+    private static final boolean TEST_MODE = true; // Đổi thành false khi deploy production
+
     @Inject
     public AuthRepository(ApiService api, TokenManager tm) {
         this.api = api;
@@ -35,10 +38,19 @@ public class AuthRepository {
 
     private void checkInitialLoginStatus() {
         // Dùng postValue để đảm bảo an toàn nếu được gọi từ background thread
-        isLoggedInState.postValue(tokenManager.getAccessToken() != null);
+        if (TEST_MODE) {
+            // Test mode: luôn coi như đã đăng nhập
+            isLoggedInState.postValue(true);
+        } else {
+            isLoggedInState.postValue(tokenManager.getAccessToken() != null);
+        }
     }
 
     public void logout() {
+        if (TEST_MODE) {
+            // Test mode: không cho logout (để test UI)
+            return;
+        }
         tokenManager.clear();
         isLoggedInState.postValue(false); // Phát ra trạng thái "đã đăng xuất"
     }

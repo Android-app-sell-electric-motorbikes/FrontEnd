@@ -2,33 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- Nút Login: Sẽ hiển thị khi người dùng CHƯA đăng nhập -->
-    <item android:id="@+id/login"
-        android:title="@string/login"
-        android:icon="@drawable/ic_round_person_24"
-        app:showAsAction="ifRoom"/>
-
-
-    <!-- Nút Logout: Sẽ hiển thị khi người dùng ĐÃ đăng nhập -->
-    <item android:id="@+id/action_logout"
-        android:title="Đăng xuất"
-        android:icon="@drawable/ic_logout"
-        app:showAsAction="ifRoom"
-        android:visible="false" /> <!-- Ban đầu sẽ ẩn đi -->
-    <!-- ============================================= -->
-
+    <!-- Chỉ giữ Search và Notification ở toolbar -->
     <item android:id="@+id/action_search"
         android:title="@string/menu_search"
         android:icon="@drawable/ic_search_24"
-        app:showAsAction="ifRoom|collapseActionView"/>
+        app:showAsAction="always"/>
 
-    <item android:id="@+id/action_filter"
-        android:title="@string/menu_filter"
-        android:icon="@drawable/ic_tune_24"
-        app:showAsAction="ifRoom"/>
-
-    <item android:id="@+id/action_cart"
-        android:title="@string/menu_cart"
-        android:icon="@drawable/ic_cart_24"
+    <item android:id="@+id/action_notifications"
+        android:title="Thông báo"
+        android:icon="@drawable/ic_notifications_24"
         app:showAsAction="always"/>
 </menu>

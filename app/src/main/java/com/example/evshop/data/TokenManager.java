@@ -9,6 +9,10 @@ public class TokenManager {
     private final SharedPreferences prefs;
     private final Context context; // <-- SỬA: Thêm Context
 
+    // ⚠️ TEST MODE: Bật để test UI mà không cần đăng nhập thật
+    private static final boolean TEST_MODE = true; // Đổi thành false khi deploy production
+    private static final String FAKE_TOKEN = "test_token_for_ui_testing_only";
+
     public TokenManager(Context ctx) {
         this.context = ctx.getApplicationContext(); // <-- SỬA: Thêm dòng này
         prefs = this.context.getSharedPreferences("auth", Context.MODE_PRIVATE);
@@ -19,6 +23,10 @@ public class TokenManager {
     }
 
     public String getAccessToken() {
+        if (TEST_MODE) {
+            // Test mode: trả về fake token để test UI
+            return FAKE_TOKEN;
+        }
         return prefs.getString("access_token", null);
     }
 
@@ -27,10 +35,18 @@ public class TokenManager {
     }
 
     public String getRefreshToken() {
+        if (TEST_MODE) {
+            // Test mode: trả về fake token
+            return FAKE_TOKEN;
+        }
         return prefs.getString("refresh_token", null);
     }
 
     public void clear() {
+        if (TEST_MODE) {
+            // Test mode: không xóa token (để giữ trạng thái đăng nhập)
+            return;
+        }
         prefs.edit().clear().apply();
     }
 

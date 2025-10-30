@@ -25,16 +25,13 @@ public class NotificationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notification);
 
-        // Setup toolbar với nút back
+        // Setup toolbar với nút back - theo chuẩn Material Design
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
-        
-        // Xử lý click nút back
-        toolbar.setNavigationOnClickListener(v -> finish());
 
         recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -87,5 +84,12 @@ public class NotificationActivity extends AppCompatActivity {
 
         adapter = new NotificationAdapter(items);
         recyclerView.setAdapter(adapter);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        // Xử lý nút back giống các Activity khác
+        finish();
+        return true;
     }
 }

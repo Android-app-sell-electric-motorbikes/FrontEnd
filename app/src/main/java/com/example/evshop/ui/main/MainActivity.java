@@ -18,7 +18,7 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.example.evshop.R;
 import com.example.evshop.databinding.ActivityMainBinding;
-import com.example.evshop.ui.auth.LoginActivity; // <-- QUAN TRỌNG: Thay bằng Activity đăng nhập của bạn (ví dụ: LoginActivity)
+import com.example.evshop.ui.auth.LoginActivity;
 import com.example.evshop.ui.auth.AuthViewModel;
 import com.example.evshop.ui.map.VietMapMapViewActivity;
 import com.example.evshop.util.NotificationHelper;
@@ -51,17 +51,31 @@ public class MainActivity extends AppCompatActivity {
         // 1. Khởi tạo AuthViewModel
         authViewModel = new ViewModelProvider(this).get(AuthViewModel.class);
 
-        // 2. Lắng nghe sự thay đổi trạng thái đăng nhập
-        // Khi trạng thái thay đổi, yêu cầu hệ thống vẽ lại menu ngay lập tức
-        authViewModel.isLoggedIn.observe(this, isLoggedIn -> {
-            invalidateOptionsMenu();
-        });
+        // 2. Setup Bottom Navigation
+        setupBottomNavigation();
 
         // 3. Tích hợp thanh công cụ (Toolbar) với Navigation Component
         // Tự động xử lý tiêu đề và nút quay lại
         NavigationUI.setupWithNavController(binding.toolbar, navController);
 
         requestNotificationPermission();
+    }
+
+    private void setupBottomNavigation() {
+        // Kết nối Bottom Navigation với NavController
+        NavigationUI.setupWithNavController(binding.bottomNavigation, navController);
+        
+        // Lắng nghe thay đổi destination để update UI
+        navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+            // Có thể ẩn/hiện bottom nav tùy theo màn hình
+            int destId = destination.getId();
+            if (destId == R.id.loginFragment || destId == R.id.registerFragment) {
+                // Ẩn bottom nav khi ở màn hình login/register
+                binding.bottomNavigation.setVisibility(android.view.View.GONE);
+            } else {
+                binding.bottomNavigation.setVisibility(android.view.View.VISIBLE);
+            }
+        });
     }
 
     @Override
@@ -71,49 +85,20 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        // Hàm này được gọi ngay trước khi menu hiển thị
-        // Đây là nơi hoàn hảo để ẩn/hiện các nút
-        MenuItem loginItem = menu.findItem(R.id.login);
-        MenuItem logoutItem = menu.findItem(R.id.action_logout);
-
-        if (loginItem != null && logoutItem != null) {
-            // Lấy trạng thái đăng nhập mới nhất từ ViewModel
-            Boolean isLoggedIn = authViewModel.isLoggedIn.getValue();
-            boolean loggedIn = isLoggedIn != null && isLoggedIn;
-
-            // Ẩn/hiện các nút dựa trên trạng thái
-            loginItem.setVisible(!loggedIn);
-            logoutItem.setVisible(loggedIn);
-        }
-
-        return super.onPrepareOptionsMenu(menu);
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Hàm này xử lý sự kiện khi người dùng nhấn vào một item trong menu
         int itemId = item.getItemId();
 
-        if (itemId == R.id.login) {
-            // Chuyển sang màn hình đăng nhập
-            startActivity(new Intent(this, LoginActivity.class)); // Thay AuthActivity nếu cần
-            return true;
-        } else if (itemId == R.id.action_logout) {
-            // Gọi logout từ ViewModel
-            authViewModel.logout();
-
-            // Chuyển về màn hình Login và xóa hết các màn hình cũ trong stack
-            Intent intent = new Intent(this, LoginActivity.class); // Thay AuthActivity nếu cần
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-
+        if (itemId == R.id.action_notifications) {
+            // Mở màn hình Notifications
+            startActivity(new Intent(this, com.example.evshop.ui.NotificationActivity.class));
             return true;
         }
-
-        // Nếu không phải các nút trên, để cho NavigationUI tự xử lý (ví dụ: search, cart, filter)
-        return NavigationUI.onNavDestinationSelected(item, navController) || super.onOptionsItemSelected(item);
+        
+        // Để các menu items khác (search) được xử lý bởi Fragment
+        return super.onOptionsItemSelected(item);
     }
 
     private void openVietMapActivity() {

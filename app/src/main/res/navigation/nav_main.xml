@@ -3,10 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_main"
-    app:startDestination="@id/homeFragment">
+    app:startDestination="@id/navigation_home">
 
     <fragment
-        android:id="@+id/homeFragment"
+        android:id="@+id/navigation_home"
         android:name="com.example.evshop.ui.home.HomeFragment"
         android:label="@string/title_evshop"
         tools:layout="@layout/fragment_home" >
@@ -19,10 +19,16 @@
     </fragment>
 
     <fragment
-        android:id="@+id/action_cart"
+        android:id="@+id/navigation_cart"
         android:name="com.example.evshop.domain.models.CartFragment"
         android:label="Giỏ hàng"
         tools:layout="@layout/fragment_cart" />
+
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.example.evshop.ui.profile.ProfileFragment"
+        android:label="Tài khoản"
+        tools:layout="@layout/fragment_profile" />
 
     <fragment
         android:id="@+id/loginFragment"

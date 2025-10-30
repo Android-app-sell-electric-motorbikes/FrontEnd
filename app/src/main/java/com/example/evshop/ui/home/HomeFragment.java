@@ -22,11 +22,8 @@ import com.example.evshop.ui.auth.AuthViewModel; // <-- **BƯỚC 1: IMPORT AUTH
 import com.example.evshop.ui.map.VietMapMapViewActivity;
 import com.example.evshop.ui.vehicle.TemplateVehicleListActivity;
 import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.badge.BadgeDrawable;
-import com.google.android.material.badge.ExperimentalBadgeUtils;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.chip.Chip;
-import com.google.android.material.badge.BadgeUtils;
 
 import java.util.*;
 import javax.inject.Inject;
@@ -39,7 +36,6 @@ public class HomeFragment extends Fragment {
     private HomeViewModel vm;
     private AuthViewModel authViewModel; // <-- **BƯỚC 2: KHAI BÁO AUTHVIEWMODEL**
     private ProductAdapter adapter;
-    private BadgeDrawable cartBadge;
     private Handler bannerHandler;
     private Runnable bannerRunnable;
     private static final double STORE_LAT = 16.047079;
@@ -61,6 +57,9 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // Cho phép Fragment xử lý menu items
+        setHasOptionsMenu(true);
 
         // --- **BƯỚC 3: KHỞI TẠO CÁC VIEWMODEL** ---
         vm = new ViewModelProvider(this).get(HomeViewModel.class);
@@ -93,32 +92,32 @@ public class HomeFragment extends Fragment {
         // --- **BƯỚC 4: LẮNG NGHE TRẠNG THÁI ĐĂNG NHẬP** ---
         // Hàm observe() này sẽ thay thế cho việc gọi updateAuthUi() thủ công
         authViewModel.isLoggedIn.observe(getViewLifecycleOwner(), this::updateUiBasedOnAuthState);
+    }
 
-        // Bạn có thể gọi các hàm khác ở đây nếu cần, ví dụ:
-        // toggleSearch();
-        // openFilterSheet();
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int itemId = item.getItemId();
+        
+        if (itemId == R.id.action_search) {
+            toggleSearch();
+            return true;
+        }
+        
+        return super.onOptionsItemSelected(item);
     }
 
     // --- **BƯỚC 5: HÀM CẬP NHẬT UI MỚI, THAY THẾ updateAuthUi()** ---
     private void updateUiBasedOnAuthState(Boolean isLoggedIn) {
         boolean loggedIn = isLoggedIn != null && isLoggedIn;
 
+        // Toggle giữa 2 panels
         b.panelAuth.setVisibility(loggedIn ? View.GONE : View.VISIBLE);
-        b.chipUser.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
-        b.btnViewAllLoggedIn.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
+        b.panelLoggedIn.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
 
         if (loggedIn) {
             // TODO: Nâng cấp để lấy tên người dùng từ một nguồn đáng tin cậy hơn (ví dụ: một User object trong AuthViewModel)
             // Hiện tại, có thể tạm thời hiển thị một chuỗi chào mừng chung.
             b.chipUser.setText(getString(R.string.welcome));
-        }
-
-        // Cập nhật menu trên toolbar (nếu có)
-        if (toolbar != null && toolbar.getMenu() != null) {
-            MenuItem loginItem = toolbar.getMenu().findItem(R.id.login);
-            MenuItem logoutItem = toolbar.getMenu().findItem(R.id.action_logout);
-            if (loginItem != null) loginItem.setVisible(!loggedIn);
-            if (logoutItem != null) logoutItem.setVisible(loggedIn);
         }
     }
 
@@ -137,7 +136,6 @@ public class HomeFragment extends Fragment {
 
     private MaterialToolbar toolbar;
 
-    @OptIn(markerClass = ExperimentalBadgeUtils.class)
     private void setupToolbar() {
         toolbar = requireActivity().findViewById(R.id.toolbar);
         if (toolbar == null) {
@@ -145,20 +143,6 @@ public class HomeFragment extends Fragment {
         }
         toolbar.setNavigationIcon(null);
         toolbar.setTitle(R.string.title_evshop);
-
-        cartBadge = BadgeDrawable.create(requireContext());
-        cartBadge.setNumber(0);
-        cartBadge.setVisible(true);
-
-        toolbar.post(() -> {
-            if (toolbar.getMenu() != null && toolbar.getMenu().findItem(R.id.action_cart) != null) {
-                try {
-                    BadgeUtils.attachBadgeDrawable(cartBadge, toolbar, R.id.action_cart);
-                } catch (Throwable t) {
-                    t.printStackTrace();
-                }
-            }
-        });
     }
 
 
@@ -336,8 +320,8 @@ public class HomeFragment extends Fragment {
             dialog.dismiss();
         });
 
-        // Chỉ show dialog này khi có lệnh, không tự động show khi vào màn hình
-        // dialog.show();
+        // Hiển thị dialog
+        dialog.show();
     }
 
     private void showProfileMenu() {
@@ -408,31 +392,10 @@ public class HomeFragment extends Fragment {
         dialog.show();
     }
 
-    @OptIn(markerClass = ExperimentalBadgeUtils.class)
-    private void incrementCartBadge() {
-        if (cartBadge == null || toolbar == null) return;
-        cartBadge.setNumber(cartBadge.getNumber() + 1);
-        if (toolbar.getMenu() != null && toolbar.getMenu().findItem(R.id.action_cart) != null) {
-            try {
-                BadgeUtils.attachBadgeDrawable(cartBadge, toolbar, R.id.action_cart);
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
-        }
-    }
-
-    @OptIn(markerClass = ExperimentalBadgeUtils.class)
-    @Override public void onResume() {
+    @Override 
+    public void onResume() {
         super.onResume();
-        // Không cần gọi updateAuthUi() ở đây nữa vì LiveData đã tự động xử lý.
-        if (toolbar != null) {
-            toolbar.post(() -> {
-                if (toolbar.getMenu() != null && toolbar.getMenu().findItem(R.id.action_cart) != null && cartBadge != null) {
-                    try { BadgeUtils.attachBadgeDrawable(cartBadge, toolbar, R.id.action_cart); }
-                    catch (Throwable t) { t.printStackTrace(); }
-                }
-            });
-        }
+        // Banner auto-scroll
         if (bannerHandler != null && bannerRunnable != null) {
             bannerHandler.postDelayed(bannerRunnable, 3000);
         }
