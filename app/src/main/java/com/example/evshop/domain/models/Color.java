@@ -19,4 +19,9 @@ public class Color {
     public String getColorName() {
         return colorName;
     }
+
+    @Override
+    public String toString() {
+        return colorName; // Trả về tên để hiển thị
+    }
 }

@@ -10,26 +10,31 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+// *** THÊM IMPORT NÀY ***
+import androidx.appcompat.widget.Toolbar;
+
 
 import com.example.evshop.R;
 import com.example.evshop.databinding.FragmentHomeBinding;
 import com.example.evshop.databinding.ItemBannerBinding;
 import com.example.evshop.domain.models.TemplateVehicle;
+import com.example.evshop.domain.models.UserData;
 import com.example.evshop.ui.adapter.VehicleAdapter;
 import com.example.evshop.ui.auth.AuthViewModel;
-// *** BƯỚC 1: IMPORT MAINACTIVITY ***
 import com.example.evshop.ui.main.MainActivity;
 import com.example.evshop.ui.vehicle.TemplateVehicleListActivity;
 import com.example.evshop.ui.vehicle.VehicleDetailActivity;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
@@ -60,59 +65,49 @@ public class HomeFragment extends Fragment {
         setupBanner();
         setupRecyclerView();
         observeHomeViewModel();
-        observeLoginState(); // <-- Logic chính nằm ở đây
+        observeLoginState();
         setupClickListeners();
-
-        homeViewModel.refresh();
     }
 
-    // *** BƯỚC 2: CẬP NHẬT HÀM NÀY ***
     private void observeLoginState() {
         authViewModel.getIsLoggedInState().observe(getViewLifecycleOwner(), isLoggedIn -> {
+            if (b == null) return;
             boolean loggedIn = isLoggedIn != null && isLoggedIn;
 
-            // Cập nhật giao diện của HomeFragment
-            b.panelAuth.setVisibility(loggedIn ? View.GONE : View.VISIBLE);
-            b.chipUser.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
-            b.viewPager.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
-            b.btnViewAllLoggedIn.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
+            // Giao diện chính của HomeFragment giờ không cần ẩn/hiện dựa trên login nữa,
+            // vì nếu chưa login thì đã ở màn hình LoginFragment rồi.
+            // Tuy nhiên, chúng ta vẫn cần gọi refresh() khi đã chắc chắn đăng nhập.
             if (loggedIn) {
-                b.chipUser.setText("Tài khoản");
+                // GỌI API KHI GIAO DIỆN ĐÃ SẴN SÀNG
+                b.panelAuth.setVisibility(View.GONE);
+                homeViewModel.refresh();
             }
 
-            // Ra lệnh cho MainActivity ẩn/hiện Toolbar
+            // Xóa bỏ các lệnh ẩn/hiện không cần thiết
+            // b.chipUser.setVisibility(View.GONE);
+
+            // Ra lệnh cho MainActivity ẩn/hiện icon tài khoản trên Toolbar
             if (getActivity() instanceof MainActivity) {
-                ((MainActivity) getActivity()).showToolbar(loggedIn);
+                ((MainActivity) getActivity()).showToolbarItems(loggedIn);
             }
         });
     }
 
-    // *** BƯỚC 3: CẬP NHẬT HÀM NÀY ĐỂ ĐẢM BẢO AN TOÀN ***
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        // Khi rời khỏi HomeFragment, hãy đảm bảo Toolbar hiện lại
-        // để không ảnh hưởng đến các màn hình khác.
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).showToolbar(true);
-        }
-        b = null;
+        b = null; // Tránh memory leak
     }
 
-
-    // --- CÁC HÀM CÒN LẠI GIỮ NGUYÊN, KHÔNG CẦN SỬA ---
-
     private void setupBanner() {
-        List<Integer> bannerImages = Arrays.asList(
-                R.drawable.banner_xe3,
-                R.drawable.banner_xe6,
-                R.drawable.banner_xe5
-        );
+        if (b == null) return;
+        List<Integer> bannerImages = Arrays.asList(R.drawable.banner_xe3, R.drawable.banner_xe6, R.drawable.banner_xe5);
         BannerAdapter bannerAdapter = new BannerAdapter(bannerImages);
         b.viewPager.setAdapter(bannerAdapter);
     }
 
     private void setupRecyclerView() {
+        if (b == null) return;
         VehicleAdapter.OnVehicleClickListener listener = template -> {
             if (getContext() == null) return;
             Intent intent = new Intent(getContext(), VehicleDetailActivity.class);
@@ -126,41 +121,137 @@ public class HomeFragment extends Fragment {
     }
 
     private void observeHomeViewModel() {
+        if (b == null) return;
         homeViewModel.loading.observe(getViewLifecycleOwner(), isLoading -> {
-            if (isLoading != null) b.swipeRefresh.setRefreshing(isLoading);
+            if (b!=null && isLoading != null) b.swipeRefresh.setRefreshing(isLoading);
         });
         homeViewModel.getFeaturedVehicles().observe(getViewLifecycleOwner(), vehicles -> {
-            if (vehicles != null) vehicleAdapter.submitList(vehicles);
+            if (b!=null && vehicles != null) vehicleAdapter.submitList(vehicles);
         });
         homeViewModel.error.observe(getViewLifecycleOwner(), hasError -> {
-            if (hasError != null && hasError) Toast.makeText(getContext(), "Lỗi tải dữ liệu", Toast.LENGTH_SHORT).show();
+            if (b!=null && hasError != null && hasError) Toast.makeText(getContext(), "Lỗi tải dữ liệu", Toast.LENGTH_SHORT).show();
         });
     }
 
+    // ======================================================================
+    // ***           HÀM SETUPCLICKLISTENERS ĐÃ ĐƯỢC VIẾT LẠI           ***
+    // ======================================================================
     private void setupClickListeners() {
+        if (b == null) return;
+
+        // Giữ lại listener cho SwipeRefresh
         b.swipeRefresh.setOnRefreshListener(() -> homeViewModel.refresh());
-        b.btnSignIn.setOnClickListener(v -> navController.navigate(R.id.action_homeFragment_to_loginFragment));
-        b.btnSignUp.setOnClickListener(v -> navController.navigate(R.id.action_homeFragment_to_registerFragment));
-        b.chipUser.setOnClickListener(v -> {
-            PopupMenu popupMenu = new PopupMenu(getContext(), b.chipUser);
-            popupMenu.getMenu().add("Tài khoản của tôi");
-            popupMenu.getMenu().add("Đăng xuất");
-            popupMenu.setOnMenuItemClickListener(item -> {
-                if ("Đăng xuất".equals(item.getTitle().toString())) {
-                    authViewModel.logout();
-                    return true;
-                }
-                return false;
-            });
-            popupMenu.show();
-        });
+
+        // Nút "Xem tất cả" vẫn hoạt động bình thường
         b.btnViewAllLoggedIn.setOnClickListener(v -> {
             if (getContext() == null) return;
             Intent intent = new Intent(getContext(), TemplateVehicleListActivity.class);
             startActivity(intent);
         });
+
+        // Gắn listener vào Toolbar của Activity để bắt sự kiện click item menu
+        if (getActivity() != null) {
+            Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
+            toolbar.setOnMenuItemClickListener(menuItem -> {
+                // Kiểm tra xem có phải người dùng đã nhấn đúng vào icon tài khoản không
+                if (menuItem.getItemId() == R.id.action_account_menu) {
+                    // Tìm View của chính item đó để làm "điểm neo" cho PopupMenu
+                    View menuItemView = getActivity().findViewById(R.id.action_account_menu);
+                    if (menuItemView != null) {
+                        showUserPopupMenu(menuItemView);
+                    }
+                    return true;
+                }
+                return false;
+            });
+        }
     }
 
+    /**
+     * Hàm mới để hiển thị PopupMenu, giống trong AdminActivity.
+     * @param anchorView View mà menu sẽ "neo" vào (chính là icon tài khoản).
+     */
+    private void showUserPopupMenu(View anchorView) {
+        if (getContext() == null) return;
+
+        PopupMenu popupMenu = new PopupMenu(getContext(), anchorView);
+        popupMenu.getMenu().add("Tài khoản của tôi");
+        popupMenu.getMenu().add("Đăng xuất");
+
+        popupMenu.setOnMenuItemClickListener(item -> {
+            String title = item.getTitle().toString();
+            if ("Tài khoản của tôi".equals(title)) {
+                // *** THAY ĐỔI Ở ĐÂY: GỌI HÀM HIỂN THỊ PROFILE MỚI ***
+                showUserProfileDialog();
+                return true;
+            } else if ("Đăng xuất".equals(title)) {
+                logout();
+                return true;
+            }
+            return false;
+        });
+
+        popupMenu.show();
+    }
+
+    private void showUserProfileDialog() {
+        // Luôn kiểm tra context trong Fragment
+        if (getContext() == null) {
+            return;
+        }
+
+        // Lấy dữ liệu người dùng hiện tại từ AuthViewModel
+        UserData currentUser = authViewModel.getCurrentUser().getValue();
+
+        // Kiểm tra nếu không có dữ liệu (chưa kịp tải hoặc lỗi)
+        if (currentUser == null) {
+            Toast.makeText(getContext(), "Không thể tải thông tin người dùng", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Xây dựng chuỗi thông tin để hiển thị
+        StringBuilder messageBuilder = new StringBuilder();
+        messageBuilder.append("Tên: ").append(currentUser.fullName).append("\n\n");
+        messageBuilder.append("Email: ").append(currentUser.email).append("\n\n");
+        // Bạn có thể thêm các thông tin khác như số điện thoại nếu có trong model UserData
+        //messageBuilder.append("Ngày/Tháng/Năm Sinh: ").append(currentUser.dateOfBirth).append("\n\n");
+
+
+        // Xử lý hiển thị danh sách roles (vai trò)
+        String rolesString = "N/A";
+        if (currentUser.roles != null && !currentUser.roles.isEmpty()) {
+            // Nối các role lại với nhau, phân cách bởi dấu phẩy
+            // Cần API 24+ để dùng stream, dự án của bạn có vẻ đã đáp ứng
+            rolesString = currentUser.roles.stream().collect(Collectors.joining(", "));
+        }
+        messageBuilder.append("Vai trò: ").append(rolesString);
+
+        // Tạo và hiển thị AlertDialog
+        new AlertDialog.Builder(getContext()) // Sử dụng getContext() thay vì 'this'
+                .setTitle("Thông tin Tài khoản") // Đổi tiêu đề cho phù hợp
+                .setMessage(messageBuilder.toString())
+                .setPositiveButton("Đóng", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
+
+
+
+    /**
+     * Hàm private để gom logic đăng xuất cho gọn.
+     */
+    private void logout() {
+        authViewModel.logout();
+        Intent intent = new Intent(getActivity(), MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        if (getActivity() != null) {
+            getActivity().finish();
+        }
+    }
+
+
+    // --- ADAPTER CHO BANNER GIỮ NGUYÊN ---
     public static class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.BannerViewHolder> {
         private final List<Integer> images;
         public BannerAdapter(List<Integer> images) { this.images = images; }

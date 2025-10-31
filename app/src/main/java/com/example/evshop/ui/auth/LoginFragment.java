@@ -14,6 +14,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.example.evshop.R;
 import com.example.evshop.databinding.FragmentLoginBinding;
 import com.example.evshop.ui.admin.AdminActivity;
+import com.example.evshop.ui.main.MainActivity;
 import com.google.android.material.snackbar.Snackbar;
 
 import javax.annotation.Nullable;
@@ -39,6 +40,10 @@ public class LoginFragment extends Fragment {
         // *** THAY ĐỔI CỰC KỲ QUAN TRỌNG Ở ĐÂY ***
         // Lấy ViewModel được chia sẻ từ Activity, thay vì tạo mới.
         authViewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
+
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).showToolbarItems(false);
+        }
 
         b.btnLogin.setOnClickListener(v -> {
             String email = String.valueOf(b.etEmail.getText());
@@ -94,10 +99,17 @@ public class LoginFragment extends Fragment {
                     break;
 
                 case GO_TO_HOME:
-                    Snackbar.make(b.getRoot(), "Đăng nhập thành công", Snackbar.LENGTH_SHORT)
-                            .setAnchorView(b.btnLogin).show();
-                    NavHostFragment.findNavController(this).navigateUp();
-                    break;
+                Snackbar.make(b.getRoot(), "Đăng nhập thành công", Snackbar.LENGTH_SHORT)
+                        .setAnchorView(b.btnLogin).show();
+
+                // ========================================================
+                // ***           THAY ĐỔI CỐT LÕI NẰM Ở ĐÂY           ***
+                // ========================================================
+                // THAY THẾ: NavHostFragment.findNavController(this).navigateUp();
+                // BẰNG LỆNH MỚI:
+                NavHostFragment.findNavController(this)
+                        .navigate(R.id.action_loginFragment_to_homeFragment);
+                break;
             }
 
             authViewModel.onNavigationComplete();

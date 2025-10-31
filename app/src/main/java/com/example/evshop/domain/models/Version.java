@@ -19,4 +19,9 @@ public class Version {
     public String getVersionName() {
         return versionName;
     }
+
+    @Override
+    public String toString() {
+        return versionName; // Trả về tên để hiển thị
+    }
 }
