@@ -42,13 +42,14 @@ public class HomeViewModel extends ViewModel {
         loading.setValue(true);
         error.setValue(false);
 
-        vehicleRepository.getAllTemplateVehicles(new Callback<ApiEnvelope<List<TemplateVehicle>>>() {
+        // *** SỬA LẠI CÁCH GỌI Ở ĐÂY ***
+        // Gọi repository.getAllTemplateVehicles() trước, sau đó mới .enqueue()
+        vehicleRepository.getAllTemplateVehicles().enqueue(new Callback<ApiEnvelope<List<TemplateVehicle>>>() {
             @Override
             public void onResponse(@NonNull Call<ApiEnvelope<List<TemplateVehicle>>> call, @NonNull Response<ApiEnvelope<List<TemplateVehicle>>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess) {
                     List<TemplateVehicle> allVehicles = response.body().result;
 
-                    // Tạo danh sách xe nổi bật
                     List<TemplateVehicle> featuredList = new ArrayList<>();
                     if (allVehicles != null) {
                         for (int i = 0; i < Math.min(allVehicles.size(), FEATURED_VEHICLES_COUNT); i++) {
@@ -69,6 +70,7 @@ public class HomeViewModel extends ViewModel {
             }
         });
     }
+
 
     private void handleError() {
         _featuredVehicles.postValue(new ArrayList<>());

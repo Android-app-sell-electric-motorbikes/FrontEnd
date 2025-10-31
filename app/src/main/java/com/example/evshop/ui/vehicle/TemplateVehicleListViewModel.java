@@ -38,7 +38,9 @@ public class TemplateVehicleListViewModel extends ViewModel {
 
     public void loadAllVehicles() {
         _loading.postValue(true);
-        repository.getAllTemplateVehicles(new Callback<ApiEnvelope<List<TemplateVehicle>>>() {
+        // *** SỬA LẠI CÁCH GỌI Ở ĐÂY ***
+        // Gọi repository.getAllTemplateVehicles() trước, sau đó mới .enqueue()
+        repository.getAllTemplateVehicles().enqueue(new Callback<ApiEnvelope<List<TemplateVehicle>>>() {
             @Override
             public void onResponse(Call<ApiEnvelope<List<TemplateVehicle>>> call, Response<ApiEnvelope<List<TemplateVehicle>>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess) {

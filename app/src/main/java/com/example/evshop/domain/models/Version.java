@@ -5,15 +5,15 @@ import com.google.gson.annotations.SerializedName;
 
 public class Version {
     // Thêm các trường khác của Version nếu có từ JSON (ví dụ: versionId)
-    @SerializedName("versionId")
-    private String versionId;
+    @SerializedName("id")
+    private String id;
 
     @SerializedName("versionName")
     private String versionName;
 
     // --- Getters ---
-    public String getVersionId() {
-        return versionId;
+    public String getId() {
+        return id;
     }
 
     public String getVersionName() {

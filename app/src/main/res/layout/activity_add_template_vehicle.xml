@@ -5,15 +5,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ui.admin.vehicle.AddTemplateVehicleActivity">
-
+    tools:context=".ui.admin.AddTemplateVehicleActivity">
     <!-- Thanh Toolbar có nút quay lại -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
         app:navigationIcon="@drawable/ic_arrow_back"
-        app:title="Thêm Mẫu Xe Mới" />
+        app:navigationIconTint="?attr/colorOnPrimary"
+        app:title="Thêm Mẫu Xe Mới"
+        app:titleTextColor="?attr/colorOnPrimary" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -26,11 +28,14 @@
             android:padding="16dp">
 
             <!-- Spinner để chọn Version -->
+            <!-- Sử dụng style của Material3 để chữ to và rõ hơn -->
             <TextView
+                style="@style/TextAppearance.Material3.TitleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:labelFor="@+id/spinner_version"
-                android:text="Chọn Phiên bản xe (Version)" />
+                android:text="Chọn Phiên bản xe (Version)"
+                android:textColor="?attr/colorOnSurface" />
 
             <Spinner
                 android:id="@+id/spinner_version"
@@ -40,11 +45,13 @@
 
             <!-- Spinner để chọn Màu sắc -->
             <TextView
+                style="@style/TextAppearance.Material3.TitleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="24dp"
                 android:labelFor="@+id/spinner_color"
-                android:text="Chọn Màu sắc" />
+                android:text="Chọn Màu sắc"
+                android:textColor="?attr/colorOnSurface" />
 
             <Spinner
                 android:id="@+id/spinner_color"
@@ -56,12 +63,12 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp">
+                android:layout_marginTop="24dp">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/et_description"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Mô tả"
+                    android:hint="Mô tả chi tiết"
                     android:inputType="textMultiLine"
                     android:minLines="3"
                     android:gravity="top"/>
@@ -76,30 +83,40 @@
                     android:id="@+id/et_price"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Giá bán"
+                    android:hint="Giá bán (VND)"
                     android:inputType="numberDecimal" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- Chọn ảnh -->
             <TextView
+                style="@style/TextAppearance.Material3.TitleSmall"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Ảnh đại diện" />
+                android:layout_marginTop="24dp"
+                android:text="Ảnh đại diện sản phẩm"
+                android:textColor="?attr/colorOnSurface"/>
 
-            <ImageView
-                android:id="@+id/iv_preview"
+            <!-- Bọc trong CardView để có hiệu ứng đổ bóng và bo góc -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="150dp"
                 android:layout_height="150dp"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="8dp"
-                android:background="?attr/colorOnSurface"
-                android:contentDescription="Ảnh xem trước"
-                android:scaleType="centerCrop"
-                android:src="@drawable/placeholder_vehicle" />
+                app:cardCornerRadius="8dp"
+                app:cardElevation="4dp">
+                <ImageView
+                    android:id="@+id/iv_preview"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="Ảnh xem trước"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/placeholder_vehicle" />
+            </com.google.android.material.card.MaterialCardView>
+
 
             <Button
                 android:id="@+id/btn_select_image"
+                style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
@@ -111,7 +128,9 @@
                 android:id="@+id/btn_add_template"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:layout_marginTop="32dp"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
                 android:text="Thêm Mẫu Xe" />
 
             <!-- Loading Indicator -->

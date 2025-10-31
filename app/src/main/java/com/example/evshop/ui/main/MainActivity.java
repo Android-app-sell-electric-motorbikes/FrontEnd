@@ -44,16 +44,30 @@ public class MainActivity extends AppCompatActivity {
         setupNavigation();
     }
 
+    // Trong file: D:/PRM391/FrontEnd/app/src/main/java/com/example/evshop/ui/main/MainActivity.java
+
     private void setupNavigation() {
         // Tìm NavController
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host); // Đảm bảo ID này đúng với activity_main.xml
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host); // ID của NavHostFragment trong activity_main.xml
         if (navHostFragment != null) {
             navController = navHostFragment.getNavController();
-            // Cấu hình AppBar để tiêu đề tự động thay đổi theo Fragment
-            AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph()).build();
+
+            // *** SỬA LẠI HOÀN TOÀN ĐOẠN CẤU HÌNH APPBAR ***
+            //
+            // Khai báo các màn hình nào là "top-level" (không có nút back).
+            // Trong trường hợp này, chỉ có HomeFragment.
+            AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
+                    R.id.homeFragment // <-- Thêm ID của HomeFragment tại đây
+            ).build();
+
+            // Thiết lập Toolbar với cấu hình mới
+            // Dòng này sẽ làm 2 việc:
+            // 1. Tự động thay đổi tiêu đề Toolbar.
+            // 2. Tự động hiển thị/ẩn nút back dựa trên cấu hình bạn vừa cung cấp.
             NavigationUI.setupWithNavController(binding.toolbar, navController, appBarConfiguration);
         }
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

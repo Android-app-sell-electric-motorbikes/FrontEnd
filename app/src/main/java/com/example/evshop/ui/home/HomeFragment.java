@@ -70,23 +70,45 @@ public class HomeFragment extends Fragment {
     }
 
     private void observeLoginState() {
+        // Lắng nghe trạng thái đăng nhập từ AuthViewModel
         authViewModel.getIsLoggedInState().observe(getViewLifecycleOwner(), isLoggedIn -> {
-            if (b == null) return;
+            if (b == null) return; // Đảm bảo view binding còn tồn tại
+
             boolean loggedIn = isLoggedIn != null && isLoggedIn;
 
-            // Giao diện chính của HomeFragment giờ không cần ẩn/hiện dựa trên login nữa,
-            // vì nếu chưa login thì đã ở màn hình LoginFragment rồi.
-            // Tuy nhiên, chúng ta vẫn cần gọi refresh() khi đã chắc chắn đăng nhập.
+            // Cập nhật giao diện dựa trên trạng thái đăng nhập
             if (loggedIn) {
-                // GỌI API KHI GIAO DIỆN ĐÃ SẴN SÀNG
+                // --- KHI ĐÃ ĐĂNG NHẬP ---
+
+                // Ẩn panel đăng nhập/đăng ký
                 b.panelAuth.setVisibility(View.GONE);
+
+                // Lấy thông tin người dùng để hiển thị trên chip
+                UserData user = authViewModel.getCurrentUser().getValue();
+                if (user != null) {
+                    b.chipUser.setText("Chào, " + user.fullName);
+                }
+                // Hiện chip chào mừng
+                b.chipUser.setVisibility(View.VISIBLE);
+
+                // ===> HIỆN NÚT "XEM TẤT CẢ SẢN PHẨM" <===
+                b.btnViewAllLoggedIn.setVisibility(View.VISIBLE);
+
+                // Tải lại dữ liệu trang chủ
                 homeViewModel.refresh();
+
+            } else {
+                // --- KHI CHƯA ĐĂNG NHẬP ---
+
+                // Hiện panel đăng nhập/đăng ký
+                b.panelAuth.setVisibility(View.VISIBLE);
+
+                // Ẩn các thành phần của người dùng đã đăng nhập
+                b.chipUser.setVisibility(View.GONE);
+                b.btnViewAllLoggedIn.setVisibility(View.GONE);
             }
 
-            // Xóa bỏ các lệnh ẩn/hiện không cần thiết
-            // b.chipUser.setVisibility(View.GONE);
-
-            // Ra lệnh cho MainActivity ẩn/hiện icon tài khoản trên Toolbar
+            // Cập nhật icon trên Toolbar của Activity (đoạn này đã đúng)
             if (getActivity() instanceof MainActivity) {
                 ((MainActivity) getActivity()).showToolbarItems(loggedIn);
             }

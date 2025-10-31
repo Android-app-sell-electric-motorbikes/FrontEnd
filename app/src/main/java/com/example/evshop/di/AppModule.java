@@ -1,7 +1,7 @@
 package com.example.evshop.di;
 
 import com.example.evshop.data.Analytics;
-import com.example.evshop.data.HomeRepository;
+//import com.example.evshop.data.HomeRepository;
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
