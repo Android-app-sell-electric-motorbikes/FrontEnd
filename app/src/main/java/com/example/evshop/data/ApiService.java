@@ -12,6 +12,7 @@ import com.example.evshop.domain.models.LoginResult;
 import com.example.evshop.domain.models.TemplateVehicle;
 import com.example.evshop.domain.models.Version;
 import com.example.evshop.domain.models.VersionDetails;
+import com.example.evshop.domain.models.InventoryItem;
 
 import java.util.List;
 
@@ -83,6 +84,8 @@ public interface ApiService {
                 // Header Content-Type sẽ được thêm vào trong Repository
         );
 
+        @GET("api/ElectricVehicle/get-evc-inventory")
+        Call<ApiEnvelope<List<InventoryItem>>> getInventory();
 
         // =========================================================================
         // *** STEP 3: API ĐỂ TẠO TEMPLATE (Đã có, giữ nguyên)                     ***

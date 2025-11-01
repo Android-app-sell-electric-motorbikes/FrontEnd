@@ -40,6 +40,7 @@ public class AdminActivity extends AppCompatActivity {
     private MaterialButton btnManageVehicles;
     private MaterialButton btnManageUsers;
     private MaterialButton btnManageOrders;
+    private MaterialButton btnManageInventory;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -84,13 +85,19 @@ public class AdminActivity extends AppCompatActivity {
         btnManageVehicles = findViewById(R.id.btnManageVehicles);
         btnManageUsers = findViewById(R.id.btnManageUsers);
         btnManageOrders = findViewById(R.id.btnManageOrders);
-
+        btnManageInventory = findViewById(R.id.btn_manage_inventory);
         // Gắn sự kiện click cho nút "Thêm Mẫu Xe Mới"
         btnGoToAddTemplate.setOnClickListener(v -> {
             // Tạo Intent để mở màn hình AddTemplateVehicleActivity
             Intent intent = new Intent(AdminActivity.this, AddTemplateVehicleActivity.class);
             startActivity(intent);
         });
+
+        btnManageInventory.setOnClickListener(v -> {
+            Intent intent = new Intent(AdminActivity.this, VehicleInventoryActivity.class);
+            startActivity(intent);
+        });
+
 
         // Gắn sự kiện cho các nút khác
         btnManageVehicles.setOnClickListener(v -> {

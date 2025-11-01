@@ -46,6 +46,11 @@
             android:name=".ui.admin.AdminActivity"
             android:exported="false" />
         <activity
+            android:name=".ui.admin.VehicleInventoryActivity"
+            android:exported="false"
+            android:label="Quản Lý Kho Xe"
+            android:parentActivityName=".ui.admin.AdminActivity" />
+        <activity
             android:name=".ui.admin.AddTemplateVehicleActivity"
             android:exported="false" />
         <activity
