@@ -70,11 +70,11 @@ public class FeaturedVehicleAdapter extends ListAdapter<TemplateVehicle, Feature
             if (template.getImgUrl() != null && !template.getImgUrl().isEmpty()) {
                 Glide.with(itemView.getContext())
                         .load(template.getImgUrl().get(0))
-                        .placeholder(R.drawable.ic_placeholder)
+                        .placeholder(R.drawable.placeholder_vehicle)
                         .error(R.drawable.ic_placeholder)
                         .into(imgVehicle);
             } else {
-                imgVehicle.setImageResource(R.drawable.ic_placeholder);
+                imgVehicle.setImageResource(R.drawable.placeholder_vehicle);
             }
 
             itemView.setOnClickListener(v -> listener.onVehicleClick(template));

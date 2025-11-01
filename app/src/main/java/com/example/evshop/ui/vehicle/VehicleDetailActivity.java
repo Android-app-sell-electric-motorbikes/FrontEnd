@@ -101,11 +101,11 @@ public class VehicleDetailActivity extends AppCompatActivity {
             if (template.getImgUrl() != null && !template.getImgUrl().isEmpty()) {
                 Glide.with(this)
                         .load(template.getImgUrl().get(0))
-                        .placeholder(R.drawable.ic_placeholder)
+                        .placeholder(R.drawable.placeholder_vehicle)
                         .error(R.drawable.ic_placeholder)
                         .into(imgVehicleDetail);
             } else {
-                imgVehicleDetail.setImageResource(R.drawable.ic_placeholder);
+                imgVehicleDetail.setImageResource(R.drawable.placeholder_vehicle);
             }
 
             String colorName = (template.getColor() != null) ? template.getColor().getColorName() : "N/A";

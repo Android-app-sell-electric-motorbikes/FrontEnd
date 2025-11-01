@@ -50,6 +50,7 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         app:title="Quản Lý Kho Xe"
-        app:titleTextColor="?attr/colorOnPrimary" />
+        app:titleTextColor="?attr/colorOnPrimary"
+        android:theme="@style/Widget.EV.Toolbar.WithBlackNavIcon" /> <!-- THÊM DÒNG NÀY -->
 
 </FrameLayout>
