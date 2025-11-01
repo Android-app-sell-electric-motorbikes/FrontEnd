@@ -3,18 +3,15 @@ package com.example.evshop.domain.models;
 
 import com.google.gson.annotations.SerializedName;
 
-// Lớp này DÙNG CHO API DANH SÁCH (Get-all-template-vehicles)
 public class Version {
-
-    // *** THAY ĐỔI QUAN TRỌNG NHẤT: PHẢI KHỚP VỚI JSON CỦA API DANH SÁCH ***
-    @SerializedName("versionId") // <-- API DANH SÁCH DÙNG "versionId"
-    private String id; // <-- Ta vẫn dùng tên biến là "id" cho tiện, nhưng báo cho Gson biết nó tên là "versionId"
+    // Thêm các trường khác của Version nếu có từ JSON (ví dụ: versionId)
+    @SerializedName("id")
+    private String id;
 
     @SerializedName("versionName")
     private String versionName;
 
     // --- Getters ---
-
     public String getId() {
         return id;
     }
@@ -23,6 +20,8 @@ public class Version {
         return versionName;
     }
 
-    // Không cần các trường chi tiết khác ở đây vì API danh sách không cung cấp chúng.
-    // Giữ cho model này thật gọn nhẹ.
+    @Override
+    public String toString() {
+        return versionName; // Trả về tên để hiển thị
+    }
 }

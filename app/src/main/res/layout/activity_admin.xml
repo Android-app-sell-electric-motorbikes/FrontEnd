@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.admin.AdminActivity"
+    android:background="@color/admin_background_color"> <!-- SỬA Ở ĐÂY -->
+
+    <!-- Toolbar cho trang Admin (giữ nguyên) -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        app:title="Trang Quản Trị" />
+
+    <!-- Các nội dung còn lại giữ nguyên -->
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bảng điều khiển"
+                android:textAppearance="@style/TextAppearance.Material3.TitleLarge"/>
+
+            <!-- Nút Quản lý Xe -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnManageVehicles"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Quản lý Xe"
+                app:icon="@drawable/ic_round_directions_car_24"
+                android:paddingVertical="12dp"
+                android:gravity="start|center_vertical"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_manage_inventory"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:text="Quản lý Kho (Tồn kho)"
+                app:icon="@drawable/ic_inventory" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_go_to_add_template"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:text="Thêm Mẫu Xe Mới"
+                app:icon="@drawable/ic_add" />
+
+            <!-- Nút Quản lý Người dùng -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnManageUsers"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Quản lý Người dùng"
+                app:icon="@drawable/ic_round_group_24"
+                android:paddingVertical="12dp"
+                android:gravity="start|center_vertical"/>
+
+            <!-- Nút Quản lý Đơn hàng -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnManageOrders"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Quản lý Đơn hàng"
+                app:icon="@drawable/ic_round_receipt_long_24"
+                android:paddingVertical="12dp"
+                android:gravity="start|center_vertical"/>
+
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

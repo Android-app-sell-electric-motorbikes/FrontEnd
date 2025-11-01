@@ -1,95 +1,79 @@
 package com.example.evshop.ui.home;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.example.evshop.common.Callback;
-import com.example.evshop.data.HomeRepository;
-import com.example.evshop.data.HomeRepository.Filters;
-import com.example.evshop.domain.models.Product;
+import com.example.evshop.data.repository.VehicleRepository;
+import com.example.evshop.domain.models.ApiEnvelope;
+import com.example.evshop.domain.models.TemplateVehicle;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-
 import javax.inject.Inject;
-
 import dagger.hilt.android.lifecycle.HiltViewModel;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 @HiltViewModel
 public class HomeViewModel extends ViewModel {
-    private final HomeRepository repo;
 
-    private final MutableLiveData<List<Product>> _items = new MutableLiveData<>(new ArrayList<>());
-    public final LiveData<List<Product>> items = _items;
+    private final VehicleRepository vehicleRepository;
+
+    // Chỉ cần LiveData cho xe nổi bật
+    private final MutableLiveData<List<TemplateVehicle>> _featuredVehicles = new MutableLiveData<>();
+    public LiveData<List<TemplateVehicle>> getFeaturedVehicles() { // Đổi tên lại cho rõ nghĩa
+        return _featuredVehicles;
+    }
+
+    private static final int FEATURED_VEHICLES_COUNT = 4;
 
     public final MutableLiveData<Boolean> loading = new MutableLiveData<>(false);
-    public final MutableLiveData<Boolean> error   = new MutableLiveData<>(false);
-    public final MutableLiveData<Boolean> hasMore = new MutableLiveData<>(true);
-
-    private int page = 0;
-    private String category = "Tất cả";
-    private String query = "";
-    public Filters filters = new Filters();
+    public final MutableLiveData<Boolean> error = new MutableLiveData<>(false);
 
     @Inject
-    public HomeViewModel(HomeRepository repo) {
-        this.repo = repo;
+    public HomeViewModel(VehicleRepository vehicleRepository) {
+        this.vehicleRepository = vehicleRepository;
     }
 
     public void refresh() {
-        page = 0;
-        load(true);
-    }
-
-    public void setCategory(String cat) {
-        this.category = cat;
-        refresh();
-    }
-
-    public void setQuery(String q) {
-        this.query = q;
-        refresh();
-    }
-
-    public void applyFilters(Filters f) {
-        this.filters = (f != null) ? f : new Filters();
-        refresh();
-    }
-
-    public void loadMore() {
-        if (Boolean.FALSE.equals(hasMore.getValue())) return;
-        page++;
-        load(false);
-    }
-
-    private void load(boolean replace) {
         loading.setValue(true);
         error.setValue(false);
 
-        final int p = replace ? 0 : page;
-
-        repo.loadPage(p, category, query, filters, new Callback<List<Product>>() { // 👈 dùng generic
+        // *** SỬA LẠI CÁCH GỌI Ở ĐÂY ***
+        // Gọi repository.getAllTemplateVehicles() trước, sau đó mới .enqueue()
+        vehicleRepository.getAllTemplateVehicles().enqueue(new Callback<ApiEnvelope<List<TemplateVehicle>>>() {
             @Override
-            public void onSuccess(List<Product> data, boolean more) {              // 👈 chỉ 1 hàm này
-                loading.postValue(false);
-                hasMore.postValue(more);
+            public void onResponse(@NonNull Call<ApiEnvelope<List<TemplateVehicle>>> call, @NonNull Response<ApiEnvelope<List<TemplateVehicle>>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().isSuccess) {
+                    List<TemplateVehicle> allVehicles = response.body().result;
 
-                if (replace) {
-                    _items.postValue(data);
+                    List<TemplateVehicle> featuredList = new ArrayList<>();
+                    if (allVehicles != null) {
+                        for (int i = 0; i < Math.min(allVehicles.size(), FEATURED_VEHICLES_COUNT); i++) {
+                            featuredList.add(allVehicles.get(i));
+                        }
+                    }
+                    _featuredVehicles.postValue(featuredList);
                 } else {
-                    List<Product> cur = new ArrayList<>(Objects.requireNonNullElse(_items.getValue(), new ArrayList<>()));
-                    cur.addAll(data);
-                    _items.postValue(cur);
+                    handleError();
                 }
+                loading.postValue(false);
             }
 
             @Override
-            public void onError(Throwable t) {
+            public void onFailure(@NonNull Call<ApiEnvelope<List<TemplateVehicle>>> call, @NonNull Throwable t) {
+                handleError();
                 loading.postValue(false);
-                error.postValue(true);
             }
         });
+    }
+
+
+    private void handleError() {
+        _featuredVehicles.postValue(new ArrayList<>());
+        error.postValue(true);
     }
 }

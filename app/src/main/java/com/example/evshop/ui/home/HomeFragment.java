@@ -1,54 +1,51 @@
 package com.example.evshop.ui.home;
 
 import android.content.Intent;
-import android.os.*;
-import android.view.*;
-import android.widget.*;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.PopupMenu;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.OptIn;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.fragment.NavHostFragment;
-import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+// *** THÊM IMPORT NÀY ***
+import androidx.appcompat.widget.Toolbar;
+
 
 import com.example.evshop.R;
-import com.example.evshop.data.Analytics;
-import com.example.evshop.data.HomeRepository;
-// import com.example.evshop.data.TokenManager; // <-- KHÔNG CẦN DÙNG TRỰC TIẾP NỮA
 import com.example.evshop.databinding.FragmentHomeBinding;
-import com.example.evshop.ui.auth.AuthViewModel; // <-- **BƯỚC 1: IMPORT AUTHVIEWMODEL**
-import com.example.evshop.ui.map.VietMapMapViewActivity;
+import com.example.evshop.databinding.ItemBannerBinding;
+import com.example.evshop.domain.models.TemplateVehicle;
+import com.example.evshop.domain.models.UserData;
+import com.example.evshop.ui.adapter.VehicleAdapter;
+import com.example.evshop.ui.auth.AuthViewModel;
+import com.example.evshop.ui.main.MainActivity;
 import com.example.evshop.ui.vehicle.TemplateVehicleListActivity;
-import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.badge.BadgeDrawable;
-import com.google.android.material.badge.ExperimentalBadgeUtils;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
-import com.google.android.material.chip.Chip;
-import com.google.android.material.badge.BadgeUtils;
+import com.example.evshop.ui.vehicle.VehicleDetailActivity;
 
-import java.util.*;
-import javax.inject.Inject;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import dagger.hilt.android.AndroidEntryPoint;
-
 
 @AndroidEntryPoint
 public class HomeFragment extends Fragment {
+
     private FragmentHomeBinding b;
-    private HomeViewModel vm;
-    private AuthViewModel authViewModel; // <-- **BƯỚC 2: KHAI BÁO AUTHVIEWMODEL**
-    private ProductAdapter adapter;
-    private BadgeDrawable cartBadge;
-    private Handler bannerHandler;
-    private Runnable bannerRunnable;
-    private static final double STORE_LAT = 16.047079;
-    private static final double STORE_LNG = 108.206230;
-
-
-    @Inject
-    Analytics analytics;
-    // @Inject TokenManager tokenManager; // <-- KHÔNG CẦN INJECT TOKENMANAGER NỮA
+    private AuthViewModel authViewModel;
+    private NavController navController;
+    private HomeViewModel homeViewModel;
+    private VehicleAdapter vehicleAdapter;
 
     @Nullable
     @Override
@@ -57,321 +54,244 @@ public class HomeFragment extends Fragment {
         return b.getRoot();
     }
 
-
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // --- **BƯỚC 3: KHỞI TẠO CÁC VIEWMODEL** ---
-        vm = new ViewModelProvider(this).get(HomeViewModel.class);
-        // Lấy AuthViewModel được chia sẻ từ Activity
+        navController = Navigation.findNavController(view);
+        homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         authViewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
 
-        // -- Giữ lại các setup cũ của bạn --
-        setupToolbar();
         setupBanner();
-        setupChips();
-        setupGrid();
-        setupSwipe();
-        observe(); // Observe HomeViewModel
-        vm.refresh();
-
-        // Gán sự kiện cho các nút
-        b.btnSignIn.setOnClickListener(v -> NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_loginFragment));
-        b.btnSignUp.setOnClickListener(v -> NavHostFragment.findNavController(this).navigate(R.id.action_homeFragment_to_registerFragment)); // Đi đến login trước
-        b.btnMap.setOnClickListener(v -> openVietMapActivity());
-        b.chipUser.setOnClickListener(v -> openVietMapActivity());
-        b.btnViewAllLoggedIn.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), TemplateVehicleListActivity.class);
-            startActivity(intent);
-        });
-
-
-        // --- **BƯỚC 4: LẮNG NGHE TRẠNG THÁI ĐĂNG NHẬP** ---
-        // Hàm observe() này sẽ thay thế cho việc gọi updateAuthUi() thủ công
-        authViewModel.isLoggedIn.observe(getViewLifecycleOwner(), this::updateUiBasedOnAuthState);
-
-        // Bạn có thể gọi các hàm khác ở đây nếu cần, ví dụ:
-        // toggleSearch();
-        // openFilterSheet();
+        setupRecyclerView();
+        observeHomeViewModel();
+        observeLoginState();
+        setupClickListeners();
     }
 
-    // --- **BƯỚC 5: HÀM CẬP NHẬT UI MỚI, THAY THẾ updateAuthUi()** ---
-    private void updateUiBasedOnAuthState(Boolean isLoggedIn) {
-        boolean loggedIn = isLoggedIn != null && isLoggedIn;
+    private void observeLoginState() {
+        // Lắng nghe trạng thái đăng nhập từ AuthViewModel
+        authViewModel.getIsLoggedInState().observe(getViewLifecycleOwner(), isLoggedIn -> {
+            if (b == null) return; // Đảm bảo view binding còn tồn tại
 
-        b.panelAuth.setVisibility(loggedIn ? View.GONE : View.VISIBLE);
-        b.chipUser.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
-        b.btnViewAllLoggedIn.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
+            boolean loggedIn = isLoggedIn != null && isLoggedIn;
 
-        if (loggedIn) {
-            // TODO: Nâng cấp để lấy tên người dùng từ một nguồn đáng tin cậy hơn (ví dụ: một User object trong AuthViewModel)
-            // Hiện tại, có thể tạm thời hiển thị một chuỗi chào mừng chung.
-            b.chipUser.setText(getString(R.string.welcome));
-        }
+            // Cập nhật giao diện dựa trên trạng thái đăng nhập
+            if (loggedIn) {
+                // --- KHI ĐÃ ĐĂNG NHẬP ---
 
-        // Cập nhật menu trên toolbar (nếu có)
-        if (toolbar != null && toolbar.getMenu() != null) {
-            MenuItem loginItem = toolbar.getMenu().findItem(R.id.login);
-            MenuItem logoutItem = toolbar.getMenu().findItem(R.id.action_logout);
-            if (loginItem != null) loginItem.setVisible(!loggedIn);
-            if (logoutItem != null) logoutItem.setVisible(loggedIn);
-        }
-    }
+                // Ẩn panel đăng nhập/đăng ký
+                b.panelAuth.setVisibility(View.GONE);
 
-
-    // ===================================================================
-    // CÁC HÀM KHÁC CỦA BẠN (GIỮ NGUYÊN, KHÔNG CẦN THAY ĐỔI)
-    // ===================================================================
-
-    private void openVietMapActivity() {
-        if (getContext() == null) return;
-        Intent i = new Intent(getContext(), VietMapMapViewActivity.class);
-        i.putExtra("STORE_LAT", STORE_LAT);
-        i.putExtra("STORE_LNG", STORE_LNG);
-        startActivity(i);
-    }
-
-    private MaterialToolbar toolbar;
-
-    @OptIn(markerClass = ExperimentalBadgeUtils.class)
-    private void setupToolbar() {
-        toolbar = requireActivity().findViewById(R.id.toolbar);
-        if (toolbar == null) {
-            return;
-        }
-        toolbar.setNavigationIcon(null);
-        toolbar.setTitle(R.string.title_evshop);
-
-        cartBadge = BadgeDrawable.create(requireContext());
-        cartBadge.setNumber(0);
-        cartBadge.setVisible(true);
-
-        toolbar.post(() -> {
-            if (toolbar.getMenu() != null && toolbar.getMenu().findItem(R.id.action_cart) != null) {
-                try {
-                    BadgeUtils.attachBadgeDrawable(cartBadge, toolbar, R.id.action_cart);
-                } catch (Throwable t) {
-                    t.printStackTrace();
+                // Lấy thông tin người dùng để hiển thị trên chip
+                UserData user = authViewModel.getCurrentUser().getValue();
+                if (user != null) {
+                    b.chipUser.setText("Chào, " + user.fullName);
                 }
-            }
-        });
-    }
+                // Hiện chip chào mừng
+                b.chipUser.setVisibility(View.VISIBLE);
 
+                // ===> HIỆN NÚT "XEM TẤT CẢ SẢN PHẨM" <===
+                b.btnViewAllLoggedIn.setVisibility(View.VISIBLE);
 
-    private void toggleSearch() {
-        int vis = (b.tilSearch.getVisibility() == View.VISIBLE) ? View.GONE : View.VISIBLE;
-        b.tilSearch.setVisibility(vis);
-        if (vis == View.VISIBLE) {
-            b.etSearch.requestFocus();
-            b.etSearch.setOnEditorActionListener((tv, actionId, event) -> {
-                String q = tv.getText() != null ? tv.getText().toString() : "";
-                vm.setQuery(q);
-                return true;
-            });
-        }
-    }
+                // Tải lại dữ liệu trang chủ
+                homeViewModel.refresh();
 
-    private void setupBanner() {
-        List<Integer> banners = Arrays.asList(
-                R.drawable.banner_xe3,
-                R.drawable.banner_xe5,
-                R.drawable.banner_xe6
-        );
-        b.viewPager.setAdapter(new BannerAdapter(banners));
+            } else {
+                // --- KHI CHƯA ĐĂNG NHẬP ---
 
-        bannerHandler = new Handler(Looper.getMainLooper());
-        bannerRunnable = new Runnable() {
-            @Override
-            public void run() {
-                if (b.viewPager.getAdapter() == null || b.viewPager.getAdapter().getItemCount() == 0)
-                    return;
-                int next = (b.viewPager.getCurrentItem() + 1) % b.viewPager.getAdapter().getItemCount();
-                b.viewPager.setCurrentItem(next, true);
-                bannerHandler.postDelayed(this, 3000);
-            }
-        };
-    }
+                // Hiện panel đăng nhập/đăng ký
+                b.panelAuth.setVisibility(View.VISIBLE);
 
-    private void setupChips() {
-        String[] cats = {
-                getString(R.string.chip_all),
-                getString(R.string.chip_city),
-                getString(R.string.chip_sport),
-                getString(R.string.chip_offroad),
-                getString(R.string.chip_eco)
-        };
-        b.chipGroup.setSingleSelection(true);
-        for (int i = 0; i < cats.length; i++) {
-            Chip chip = new Chip(requireContext());
-            chip.setText(cats[i]);
-            chip.setCheckable(true);
-            if (i == 0) chip.setChecked(true);
-            chip.setOnClickListener(v -> vm.setCategory(chip.getText().toString()));
-            b.chipGroup.addView(chip);
-        }
-    }
-
-    private void setupGrid() {
-        GridLayoutManager glm = new GridLayoutManager(getContext(), 2);
-        b.rvProducts.setLayoutManager(glm);
-
-        adapter = new ProductAdapter(p -> {
-            analytics.viewProduct(p.getId());
-            Toast.makeText(getContext(), "Xem " + p.getName(), Toast.LENGTH_SHORT).show();
-            // TODO: Nav to product detail when available
-            Intent intent = new Intent(requireContext(), com.example.evshop.ui.ProductDetailsActivity.class);
-            intent.putExtra("product_name", p.getName());
-            intent.putExtra("product_price", p.getPriceVnd());
-            intent.putExtra("product_image", p.getImageUrl());
-            startActivity(intent);
-
-        });
-        b.rvProducts.setAdapter(adapter);
-
-        b.rvProducts.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView rv, int dx, int dy) {
-                super.onScrolled(rv, dx, dy);
-                if (dy > 0) {
-                    int visible = glm.getChildCount();
-                    int total = glm.getItemCount();
-                    int first = glm.findFirstVisibleItemPosition();
-                    if (visible + first >= total - 2) {
-                        vm.loadMore();
-                    }
-                }
-            }
-        });
-    }
-
-    private void setupSwipe() {
-        b.swipeRefresh.setOnRefreshListener(vm::refresh);
-    }
-
-    private void observe() {
-        vm.items.observe(getViewLifecycleOwner(), list -> {
-            adapter.submit(list);
-            b.swipeRefresh.setRefreshing(false);
-        });
-        vm.loading.observe(getViewLifecycleOwner(), isLoading -> {
-            adapter.setLoading(Boolean.TRUE.equals(isLoading));
-            b.swipeRefresh.setRefreshing(Boolean.TRUE.equals(isLoading));
-        });
-        vm.error.observe(getViewLifecycleOwner(), isError -> {
-            adapter.setError(Boolean.TRUE.equals(isError), vm::refresh);
-        });
-    }
-
-    private void openFilterSheet() {
-        if (getContext() == null) return;
-        BottomSheetDialog dialog = new BottomSheetDialog(requireContext());
-        View v = LayoutInflater.from(getContext()).inflate(R.layout.sheet_filter_sort, null);
-        dialog.setContentView(v);
-
-        // Sort
-        RadioGroup rg = v.findViewById(R.id.rgSort);
-        rg.check(R.id.rbPopular);
-
-        // Brands (mock)
-        LinearLayout brandContainer = v.findViewById(R.id.brandContainer);
-        String[] brands = {"VoltX", "EVM", "GreenGo", "Thunder", "EcoRide"};
-        List<CheckBox> brandChecks = new ArrayList<>();
-        for (String br : brands) {
-            CheckBox cb = new CheckBox(getContext());
-            cb.setText(br);
-            brandContainer.addView(cb);
-            brandChecks.add(cb);
-        }
-
-        // Price
-        SeekBar seekPrice = v.findViewById(R.id.seekPrice);
-        TextView txtPrice = v.findViewById(R.id.txtPriceValue);
-        seekPrice.setProgress(150);
-        txtPrice.setText("≤ " + com.example.evshop.util.Formatters.currency(150_000_000));
-        seekPrice.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                txtPrice.setText("≤ " + com.example.evshop.util.Formatters.currency(progress * 1_000_000L));
+                // Ẩn các thành phần của người dùng đã đăng nhập
+                b.chipUser.setVisibility(View.GONE);
+                b.btnViewAllLoggedIn.setVisibility(View.GONE);
             }
 
-            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
-        });
-
-        // Rating
-        SeekBar seekRating = v.findViewById(R.id.seekRating);
-        TextView txtRating = v.findViewById(R.id.txtRatingMin);
-        seekRating.setProgress(30);
-        txtRating.setText("≥ 3.0");
-        seekRating.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                txtRating.setText("≥ " + (progress / 10f));
+            // Cập nhật icon trên Toolbar của Activity (đoạn này đã đúng)
+            if (getActivity() instanceof MainActivity) {
+                ((MainActivity) getActivity()).showToolbarItems(loggedIn);
             }
-
-            @Override public void onStartTrackingTouch(SeekBar seekBar) {}
-            @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
-
-        v.findViewById(R.id.btnCancel).setOnClickListener(btn -> dialog.dismiss());
-        v.findViewById(R.id.btnApply).setOnClickListener(btn -> {
-            HomeRepository.Filters f = new HomeRepository.Filters();
-            int checked = rg.getCheckedRadioButtonId();
-            if (checked == R.id.rbPriceAsc) f.sort = HomeRepository.Filters.Sort.PRICE_ASC;
-            else if (checked == R.id.rbPriceDesc) f.sort = HomeRepository.Filters.Sort.PRICE_DESC;
-            else if (checked == R.id.rbRating) f.sort = HomeRepository.Filters.Sort.RATING;
-            else f.sort = HomeRepository.Filters.Sort.POPULAR;
-
-            for (CheckBox cb : brandChecks)
-                if (cb.isChecked()) f.brands.add(cb.getText().toString());
-            f.maxPriceVnd = seekPrice.getProgress() * 1_000_000L;
-            f.minRating = seekRating.getProgress() / 10f;
-
-            vm.applyFilters(f);
-            analytics.applyFilter("sort=" + f.sort + ", brands=" + f.brands + ", price<=" + f.maxPriceVnd + ", rating>=" + f.minRating);
-            dialog.dismiss();
-        });
-
-        // Chỉ show dialog này khi có lệnh, không tự động show khi vào màn hình
-        // dialog.show();
-    }
-
-    @OptIn(markerClass = ExperimentalBadgeUtils.class)
-    private void incrementCartBadge() {
-        if (cartBadge == null || toolbar == null) return;
-        cartBadge.setNumber(cartBadge.getNumber() + 1);
-        if (toolbar.getMenu() != null && toolbar.getMenu().findItem(R.id.action_cart) != null) {
-            try {
-                BadgeUtils.attachBadgeDrawable(cartBadge, toolbar, R.id.action_cart);
-            } catch (Throwable t) {
-                t.printStackTrace();
-            }
-        }
-    }
-
-    @OptIn(markerClass = ExperimentalBadgeUtils.class)
-    @Override public void onResume() {
-        super.onResume();
-        // Không cần gọi updateAuthUi() ở đây nữa vì LiveData đã tự động xử lý.
-        if (toolbar != null) {
-            toolbar.post(() -> {
-                if (toolbar.getMenu() != null && toolbar.getMenu().findItem(R.id.action_cart) != null && cartBadge != null) {
-                    try { BadgeUtils.attachBadgeDrawable(cartBadge, toolbar, R.id.action_cart); }
-                    catch (Throwable t) { t.printStackTrace(); }
-                }
-            });
-        }
-        if (bannerHandler != null && bannerRunnable != null) {
-            bannerHandler.postDelayed(bannerRunnable, 3000);
-        }
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        if (bannerHandler != null && bannerRunnable != null) {
-            bannerHandler.removeCallbacks(bannerRunnable);
+    public void onDestroyView() {
+        super.onDestroyView();
+        b = null; // Tránh memory leak
+    }
+
+    private void setupBanner() {
+        if (b == null) return;
+        List<Integer> bannerImages = Arrays.asList(R.drawable.banner_xe3, R.drawable.banner_xe6, R.drawable.banner_xe5);
+        BannerAdapter bannerAdapter = new BannerAdapter(bannerImages);
+        b.viewPager.setAdapter(bannerAdapter);
+    }
+
+    private void setupRecyclerView() {
+        if (b == null) return;
+        VehicleAdapter.OnVehicleClickListener listener = template -> {
+            if (getContext() == null) return;
+            Intent intent = new Intent(getContext(), VehicleDetailActivity.class);
+            intent.putExtra("VEHICLE_ID", template.getId());
+            startActivity(intent);
+        };
+        vehicleAdapter = new VehicleAdapter(listener);
+        b.rvFeaturedVehicles.setLayoutManager(new LinearLayoutManager(getContext()));
+        b.rvFeaturedVehicles.setAdapter(vehicleAdapter);
+        b.rvFeaturedVehicles.setNestedScrollingEnabled(false);
+    }
+
+    private void observeHomeViewModel() {
+        if (b == null) return;
+        homeViewModel.loading.observe(getViewLifecycleOwner(), isLoading -> {
+            if (b!=null && isLoading != null) b.swipeRefresh.setRefreshing(isLoading);
+        });
+        homeViewModel.getFeaturedVehicles().observe(getViewLifecycleOwner(), vehicles -> {
+            if (b!=null && vehicles != null) vehicleAdapter.submitList(vehicles);
+        });
+        homeViewModel.error.observe(getViewLifecycleOwner(), hasError -> {
+            if (b!=null && hasError != null && hasError) Toast.makeText(getContext(), "Lỗi tải dữ liệu", Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    // ======================================================================
+    // ***           HÀM SETUPCLICKLISTENERS ĐÃ ĐƯỢC VIẾT LẠI           ***
+    // ======================================================================
+    private void setupClickListeners() {
+        if (b == null) return;
+
+        // Giữ lại listener cho SwipeRefresh
+        b.swipeRefresh.setOnRefreshListener(() -> homeViewModel.refresh());
+
+        // Nút "Xem tất cả" vẫn hoạt động bình thường
+        b.btnViewAllLoggedIn.setOnClickListener(v -> {
+            if (getContext() == null) return;
+            Intent intent = new Intent(getContext(), TemplateVehicleListActivity.class);
+            startActivity(intent);
+        });
+
+        // Gắn listener vào Toolbar của Activity để bắt sự kiện click item menu
+        if (getActivity() != null) {
+            Toolbar toolbar = getActivity().findViewById(R.id.toolbar);
+            toolbar.setOnMenuItemClickListener(menuItem -> {
+                // Kiểm tra xem có phải người dùng đã nhấn đúng vào icon tài khoản không
+                if (menuItem.getItemId() == R.id.action_account_menu) {
+                    // Tìm View của chính item đó để làm "điểm neo" cho PopupMenu
+                    View menuItemView = getActivity().findViewById(R.id.action_account_menu);
+                    if (menuItemView != null) {
+                        showUserPopupMenu(menuItemView);
+                    }
+                    return true;
+                }
+                return false;
+            });
+        }
+    }
+
+    /**
+     * Hàm mới để hiển thị PopupMenu, giống trong AdminActivity.
+     * @param anchorView View mà menu sẽ "neo" vào (chính là icon tài khoản).
+     */
+    private void showUserPopupMenu(View anchorView) {
+        if (getContext() == null) return;
+
+        PopupMenu popupMenu = new PopupMenu(getContext(), anchorView);
+        popupMenu.getMenu().add("Tài khoản của tôi");
+        popupMenu.getMenu().add("Đăng xuất");
+
+        popupMenu.setOnMenuItemClickListener(item -> {
+            String title = item.getTitle().toString();
+            if ("Tài khoản của tôi".equals(title)) {
+                // *** THAY ĐỔI Ở ĐÂY: GỌI HÀM HIỂN THỊ PROFILE MỚI ***
+                showUserProfileDialog();
+                return true;
+            } else if ("Đăng xuất".equals(title)) {
+                logout();
+                return true;
+            }
+            return false;
+        });
+
+        popupMenu.show();
+    }
+
+    private void showUserProfileDialog() {
+        // Luôn kiểm tra context trong Fragment
+        if (getContext() == null) {
+            return;
+        }
+
+        // Lấy dữ liệu người dùng hiện tại từ AuthViewModel
+        UserData currentUser = authViewModel.getCurrentUser().getValue();
+
+        // Kiểm tra nếu không có dữ liệu (chưa kịp tải hoặc lỗi)
+        if (currentUser == null) {
+            Toast.makeText(getContext(), "Không thể tải thông tin người dùng", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Xây dựng chuỗi thông tin để hiển thị
+        StringBuilder messageBuilder = new StringBuilder();
+        messageBuilder.append("Tên: ").append(currentUser.fullName).append("\n\n");
+        messageBuilder.append("Email: ").append(currentUser.email).append("\n\n");
+        // Bạn có thể thêm các thông tin khác như số điện thoại nếu có trong model UserData
+        //messageBuilder.append("Ngày/Tháng/Năm Sinh: ").append(currentUser.dateOfBirth).append("\n\n");
+
+
+        // Xử lý hiển thị danh sách roles (vai trò)
+        String rolesString = "N/A";
+        if (currentUser.roles != null && !currentUser.roles.isEmpty()) {
+            // Nối các role lại với nhau, phân cách bởi dấu phẩy
+            // Cần API 24+ để dùng stream, dự án của bạn có vẻ đã đáp ứng
+            rolesString = currentUser.roles.stream().collect(Collectors.joining(", "));
+        }
+        messageBuilder.append("Vai trò: ").append(rolesString);
+
+        // Tạo và hiển thị AlertDialog
+        new AlertDialog.Builder(getContext()) // Sử dụng getContext() thay vì 'this'
+                .setTitle("Thông tin Tài khoản") // Đổi tiêu đề cho phù hợp
+                .setMessage(messageBuilder.toString())
+                .setPositiveButton("Đóng", (dialog, which) -> dialog.dismiss())
+                .show();
+    }
+
+
+
+
+    /**
+     * Hàm private để gom logic đăng xuất cho gọn.
+     */
+    private void logout() {
+        authViewModel.logout();
+        Intent intent = new Intent(getActivity(), MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        if (getActivity() != null) {
+            getActivity().finish();
+        }
+    }
+
+
+    // --- ADAPTER CHO BANNER GIỮ NGUYÊN ---
+    public static class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.BannerViewHolder> {
+        private final List<Integer> images;
+        public BannerAdapter(List<Integer> images) { this.images = images; }
+        @NonNull @Override
+        public BannerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new BannerViewHolder(ItemBannerBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+        }
+        @Override
+        public void onBindViewHolder(@NonNull BannerViewHolder holder, int position) {
+            holder.binding.imgBanner.setImageResource(images.get(position));
+        }
+        @Override public int getItemCount() { return images.size(); }
+        static class BannerViewHolder extends RecyclerView.ViewHolder {
+            ItemBannerBinding binding;
+            public BannerViewHolder(ItemBannerBinding binding) {
+                super(binding.getRoot());
+                this.binding = binding;
+            }
         }
     }
 }

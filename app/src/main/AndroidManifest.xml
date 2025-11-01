@@ -3,24 +3,28 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
 
     <application
-
         android:name=".EVShopApp"
-        android:theme="@style/Theme.Material3.DayNight.NoActionBar"
-        android:usesCleartextTraffic="true"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        >
+        android:theme="@style/Theme.Material3.DayNight.NoActionBar"
+        android:usesCleartextTraffic="true">
+        <activity
+            android:name=".ui.vehicle.VehicleDetailActivity"
+            android:exported="false" />
+
         <service
             android:name="vn.vietmap.services.android.navigation.v5.navigation.NavigationService"
             android:enabled="true"
@@ -33,20 +37,28 @@
         <activity
             android:name=".ui.map.VietMapMapViewActivity"
             android:exported="false"
-            android:hardwareAccelerated="true"/>
+            android:hardwareAccelerated="true" />
         <activity
             android:name=".ui.auth.LoginActivity"
             android:exported="false"
             android:theme="@style/Theme.Material3.DayNight.NoActionBar" />
         <activity
-            android:name=".ui.ProductDetailsActivity"
+            android:name=".ui.admin.AdminActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.admin.VehicleInventoryActivity"
             android:exported="false"
-            android:theme="@style/Theme.Material3.DayNight.NoActionBar"/>
+            android:label="Quản Lý Kho Xe"
+            android:parentActivityName=".ui.admin.AdminActivity" />
+        <activity
+            android:name=".ui.admin.AddTemplateVehicleActivity"
+            android:exported="false" />
         <activity
             android:name=".ui.main.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

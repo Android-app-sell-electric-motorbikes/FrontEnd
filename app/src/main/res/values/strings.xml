@@ -36,4 +36,7 @@
     <string name="welcome">Xin chào, Quý Khách</string>
     <string name="view_map">Bản đồ</string>
     <string name="tts_guide">tts_guide\n</string>
+    <string name="featured_vehicles_title">Xe Nổi Bật</string>
+    <string name="vehicle_name_unavailable">Tên xe không có sẵn</string>
+
 </resources>

@@ -73,6 +73,8 @@ dependencies {
     // ---- HILT (Dependency Injection) ----
     implementation libs.hilt.android
     implementation libs.androidx.window
+    implementation libs.androidx.activity
+    implementation libs.androidx.camera.camera2.pipe
     annotationProcessor libs.hilt.compiler
 
     // ===================================================================
