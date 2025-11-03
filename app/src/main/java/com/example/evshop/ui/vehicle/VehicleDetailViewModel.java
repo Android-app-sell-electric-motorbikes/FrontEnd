@@ -21,11 +21,10 @@ public class VehicleDetailViewModel extends ViewModel {
 
     private final VehicleRepository repository;
 
-    private final MutableLiveData<TemplateVehicle> _vehicleTemplate = new MutableLiveData<>();
-    public final LiveData<TemplateVehicle> vehicleTemplate = _vehicleTemplate;
-
-    private final MutableLiveData<VersionDetails> _versionDetails = new MutableLiveData<>();
-    public final LiveData<VersionDetails> versionDetails = _versionDetails;
+    // QUAN TRỌNG: Chỉ giữ lại MỘT LiveData cho TemplateVehicle.
+    // Dữ liệu từ VersionDetails sẽ được gộp vào đây.
+    private final MutableLiveData<TemplateVehicle> _vehicleDetails = new MutableLiveData<>();
+    public final LiveData<TemplateVehicle> vehicleDetails = _vehicleDetails;
 
     private final MutableLiveData<Boolean> _loading = new MutableLiveData<>();
     public final LiveData<Boolean> loading = _loading;
@@ -38,28 +37,26 @@ public class VehicleDetailViewModel extends ViewModel {
         this.repository = repository;
     }
 
-    /**
-     * BƯỚC 1: Tải thông tin template chung bằng templateId.
-     */
-    public void loadVehicleTemplate(String templateId) {
+    public void loadVehicleDetails(String templateId) {
         _loading.setValue(true);
 
-        // *** SỬA LẠI CÁCH GỌI Ở ĐÂY ***
-        // Gọi repository.getVehicleById(templateId) trước, sau đó mới .enqueue()
+        // BƯỚC 1: Gọi API để lấy TemplateVehicle (chứa ảnh, giá, màu và versionId)
         repository.getVehicleById(templateId)
                 .enqueue(new Callback<ApiEnvelope<TemplateVehicle>>() {
                     @Override
                     public void onResponse(Call<ApiEnvelope<TemplateVehicle>> call, Response<ApiEnvelope<TemplateVehicle>> response) {
                         if (response.isSuccessful() && response.body() != null && response.body().isSuccess) {
                             TemplateVehicle template = response.body().result;
-                            _vehicleTemplate.setValue(template);
 
-                            // Sau khi có template, nếu có versionId, thực hiện BƯỚC 2
+                            // Kiểm tra xem template có tồn tại và có versionId không
                             if (template != null && template.getVersion() != null && template.getVersion().getVersionId() != null) {
-                                loadVersionDetails(template.getVersion().getVersionId());
+                                // BƯỚC 2: Gọi API thứ hai để lấy thông số kỹ thuật
+                                loadAndMergeVersionDetails(template, template.getVersion().getVersionId());
                             } else {
+                                // Nếu không có versionId, vẫn hiển thị thông tin đã có và kết thúc loading
+                                _vehicleDetails.setValue(template);
                                 _loading.setValue(false);
-                                _error.setValue("Lỗi: Template không chứa thông tin phiên bản (versionId).");
+                                _error.setValue("Lỗi: Không tìm thấy thông tin phiên bản (versionId).");
                             }
                         } else {
                             _loading.setValue(false);
@@ -76,24 +73,46 @@ public class VehicleDetailViewModel extends ViewModel {
     }
 
     /**
-     * BƯỚC 2: Tải thông số kỹ thuật bằng versionId.
+     * Tải thông số kỹ thuật và GỘP nó vào đối tượng TemplateVehicle đã có.
      */
-    private void loadVersionDetails(String versionId) {
-        // *** SỬA LẠI CÁCH GỌI Ở ĐÂY ***
+    private void loadAndMergeVersionDetails(final TemplateVehicle template, String versionId) {
         repository.getVersionDetails(versionId)
                 .enqueue(new Callback<ApiEnvelope<VersionDetails>>() {
                     @Override
                     public void onResponse(Call<ApiEnvelope<VersionDetails>> call, Response<ApiEnvelope<VersionDetails>> response) {
-                        _loading.setValue(false); // Kết thúc loading tại đây
                         if (response.isSuccessful() && response.body() != null && response.body().isSuccess) {
-                            _versionDetails.setValue(response.body().result);
+                            VersionDetails details = response.body().result;
+
+                            // Gộp dữ liệu từ VersionDetails vào đối tượng Version bên trong TemplateVehicle
+                            // Điều này yêu cầu bạn phải thêm các trường thông số vào lớp TemplateVehicle.Version
+                            // (Bạn đã làm điều này ở các bước trước)
+                            TemplateVehicle.Version version = template.getVersion();
+                            version.setVersionName(details.getVersionName());
+                            version.setDescription(details.getDescription());
+                            version.setMotorPower(details.getMotorPower());
+                            version.setBatteryCapacity(details.getBatteryCapacity());
+                            version.setRangePerCharge(details.getRangePerCharge());
+                            version.setTopSpeed(details.getTopSpeed());
+                            version.setWeight(details.getWeight());
+                            version.setHeight(details.getHeight());
+                            version.setProductionYear(details.getProductionYear());
+
+                            // Chỉ cập nhật LiveData MỘT LẦN DUY NHẤT sau khi đã có ĐỦ thông tin
+                            _vehicleDetails.setValue(template);
+
                         } else {
+                            // Nếu API thứ 2 lỗi, vẫn hiển thị thông tin từ API 1
+                            _vehicleDetails.setValue(template);
                             _error.setValue("Lỗi tải thông số kỹ thuật: " + response.message());
                         }
+                        // LUÔN LUÔN kết thúc loading sau khi chuỗi API hoàn thành
+                        _loading.setValue(false);
                     }
 
                     @Override
                     public void onFailure(Call<ApiEnvelope<VersionDetails>> call, Throwable t) {
+                        // Nếu API thứ 2 lỗi, vẫn hiển thị thông tin từ API 1
+                        _vehicleDetails.setValue(template);
                         _loading.setValue(false);
                         _error.setValue("Lỗi mạng (version details): " + t.getMessage());
                     }

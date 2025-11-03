@@ -61,7 +61,7 @@ dependencies {
     implementation libs.androidx.cardview
     implementation libs.viewpager2
     implementation libs.shimmer // Facebook Shimmer for loading effects
-
+    implementation 'com.auth0.android:jwtdecode:2.0.2' // <-- THÊM DÒNG NÀY
     // ---- NAVIGATION COMPONENT ----
     implementation libs.navigation.fragment
     implementation libs.navigation.ui

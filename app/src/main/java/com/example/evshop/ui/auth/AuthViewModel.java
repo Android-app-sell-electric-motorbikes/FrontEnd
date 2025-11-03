@@ -3,6 +3,7 @@ package com.example.evshop.ui.auth;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import android.util.Log;
 
 import com.example.evshop.data.TokenManager;
 import com.example.evshop.data.auth.AuthRepository;
@@ -44,17 +45,9 @@ public class AuthViewModel extends ViewModel {
         this.tokenManager = tokenManager;
     }
 
-    // ==========================================================
-    // *** BƯỚC 1: THÊM HÀM NÀY ĐỂ CUNG CẤP THÔNG TIN USER ***
-    // ==========================================================
-    /**
-     * Trả về LiveData chứa thông tin của người dùng đang đăng nhập.
-     * AdminActivity sẽ gọi hàm này.
-     */
     public LiveData<UserData> getCurrentUser() {
         return userRepository.getCurrentUser();
     }
-    // ==========================================================
 
 
     public void login(String email, String password) {
@@ -64,6 +57,7 @@ public class AuthViewModel extends ViewModel {
         authRepository.login(email, password, new AuthRepository.Callback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult data) {
+                // authRepository đã lưu token vào TokenManager
                 _loading.postValue(false);
 
                 if (data == null || data.userData == null) {
@@ -74,10 +68,18 @@ public class AuthViewModel extends ViewModel {
                 // Lưu thông tin người dùng lại để các màn hình khác dùng
                 userRepository.setCurrentUser(data.userData);
 
-                // Logic phân quyền (giữ nguyên)
-                if (data.accessToken != null && data.accessToken.contains("QWRtaW4")) {
+                // ========================================================
+                // ***           THAY ĐỔI CỐT LÕI NẰM Ở ĐÂY           ***
+                // ========================================================
+                // Thay thế logic cũ bằng cách gọi thẳng đến TokenManager đã được nâng cấp.
+                String userRole = tokenManager.getUserRole();
+                Log.d("AuthViewModel", "Role check after login: " + userRole);
+
+                if ("Admin".equalsIgnoreCase(userRole)) {
+                    // Nếu TokenManager nói đây là Admin, chuyển đến trang Admin.
                     _navigationEvent.postValue(NavigationEvent.GO_TO_ADMIN);
                 } else {
+                    // Ngược lại, chuyển đến trang User.
                     _navigationEvent.postValue(NavigationEvent.GO_TO_HOME);
                 }
             }
