@@ -1,9 +1,9 @@
 package com.example.evshop.data;
 
 import android.content.Context;
-import android.content.Intent; // <-- THÊM DÒNG NÀY
+import android.content.Intent;
 import android.content.SharedPreferences;
-import com.example.evshop.ui.auth.LoginActivity; // <-- THÊM DÒNG NÀY
+import com.example.evshop.ui.main.MainActivity;
 
 public class TokenManager {
     private final SharedPreferences prefs;
@@ -53,15 +53,17 @@ public class TokenManager {
 
     public void logout() {
         this.clear();
-        // 2. Tạo Intent để quay về màn hình Login
-        Intent intent = new Intent(context, LoginActivity.class);
+        // 2. Tạo Intent để quay về MainActivity (sẽ tự navigate đến LoginFragment)
+        Intent intent = new Intent(context, MainActivity.class);
         // 3. Thêm các cờ (flags) để xóa hết các Activity khác trong stack
         // và đảm bảo người dùng không thể nhấn "Back" để quay lại màn hình cũ.
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        // Thêm extra để báo MainActivity cần navigate đến login
+        intent.putExtra("navigate_to_login", true);
 
-        // 4. Bắt đầu LoginActivity
+        // 4. Bắt đầu MainActivity
         context.startActivity(intent);
     }
     // ========================================================

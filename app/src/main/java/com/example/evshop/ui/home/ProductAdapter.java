@@ -45,7 +45,7 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override public int getItemViewType(int position) {
         if (showError) return TYPE_ERROR;
-        if (showEmpty) return TYPE_EMPTY;
+        if (showEmpty || data.isEmpty()) return TYPE_EMPTY;
         if (showShimmer) return TYPE_SHIMMER;
         return TYPE_PRODUCT;
     }
@@ -62,14 +62,17 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override public void onBindViewHolder(@NonNull RecyclerView.ViewHolder h, int position) {
         if (h instanceof ProductVH) {
-            Product p = data.get(position);
-            ProductVH vh = (ProductVH) h;
-            Glide.with(vh.img.getContext()).load(p.getImageUrl()).into(vh.img);
-            vh.name.setText(p.getName());
-            vh.brand.setText(p.getBrand());
-            vh.price.setText(Formatters.currency(p.getPriceVnd()));
-            vh.rating.setText(String.format(Locale.getDefault(), "%.1f", p.getRating()));
-            vh.itemView.setOnClickListener(v -> listener.onClick(p));
+            // Kiểm tra bounds để tránh IndexOutOfBoundsException
+            if (position >= 0 && position < data.size()) {
+                Product p = data.get(position);
+                ProductVH vh = (ProductVH) h;
+                Glide.with(vh.img.getContext()).load(p.getImageUrl()).into(vh.img);
+                vh.name.setText(p.getName());
+                vh.brand.setText(p.getBrand());
+                vh.price.setText(Formatters.currency(p.getPriceVnd()));
+                vh.rating.setText(String.format(Locale.getDefault(), "%.1f", p.getRating()));
+                vh.itemView.setOnClickListener(v -> listener.onClick(p));
+            }
         } else if (h instanceof ErrorVH) {
             ((ErrorVH) h).btnRetry.setOnClickListener(v -> { if (retry!=null) retry.run(); });
         }
@@ -78,7 +81,7 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override public int getItemCount() {
         if (showError || showEmpty || showShimmer) return 4; // grid looks balanced
-        return data.size();
+        return Math.max(data.size(), 0); // Đảm bảo không trả về số âm
     }
 
 

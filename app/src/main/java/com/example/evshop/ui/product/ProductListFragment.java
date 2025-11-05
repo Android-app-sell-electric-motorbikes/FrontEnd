@@ -101,11 +101,20 @@ public class ProductListFragment extends Fragment {
     }
 
     private void observeData() {
-        viewModel.items.observe(getViewLifecycleOwner(), list -> {
-            if (list != null) {
-                adapter.submit(list);
-                binding.tvProductCount.setText(list.size() + " sản phẩm");
-            }
+        // TODO: HomeViewModel currently only manages featured vehicles, not products
+        // Need to implement products list with items LiveData in HomeViewModel
+        // viewModel.items.observe(getViewLifecycleOwner(), list -> {
+        //     if (list != null) {
+        //         adapter.submit(list);
+        //         binding.tvProductCount.setText(list.size() + " sản phẩm");
+        //     }
+        // });
+        
+        // Observe featured vehicles instead (if needed)
+        viewModel.getFeaturedVehicles().observe(getViewLifecycleOwner(), vehicles -> {
+            // TODO: Convert TemplateVehicle to Product or use different adapter
+            // For now, just stop refreshing
+            binding.swipeRefresh.setRefreshing(false);
         });
 
         viewModel.loading.observe(getViewLifecycleOwner(), isLoading -> {

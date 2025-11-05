@@ -22,16 +22,20 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
 
     public NotificationAdapter(List<Object> items) {
-        this.items = items;
+        this.items = (items != null) ? items : new java.util.ArrayList<>();
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (items.get(position) instanceof String) {
-            return TYPE_HEADER;
-        } else {
-            return TYPE_ITEM;
+        // Kiểm tra bounds để tránh IndexOutOfBoundsException
+        if (position >= 0 && position < items.size()) {
+            if (items.get(position) instanceof String) {
+                return TYPE_HEADER;
+            } else {
+                return TYPE_ITEM;
+            }
         }
+        return TYPE_ITEM; // default
     }
 
     @NonNull
@@ -54,16 +58,19 @@ public class NotificationAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public void onBindViewHolder(
             @NonNull RecyclerView.ViewHolder holder, int position
     ) {
-        if (holder instanceof HeaderViewHolder) {
-            ((HeaderViewHolder) holder).bind((String) items.get(position));
-        } else if (holder instanceof NotificationViewHolder) {
-            ((NotificationViewHolder) holder).bind((Notification) items.get(position));
+        // Kiểm tra bounds để tránh IndexOutOfBoundsException
+        if (position >= 0 && position < items.size()) {
+            if (holder instanceof HeaderViewHolder) {
+                ((HeaderViewHolder) holder).bind((String) items.get(position));
+            } else if (holder instanceof NotificationViewHolder) {
+                ((NotificationViewHolder) holder).bind((Notification) items.get(position));
+            }
         }
     }
 
     @Override
     public int getItemCount() {
-        return items.size();
+        return (items != null) ? items.size() : 0;
     }
 
     // Header ViewHolder

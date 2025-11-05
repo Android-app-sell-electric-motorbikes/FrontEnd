@@ -14,7 +14,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.evshop.databinding.FragmentProfileBinding;
 import com.example.evshop.ui.auth.AuthViewModel;
-import com.example.evshop.ui.auth.LoginActivity;
+import com.example.evshop.ui.main.MainActivity;
 import com.example.evshop.ui.map.VietMapMapViewActivity;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -84,9 +84,10 @@ public class ProfileFragment extends Fragment {
         authViewModel.logout();
         Toast.makeText(getContext(), "Đã đăng xuất", Toast.LENGTH_SHORT).show();
         
-        // Chuyển về màn hình login
-        Intent intent = new Intent(getActivity(), LoginActivity.class);
+        // Chuyển về MainActivity và navigate đến login fragment
+        Intent intent = new Intent(getActivity(), MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.putExtra("navigate_to_login", true);
         startActivity(intent);
     }
 

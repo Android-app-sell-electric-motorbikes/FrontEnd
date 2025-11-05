@@ -253,21 +253,10 @@ public class VietMapMapViewActivity extends AppCompatActivity
             permissionsGranted = false;
         }
 
-        // Fallback fused (cũng phải bọc try/catch)
-        try {
-            final Point[] out = {null};
-            if (hasLocationPermission()) {
-                fusedLocationClient.getLastLocation().addOnSuccessListener(loc -> {
-                    if (loc != null) {
-                        out[0] = Point.fromLngLat(loc.getLongitude(), loc.getLatitude());
-                    }
-                });
-            }
-            return out[0];
-        } catch (SecurityException ignored) {
-            permissionsGranted = false;
-            return null;
-        }
+        // Fallback fused không sử dụng vì getLastLocation() là ASYNC callback
+        // Trả về null thay vì gây lỗi race condition với out[0]
+        // NOTE: Nếu cần location từ fusedLocationClient, phải dùng callback pattern
+        return null;
     }
 
     private void fetchAndDrawRoute(Point origin, Point dest, boolean overview) {

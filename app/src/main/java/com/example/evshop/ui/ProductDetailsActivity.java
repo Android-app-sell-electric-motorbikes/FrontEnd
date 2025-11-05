@@ -93,15 +93,15 @@ public class ProductDetailsActivity extends AppCompatActivity {
 
         // Tạo một đối tượng Product tạm thời để dùng cho việc thêm vào giỏ hàng
         // (Lưu ý: ImageUrl ở đây chỉ là giả lập, vì ta không truyền ảnh qua Intent)
-        currentProduct = new Product(productId, name, "Brand", R.drawable.ev_scooter, price, rating, "Category");
+        currentProduct = new Product(productId, name, "Brand", R.drawable.xe1, price, rating, "Category");
     }
 
     private void setupImageSlider() {
-        // Danh sách ảnh (demo)
+        // Danh sách ảnh (demo) - sử dụng các banner images còn tồn tại
         List<Integer> images = Arrays.asList(
-                R.drawable.ev_scooter,
-                R.drawable.ev_scooter2,
-                R.drawable.ev_scooter3
+                R.drawable.banner_xe3,
+                R.drawable.banner_xe5,
+                R.drawable.banner_xe6
         );
         ImageAdapter adapter = new ImageAdapter(images);
         viewPager.setAdapter(adapter);

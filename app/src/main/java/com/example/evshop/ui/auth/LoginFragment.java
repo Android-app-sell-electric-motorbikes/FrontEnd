@@ -102,13 +102,9 @@ public class LoginFragment extends Fragment {
                 Snackbar.make(b.getRoot(), "Đăng nhập thành công", Snackbar.LENGTH_SHORT)
                         .setAnchorView(b.btnLogin).show();
 
-                // ========================================================
-                // ***           THAY ĐỔI CỐT LÕI NẰM Ở ĐÂY           ***
-                // ========================================================
-                // THAY THẾ: NavHostFragment.findNavController(this).navigateUp();
-                // BẰNG LỆNH MỚI:
+                // Navigate về home fragment (navigation_home là startDestination)
                 NavHostFragment.findNavController(this)
-                        .navigate(R.id.action_loginFragment_to_homeFragment);
+                        .navigate(R.id.navigation_home);
                 break;
             }
 

@@ -12,7 +12,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
     private List<Integer> images;
 
     public ImageAdapter(List<Integer> images) {
-        this.images = images;
+        this.images = (images != null) ? images : new java.util.ArrayList<>();
     }
 
     @NonNull
@@ -29,12 +29,15 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ImageViewHol
 
     @Override
     public void onBindViewHolder(@NonNull ImageViewHolder holder, int position) {
-        holder.imageView.setImageResource(images.get(position));
+        // Kiểm tra bounds để tránh IndexOutOfBoundsException
+        if (position >= 0 && position < images.size()) {
+            holder.imageView.setImageResource(images.get(position));
+        }
     }
 
     @Override
     public int getItemCount() {
-        return images.size();
+        return (images != null) ? images.size() : 0;
     }
 
     public static class ImageViewHolder extends RecyclerView.ViewHolder {

@@ -23,7 +23,8 @@ public class ProductConverter {
         // Lấy ID thật từ vehicle (hoặc từ version nếu vehicle.getId() null)
         String id = vehicle.getId();
         if (id == null && vehicle.getVersion() != null) {
-            id = vehicle.getVersion().getId();
+            // TemplateVehicle.Version có getVersionId() chứ không phải getId()
+            id = vehicle.getVersion().getVersionId();
         }
 
         // Lấy tên từ version

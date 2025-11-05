@@ -11,7 +11,9 @@ import java.util.List;
 
 public class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.VH> {
     private final List<Integer> images;
-    public BannerAdapter(List<Integer> images){ this.images = images; }
+    public BannerAdapter(List<Integer> images){ 
+        this.images = (images != null) ? images : new java.util.ArrayList<>();
+    }
 
 
     @NonNull @Override public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -21,12 +23,17 @@ public class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.VH> {
 
 
     @Override public void onBindViewHolder(@NonNull VH h, int pos) {
-        Glide.with(h.img.getContext()).load(images.get(pos)).into(h.img);
-        h.img.setContentDescription("Banner "+pos);
+        // Kiểm tra bounds để tránh IndexOutOfBoundsException
+        if (pos >= 0 && pos < images.size()) {
+            Glide.with(h.img.getContext()).load(images.get(pos)).into(h.img);
+            h.img.setContentDescription("Banner "+pos);
+        }
     }
 
 
-    @Override public int getItemCount() { return images.size(); }
+    @Override public int getItemCount() { 
+        return (images != null) ? images.size() : 0;
+    }
 
 
     static class VH extends RecyclerView.ViewHolder {

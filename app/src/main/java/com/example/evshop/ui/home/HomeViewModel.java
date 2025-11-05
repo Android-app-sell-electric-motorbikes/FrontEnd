@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.evshop.data.HomeRepository;
 import com.example.evshop.data.repository.VehicleRepository;
 import com.example.evshop.domain.models.ApiEnvelope;
 import com.example.evshop.domain.models.TemplateVehicle;
@@ -21,6 +22,11 @@ import retrofit2.Response;
 public class HomeViewModel extends ViewModel {
 
     private final VehicleRepository vehicleRepository;
+    
+    // Filters và category cho products (nếu cần)
+    public HomeRepository.Filters filters = new HomeRepository.Filters();
+    private String category = "Tất cả";
+    private String query = "";
 
     // Chỉ cần LiveData cho xe nổi bật
     private final MutableLiveData<List<TemplateVehicle>> _featuredVehicles = new MutableLiveData<>();
@@ -75,5 +81,35 @@ public class HomeViewModel extends ViewModel {
     private void handleError() {
         _featuredVehicles.postValue(new ArrayList<>());
         error.postValue(true);
+    }
+    
+    /**
+     * Áp dụng filters cho products.
+     * Lưu filters để sử dụng khi load products (nếu được implement sau).
+     */
+    public void applyFilters(HomeRepository.Filters f) {
+        this.filters = (f != null) ? f : new HomeRepository.Filters();
+        // TODO: Implement product loading with filters when needed
+        // refresh(); // Refresh data với filters mới
+    }
+    
+    /**
+     * Set category để filter products.
+     * Lưu category và refresh data với category mới.
+     */
+    public void setCategory(String cat) {
+        this.category = (cat != null) ? cat : "Tất cả";
+        // TODO: Implement product loading with category when needed
+        // refresh(); // Refresh data với category mới
+    }
+    
+    /**
+     * Set query để search products.
+     * Lưu query và refresh data với query mới.
+     */
+    public void setQuery(String q) {
+        this.query = (q != null) ? q : "";
+        // TODO: Implement product loading with query when needed
+        // refresh(); // Refresh data với query mới
     }
 }

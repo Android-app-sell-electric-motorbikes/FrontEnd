@@ -28,7 +28,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
     private final Runnable onCartUpdated; // callback dùng để cập nhật tổng tiền ở CartFragment
 
     public CartAdapter(List<CartItem> cartItems, Runnable onCartUpdated) {
-        this.cartItems = cartItems;
+        this.cartItems = (cartItems != null) ? cartItems : new java.util.ArrayList<>();
         this.onCartUpdated = onCartUpdated;
     }
 
@@ -42,13 +42,16 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull CartViewHolder holder, int position) {
-        CartItem item = cartItems.get(position);
-        holder.bind(item);
+        // Kiểm tra bounds để tránh IndexOutOfBoundsException
+        if (position >= 0 && position < cartItems.size()) {
+            CartItem item = cartItems.get(position);
+            holder.bind(item);
+        }
     }
 
     @Override
     public int getItemCount() {
-        return cartItems.size();
+        return (cartItems != null) ? cartItems.size() : 0;
     }
 
     class CartViewHolder extends RecyclerView.ViewHolder {

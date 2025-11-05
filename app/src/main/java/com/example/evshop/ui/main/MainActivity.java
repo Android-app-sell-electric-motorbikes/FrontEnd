@@ -18,7 +18,6 @@ import androidx.navigation.ui.NavigationUI;
 
 import com.example.evshop.R;
 import com.example.evshop.databinding.ActivityMainBinding;
-import com.example.evshop.ui.auth.LoginActivity;
 import com.example.evshop.ui.auth.AuthViewModel;
 import com.example.evshop.ui.map.VietMapMapViewActivity;
 import com.example.evshop.util.NotificationHelper;
@@ -32,6 +31,9 @@ public class MainActivity extends AppCompatActivity {
 
     // Sử dụng AuthViewModel làm "nguồn chân lý" cho trạng thái đăng nhập
     private AuthViewModel authViewModel;
+    
+    // Flag để control visibility của toolbar items
+    private boolean showToolbarItemsFlag = true;
 
     private static final double STORE_LAT = 16.047079;
     private static final double STORE_LNG = 108.206230;
@@ -58,6 +60,11 @@ public class MainActivity extends AppCompatActivity {
         // Tự động xử lý tiêu đề và nút quay lại
         NavigationUI.setupWithNavController(binding.toolbar, navController);
 
+        // 4. Nếu có flag navigate_to_login, navigate đến login fragment
+        if (getIntent().getBooleanExtra("navigate_to_login", false)) {
+            navController.navigate(R.id.loginFragment);
+        }
+
         requestNotificationPermission();
     }
 
@@ -83,6 +90,15 @@ public class MainActivity extends AppCompatActivity {
         // Gắn layout menu vào thanh công cụ
         getMenuInflater().inflate(R.menu.menu_home, menu);
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        // Control visibility của menu items dựa trên flag
+        for (int i = 0; i < menu.size(); i++) {
+            menu.getItem(i).setVisible(showToolbarItemsFlag);
+        }
+        return super.onPrepareOptionsMenu(menu);
     }
 
 
@@ -129,5 +145,14 @@ public class MainActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         // Xử lý nút "Back" trên thanh công cụ
         return navController.navigateUp() || super.onSupportNavigateUp();
+    }
+
+    /**
+     * Hiển thị hoặc ẩn các menu items trên toolbar
+     * @param show true để hiển thị, false để ẩn
+     */
+    public void showToolbarItems(boolean show) {
+        showToolbarItemsFlag = show;
+        invalidateOptionsMenu(); // Refresh menu để cập nhật trạng thái
     }
 }

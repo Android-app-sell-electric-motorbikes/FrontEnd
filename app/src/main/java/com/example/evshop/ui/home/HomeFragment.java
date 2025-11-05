@@ -91,7 +91,7 @@ public class HomeFragment extends Fragment {
 
         // --- **BƯỚC 4: LẮNG NGHE TRẠNG THÁI ĐĂNG NHẬP** ---
         // Hàm observe() này sẽ thay thế cho việc gọi updateAuthUi() thủ công
-        authViewModel.isLoggedIn.observe(getViewLifecycleOwner(), this::updateUiBasedOnAuthState);
+        authViewModel.getIsLoggedInState().observe(getViewLifecycleOwner(), this::updateUiBasedOnAuthState);
     }
 
     @Override
@@ -153,7 +153,7 @@ public class HomeFragment extends Fragment {
             b.etSearch.requestFocus();
             b.etSearch.setOnEditorActionListener((tv, actionId, event) -> {
                 String q = tv.getText() != null ? tv.getText().toString() : "";
-                vm.setQuery(q);
+                Toast.makeText(getContext(), "Tính năng tìm kiếm đang phát triển", Toast.LENGTH_SHORT).show();
                 return true;
             });
         }
@@ -194,7 +194,11 @@ public class HomeFragment extends Fragment {
             chip.setText(cats[i]);
             chip.setCheckable(true);
             if (i == 0) chip.setChecked(true);
-            chip.setOnClickListener(v -> vm.setCategory(chip.getText().toString()));
+            chip.setOnClickListener(v -> {
+                // TODO: Implement category filter functionality
+                // vm.setCategory(chip.getText().toString()); // Method not available in HomeViewModel yet
+                Toast.makeText(getContext(), "Lọc theo danh mục: " + chip.getText(), Toast.LENGTH_SHORT).show();
+            });
             b.chipGroup.addView(chip);
         }
     }
@@ -225,7 +229,6 @@ public class HomeFragment extends Fragment {
                     int total = glm.getItemCount();
                     int first = glm.findFirstVisibleItemPosition();
                     if (visible + first >= total - 2) {
-                        vm.loadMore();
                     }
                 }
             }
@@ -237,10 +240,10 @@ public class HomeFragment extends Fragment {
     }
 
     private void observe() {
-        vm.items.observe(getViewLifecycleOwner(), list -> {
-            adapter.submit(list);
+        vm.getFeaturedVehicles().observe(getViewLifecycleOwner(), vehicles -> {
             b.swipeRefresh.setRefreshing(false);
         });
+        
         vm.loading.observe(getViewLifecycleOwner(), isLoading -> {
             adapter.setLoading(Boolean.TRUE.equals(isLoading));
             b.swipeRefresh.setRefreshing(Boolean.TRUE.equals(isLoading));
