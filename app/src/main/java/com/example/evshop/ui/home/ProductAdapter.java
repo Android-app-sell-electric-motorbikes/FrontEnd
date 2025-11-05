@@ -25,7 +25,7 @@ public class ProductAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private Runnable retry;
 
 
-    interface Listener { void onClick(Product p); }
+	public interface Listener { void onClick(Product p); }
     private final Listener listener;
 
 

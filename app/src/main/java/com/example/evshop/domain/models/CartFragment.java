@@ -1,5 +1,6 @@
 package com.example.evshop.domain.models;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.evshop.R;
 import com.example.evshop.domain.models.CartItem;
 import com.example.evshop.ui.CartAdapter;
+import com.example.evshop.ui.CheckoutActivity;
 import com.example.evshop.util.CartManager;
 import com.google.android.material.button.MaterialButton;
 
@@ -61,7 +63,9 @@ public class CartFragment extends Fragment {
             if (CartManager.getInstance().getCartItems().isEmpty()) {
                 Toast.makeText(getContext(), "Giỏ hàng trống!", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(getContext(), "Chức năng thanh toán đang phát triển", Toast.LENGTH_SHORT).show();
+                // Mở màn hình thanh toán
+                Intent intent = new Intent(getContext(), CheckoutActivity.class);
+                startActivity(intent);
             }
         });
 
