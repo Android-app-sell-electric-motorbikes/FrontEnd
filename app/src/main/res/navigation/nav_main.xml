@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_main"
-    app:startDestination="@id/loginFragment">
+    app:startDestination="@id/homeFragment">
 
     <fragment
         android:id="@+id/homeFragment"
@@ -11,14 +11,17 @@
         android:label="@string/title_evshop"
         tools:layout="@layout/fragment_home" >
 
-        <!-- ============================================================== -->
-        <!-- ***    THÊM ACTION CÒN THIẾU ĐỂ ĐI TỪ HOME -> LOGIN     *** -->
-        <!-- ============================================================== -->
         <action
             android:id="@+id/action_homeFragment_to_loginFragment"
-            app:destination="@id/loginFragment"
-            app:popUpTo="@id/nav_main"
-            app:popUpToInclusive="true" />
+            app:destination="@id/loginFragment" />
+
+        <action
+            android:id="@+id/action_homeFragment_to_registerFragment"
+            app:destination="@id/registerFragment" />
+        
+        <action
+            android:id="@+id/action_global_cartFragment"
+            app:destination="@id/cartFragment" />
 
     </fragment>
 
@@ -28,12 +31,10 @@
         android:label="@string/login"
         tools:layout="@layout/fragment_login">
 
-        <!-- Action đi từ Login -> Register -->
         <action
             android:id="@+id/action_loginFragment_to_registerFragment"
             app:destination="@id/registerFragment" />
 
-        <!-- Action để đi từ Login -> Home sau khi đăng nhập thành công -->
         <action
             android:id="@+id/action_loginFragment_to_homeFragment"
             app:destination="@id/homeFragment"
@@ -46,12 +47,18 @@
         android:name="com.example.evshop.ui.auth.RegisterFragment"
         android:label="Tạo tài khoản"
         tools:layout="@layout/fragment_register" >
-        <!-- Action để quay lại Login từ Register sau khi đăng ký -->
         <action
             android:id="@+id/action_registerFragment_to_loginFragment"
             app:destination="@id/loginFragment"
             app:popUpTo="@id/loginFragment"
             app:popUpToInclusive="true" />
     </fragment>
+
+    <!-- ** SỬA LẠI ĐƯỜNG DẪN ĐẾN CARTFRAGMENT ** -->
+    <fragment
+        android:id="@+id/cartFragment"
+        android:name="com.example.evshop.ui.cart.CartFragment"
+        android:label="Giỏ hàng"
+        tools:layout="@layout/fragment_cart" />
 
 </navigation>

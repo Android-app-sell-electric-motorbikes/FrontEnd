@@ -28,6 +28,7 @@ public class AuthViewModel extends ViewModel {
         GO_TO_ADMIN,
         STAY
     }
+
     private final MutableLiveData<NavigationEvent> _navigationEvent = new MutableLiveData<>(NavigationEvent.STAY);
     public LiveData<NavigationEvent> getNavigationEvent() {
         return _navigationEvent;
@@ -44,18 +45,9 @@ public class AuthViewModel extends ViewModel {
         this.tokenManager = tokenManager;
     }
 
-    // ==========================================================
-    // *** BƯỚC 1: THÊM HÀM NÀY ĐỂ CUNG CẤP THÔNG TIN USER ***
-    // ==========================================================
-    /**
-     * Trả về LiveData chứa thông tin của người dùng đang đăng nhập.
-     * AdminActivity sẽ gọi hàm này.
-     */
     public LiveData<UserData> getCurrentUser() {
         return userRepository.getCurrentUser();
     }
-    // ==========================================================
-
 
     public void login(String email, String password) {
         _loading.setValue(true);
@@ -66,16 +58,25 @@ public class AuthViewModel extends ViewModel {
             public void onSuccess(LoginResult data) {
                 _loading.postValue(false);
 
-                if (data == null || data.userData == null) {
+                if (data == null || data.userData == null || data.accessToken == null) {
                     _error.postValue("Dữ liệu đăng nhập không hợp lệ.");
                     return;
                 }
 
-                // Lưu thông tin người dùng lại để các màn hình khác dùng
+                // ** BƯỚC 1: LƯU TOKEN **
+                tokenManager.saveAccessToken(data.accessToken);
+
+                // ** BƯỚC 2: GIẢI MÃ TOKEN ĐỂ LẤY ROLE **
+                String role = tokenManager.getUserRole();
+
+                // ** BƯỚC 3: GÁN ROLE VÀO ĐỐI TƯỢNG USERDATA **
+                data.userData.role = role;
+                
+                // ** BƯỚC 4: LƯU ĐỐI TƯỢNG USERDATA HOÀN CHỈNH VÀO REPOSITORY **
                 userRepository.setCurrentUser(data.userData);
 
-                // Logic phân quyền (giữ nguyên)
-                if (data.accessToken != null && data.accessToken.contains("QWRtaW4")) {
+                // ** BƯỚC 5: ĐIỀU HƯỚNG DỰA TRÊN DỮ LIỆU ĐÃ HOÀN CHỈNH **
+                if (data.userData.isAdmin()) {
                     _navigationEvent.postValue(NavigationEvent.GO_TO_ADMIN);
                 } else {
                     _navigationEvent.postValue(NavigationEvent.GO_TO_HOME);
@@ -97,8 +98,6 @@ public class AuthViewModel extends ViewModel {
     public LiveData<Boolean> getIsLoggedInState() {
         return authRepository.getIsLoggedInState();
     }
-
-
 
     public void logout() {
         tokenManager.clear();

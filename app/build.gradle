@@ -60,7 +60,10 @@ dependencies {
     implementation libs.swiperefreshlayout
     implementation libs.androidx.cardview
     implementation libs.viewpager2
-    implementation libs.shimmer // Facebook Shimmer for loading effects
+    implementation libs.shimmer
+    implementation 'com.auth0.android:jwtdecode:2.0.2'
+
+    // ---- VNPAY SDK (ĐÃ BỊ XÓA VÌ KHÔNG CẦN THIẾT) ----
 
     // ---- NAVIGATION COMPONENT ----
     implementation libs.navigation.fragment
@@ -77,22 +80,17 @@ dependencies {
     implementation libs.androidx.camera.camera2.pipe
     annotationProcessor libs.hilt.compiler
 
-    // ===================================================================
-    // *** SỬA LỖI MẠNG: DÙNG PHIÊN BẢN ỔN ĐỊNH ***
-    // Thay thế Retrofit 3.0.0-alpha và OkHttp 5.x.x
-    def retrofitVersion = "2.9.0" // Phiên bản ổn định, được tin dùng
-    def okhttpVersion = "4.12.0"  // Phiên bản OkHttp tương thích
-
+    // ---- NETWORKING ----
+    def retrofitVersion = "2.9.0"
+    def okhttpVersion = "4.12.0"
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
     implementation "com.squareup.okhttp3:okhttp:$okhttpVersion"
-    implementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion" // Rất quan trọng để debug
-    // ===================================================================
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttpVersion"
 
     // ---- IMAGE LOADING ----
     implementation libs.glide
     annotationProcessor libs.compiler
-    // Đã xóa 'com.squareup.picasso:picasso:2.8' để tránh trùng lặp. Nên chọn một thư viện tải ảnh.
 
     // ---- VIETMAP ----
     implementation libs.maps.sdk.android.v260
@@ -117,10 +115,9 @@ dependencies {
     androidTestImplementation libs.espresso.core
 
     // ---- KHÁC ----
-    implementation libs.javapoet // Thư viện này thường dùng cho code generation, Hilt cần nó.
+    implementation libs.javapoet
 }
 
-// Giữ lại phần này nếu cần
 configurations.configureEach {
     resolutionStrategy.eachDependency { details ->
         if (details.requested.group == "com.squareup" && details.requested.name == "javapoet") {

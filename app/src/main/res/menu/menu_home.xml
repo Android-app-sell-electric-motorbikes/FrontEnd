@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"    xmlns:app="http://schemas.android.com/apk/res-auto">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!--
-    Giữ lại một nút duy nhất trên Toolbar, giống hệt trang Admin.
-    Nút này sẽ hoạt động như một điểm neo (anchor) để hiển thị PopupMenu.
-    -->
+    <item
+        android:id="@+id/cartFragment" 
+        android:icon="@drawable/ic_cart"
+        android:title="Giỏ hàng"
+        app:showAsAction="ifRoom" />
+
     <item
         android:id="@+id/action_account_menu"
         android:icon="@drawable/ic_round_person_24"
         android:title="Tài khoản"
-        app:showAsAction="always" /> <!-- 'always' để đảm bảo nó luôn là icon -->
+        app:showAsAction="always" />
 
 </menu>

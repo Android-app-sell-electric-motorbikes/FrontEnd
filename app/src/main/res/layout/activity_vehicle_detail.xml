@@ -15,12 +15,13 @@
         app:navigationIcon="@drawable/ic_arrow_back"
         tools:title="Chi tiết xe" />
 
-    <!-- ScrollView để chứa nội dung, tránh tràn màn hình -->
+    <!-- ScrollView được điều chỉnh để không bị nút che khuất -->
     <ScrollView
         android:id="@+id/scrollView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/btnAddToCart"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar">
@@ -145,38 +146,14 @@
                     android:layout_marginBottom="12dp"
                     android:text="Thông số kỹ thuật" />
 
-                <!-- Các dòng thông số, sử dụng layout riêng để tái sử dụng -->
-                <include
-                    android:id="@+id/specMotorPower"
-                    layout="@layout/item_spec" />
-
-                <include
-                    android:id="@+id/specBattery"
-                    layout="@layout/item_spec" />
-
-                <include
-                    android:id="@+id/specRange"
-                    layout="@layout/item_spec" />
-
-                <include
-                    android:id="@+id/specTopSpeed"
-                    layout="@layout/item_spec" />
-
-                <include
-                    android:id="@+id/specWeight"
-                    layout="@layout/item_spec" />
-
-                <include
-                    android:id="@+id/specHeight"
-                    layout="@layout/item_spec" />
-
-                <include
-                    android:id="@+id/specYear"
-                    layout="@layout/item_spec" />
-
-                <include
-                    android:id="@+id/specModelName"
-                    layout="@layout/item_spec" />
+                <include android:id="@+id/specMotorPower" layout="@layout/item_spec" />
+                <include android:id="@+id/specBattery" layout="@layout/item_spec" />
+                <include android:id="@+id/specRange" layout="@layout/item_spec" />
+                <include android:id="@+id/specTopSpeed" layout="@layout/item_spec" />
+                <include android:id="@+id/specWeight" layout="@layout/item_spec" />
+                <include android:id="@+id/specHeight" layout="@layout/item_spec" />
+                <include android:id="@+id/specYear" layout="@layout/item_spec" />
+                <include android:id="@+id/specModelName" layout="@layout/item_spec" />
             </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
@@ -194,5 +171,21 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
+
+    <!-- NÚT THÊM VÀO GIỎ HÀNG -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnAddToCart"
+        style="@style/Widget.Material3.Button.Icon"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:padding="16dp"
+        android:text="Thêm vào giỏ hàng"
+        app:icon="@drawable/ic_add_to_cart"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

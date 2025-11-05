@@ -10,13 +10,13 @@ import com.example.evshop.domain.models.LoginRequest;
 import com.example.evshop.domain.models.LoginResult;
 
 import javax.inject.Inject;
-import javax.inject.Named; // << THÊM IMPORT NÀY
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import retrofit2.Call;
 import retrofit2.Response;
 
-@Singleton // Đảm bảo chỉ có một AuthRepository duy nhất trong toàn app
+@Singleton
 public class AuthRepository {
     private final ApiService api;
     private final TokenManager tokenManager;
@@ -24,7 +24,7 @@ public class AuthRepository {
     private final MutableLiveData<Boolean> isLoggedInState = new MutableLiveData<>();
 
     @Inject
-    public AuthRepository(@Named("AuthApiService") ApiService api, TokenManager tm) { // << SỬA Ở ĐÂY
+    public AuthRepository(@Named("AuthApiService") ApiService api, TokenManager tm) {
         this.api = api;
         this.tokenManager = tm;
         checkInitialLoginStatus();
@@ -35,13 +35,12 @@ public class AuthRepository {
     }
 
     private void checkInitialLoginStatus() {
-        // Dùng postValue để đảm bảo an toàn nếu được gọi từ background thread
         isLoggedInState.postValue(tokenManager.getAccessToken() != null);
     }
 
     public void logout() {
         tokenManager.clear();
-        isLoggedInState.postValue(false); // Phát ra trạng thái "đã đăng xuất"
+        isLoggedInState.postValue(false);
     }
 
     public interface Callback<T> {
@@ -60,8 +59,7 @@ public class AuthRepository {
                             tokenManager.saveAccessToken(r.accessToken);
                             tokenManager.saveRefreshToken(r.refreshToken);
 
-                            // *** CẬP NHẬT QUAN TRỌNG NHẤT ***
-                            isLoggedInState.postValue(true); // Phát ra trạng thái "đã đăng nhập"
+                            isLoggedInState.postValue(true);
 
                             cb.onSuccess(r);
                         } else {
