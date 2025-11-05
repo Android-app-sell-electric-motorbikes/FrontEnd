@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginStart="8dp"
@@ -12,18 +11,12 @@
     app:cardCornerRadius="8dp"
     app:cardElevation="4dp">
 
-    <!--
-        Thay đổi quan trọng:
-        Bỏ clickable và focusable ở đây, để CardView tự xử lý.
-        Thêm background để hiệu ứng gợn sóng hoạt động tốt hơn.
-     -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/root_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?android:attr/selectableItemBackground">
 
-        <!-- Phần thông tin cơ bản không thay đổi -->
         <ImageView
             android:id="@+id/imgVehicle"
             android:layout_width="120dp"
@@ -32,20 +25,26 @@
             android:scaleType="centerCrop"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/details_container"
             tools:src="@tools:sample/avatars" />
+
+        <!-- === CÁC THAY ĐỔI QUAN TRỌNG NẰM Ở ĐÂY === -->
 
         <TextView
             android:id="@+id/txtModel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
             android:layout_marginEnd="16dp"
             android:textSize="18sp"
             android:textStyle="bold"
+            android:maxLines="2"
+            android:ellipsize="end"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/imgVehicle"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toTopOf="@id/imgVehicle"
+            app:layout_constraintBottom_toTopOf="@id/txtColor"
+            app:layout_constraintVertical_chainStyle="packed"
             tools:text="VoltX Urban Rider V2" />
 
         <TextView
@@ -53,8 +52,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/imgVehicle"
             app:layout_constraintTop_toBottomOf="@id/txtModel"
+            app:layout_constraintBottom_toTopOf="@id/txtPrice"
             tools:text="Xanh Dương" />
 
         <TextView
@@ -62,7 +64,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="4dp"
             android:layout_marginEnd="16dp"
             android:textColor="?attr/colorPrimary"
             android:textSize="16sp"
@@ -70,12 +72,10 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/imgVehicle"
             app:layout_constraintTop_toBottomOf="@id/txtColor"
+            app:layout_constraintBottom_toBottomOf="@id/imgVehicle"
             tools:text="25.000.000 ₫" />
 
-        <!--
-            Container chứa phần chi tiết.
-            Vẫn giữ clickable/focusable là false để đảm bảo không chặn click.
-        -->
+        <!-- Phần chi tiết không cần thay đổi nhiều -->
         <FrameLayout
             android:id="@+id/details_container"
             android:layout_width="0dp"

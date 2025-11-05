@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 import com.example.evshop.databinding.FragmentRegisterBinding;
+import com.example.evshop.ui.main.MainActivity;
 import com.google.android.material.snackbar.Snackbar;
 import dagger.hilt.android.AndroidEntryPoint;
 import com.example.evshop.R;
@@ -29,6 +30,10 @@ public class RegisterFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         // vm = new ViewModelProvider(this).get(RegisterViewModel.class); // Sẽ mở ra khi có ViewModel
+
+        if (getActivity() instanceof MainActivity) {
+            ((MainActivity) getActivity()).showToolbarItems(false);
+        }
 
         // Sự kiện nhấn nút đăng ký
         binding.btnRegister.setOnClickListener(v -> {

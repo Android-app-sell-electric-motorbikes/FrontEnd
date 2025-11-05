@@ -9,4 +9,8 @@ public class Formatters {
     public static String currency(long vnd) {
         return NumberFormat.getCurrencyInstance(VI).format(vnd);
     }
+    public static String currency(double amount) {
+        NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(VI);
+        return currencyFormatter.format(amount);
+    }
 }

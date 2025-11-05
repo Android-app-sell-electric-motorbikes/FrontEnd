@@ -21,4 +21,8 @@
         <item name="boxCornerRadiusBottomEnd">14dp</item>
         <item name="hintTextAppearance">@color/ev_hint</item>
     </style>
+    <!-- Style mới cho Toolbar có icon màu đen -->
+    <style name="Widget.EV.Toolbar.WithBlackNavIcon" parent="Widget.Material3.Toolbar">
+        <item name="colorControlNormal">@android:color/black</item>
+    </style>
 </resources>

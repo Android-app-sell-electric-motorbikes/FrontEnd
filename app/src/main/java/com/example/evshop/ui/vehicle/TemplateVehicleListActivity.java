@@ -1,92 +1,85 @@
-// File: TemplateVehicleListActivity.java
-package com.example.evshop.ui.vehicle;
-
+package com.example.evshop.ui.vehicle;import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import com.example.evshop.databinding.ActivityVehicleListBinding; // <-- Chú ý: Tên file binding có thể khác
+import com.example.evshop.ui.adapter.FeaturedVehicleAdapter; // <-- Tái sử dụng Adapter của HomeFragment
 
-import com.example.evshop.R;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class TemplateVehicleListActivity extends AppCompatActivity implements TemplateVehicleAdapter.OnItemClickListener {
+public class TemplateVehicleListActivity extends AppCompatActivity {
 
-    private RecyclerView recyclerView;
-    private ProgressBar progressBar;
-    private TemplateVehicleAdapter adapter;
-    private VehicleListViewModel viewModel;
+    private ActivityVehicleListBinding b; // <-- Thay đổi tên này nếu file layout của bạn có tên khác
+    private TemplateVehicleListViewModel vm;
+    private FeaturedVehicleAdapter adapter; // Tái sử dụng adapter cũ
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Giả sử layout của bạn tên là activity_vehicle_list
-        setContentView(R.layout.activity_vehicle_list);
+        // Sử dụng ViewBinding
+        b = ActivityVehicleListBinding.inflate(getLayoutInflater()); // <-- Sửa ở đây nếu cần
+        setContentView(b.getRoot());
 
         // Khởi tạo ViewModel
-        viewModel = new ViewModelProvider(this).get(VehicleListViewModel.class);
+        vm = new ViewModelProvider(this).get(TemplateVehicleListViewModel.class);
 
-        // Ánh xạ View từ layout
-        // Giả sử ID của RecyclerView là 'recyclerVehicles' và ProgressBar là 'progressBar'
-        recyclerView = findViewById(R.id.recyclerVehicles);
-        progressBar = findViewById(R.id.progressBar);
-
+        setupToolbar();
         setupRecyclerView();
+        setupSearchView();
         observeViewModel();
     }
 
+    private void setupToolbar() {
+        // Gán sự kiện cho nút quay về
+        b.toolbar.setNavigationOnClickListener(v -> finish());
+    }
+
     private void setupRecyclerView() {
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        // Khởi tạo Adapter và truyền "this" (Activity) vào làm listener
-        adapter = new TemplateVehicleAdapter(this);
-        recyclerView.setAdapter(adapter);
+        // Tái sử dụng adapter từ HomeFragment vì item layout giống nhau
+        adapter = new FeaturedVehicleAdapter(template -> {
+            // Xử lý khi click vào một xe, mở màn hình chi tiết
+            Intent intent = new Intent(this, VehicleDetailActivity.class);
+            intent.putExtra("VEHICLE_ID", template.getId());
+            startActivity(intent);
+        });
+        b.rvAllVehicles.setAdapter(adapter); // <-- Đảm bảo ID trong XML là rvAllVehicles
+    }
+
+    private void setupSearchView() {
+        b.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // Thường không cần xử lý ở đây vì onQueryTextChange đã đủ
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                // Mỗi khi người dùng gõ chữ, gọi ViewModel để lọc
+                vm.searchVehicles(newText);
+                return true;
+            }
+        });
     }
 
     private void observeViewModel() {
-        // Lắng nghe và cập nhật danh sách xe từ ViewModel
-        viewModel.getVehicles().observe(this, vehicles -> {
+        // Lắng nghe danh sách xe từ ViewModel
+        vm.getVehicles().observe(this, vehicles -> {
             if (vehicles != null) {
-                adapter.updateVehicles(vehicles);
+                adapter.submitList(vehicles);
             }
         });
 
-        // Lắng nghe và hiển thị trạng thái loading chung
-        viewModel.isLoading().observe(this, isLoading -> {
-            if (progressBar != null) {
-                progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        // Lắng nghe trạng thái loading để hiện/ẩn ProgressBar
+        vm.getLoading().observe(this, isLoading -> {
+            if (isLoading != null) {
+                b.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+                // Ẩn RecyclerView khi đang tải để ProgressBar không bị che
+                b.rvAllVehicles.setVisibility(isLoading ? View.GONE : View.VISIBLE);
             }
         });
-
-        // Lắng nghe kết quả chi tiết xe trả về
-        viewModel.getVehicleDetails().observe(this, result -> {
-            if (result != null && result.getDetails() != null) {
-                Log.d("VEHICLE_DEBUG", "Activity: Nhận được chi tiết cho vị trí "
-                        + result.getPosition() + ". Bắt đầu cập nhật Adapter.");
-                adapter.onDetailsFetched(result.getPosition(), result.getDetails());
-            } else {
-                Log.e("VEHICLE_DEBUG", "Activity: Nhận được kết quả chi tiết nhưng bị NULL!");
-                Toast.makeText(this, "Không thể tải chi tiết sản phẩm", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    // Hàm này được gọi từ Adapter khi người dùng nhấn vào item
-    @Override
-    public void onFetchDetails(int position, String versionId) {
-        if (versionId == null || versionId.isEmpty()) {
-            Log.e("VEHICLE_DEBUG", "Activity: Yêu cầu fetch chi tiết tại vị trí "
-                    + position + " nhưng versionId BỊ NULL. Không thể gọi API.");
-            Toast.makeText(this, "Lỗi: Không tìm thấy ID sản phẩm", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        Log.d("VEHICLE_DEBUG", "Activity: Yêu cầu ViewModel gọi API fetch chi tiết cho versionId: " + versionId);
-        // Yêu cầu ViewModel gọi API
-        viewModel.fetchVehicleDetails(position, versionId);
     }
 }

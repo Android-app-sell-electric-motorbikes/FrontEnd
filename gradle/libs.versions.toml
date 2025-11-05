@@ -42,6 +42,8 @@ viewpager2 = "1.1.0"
 playServicesMaps = "19.2.0"
 identityJvm = "202411.1"
 window = "1.5.0"
+activity = "1.11.0"
+cameraCamera2Pipe = "1.6.0-alpha01"
 
 [libraries]
 androidx-cardview = { module = "androidx.cardview:cardview", version.ref = "cardview" }
@@ -89,6 +91,8 @@ viewpager2 = { module = "androidx.viewpager2:viewpager2", version.ref = "viewpag
 play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 identity-jvm = { group = "com.android.identity", name = "identity-jvm", version.ref = "identityJvm" }
 androidx-window = { group = "androidx.window", name = "window", version.ref = "window" }
+androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+androidx-camera-camera2-pipe = { group = "androidx.camera", name = "camera-camera2-pipe", version.ref = "cameraCamera2Pipe" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

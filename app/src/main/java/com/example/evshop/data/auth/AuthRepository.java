@@ -9,7 +9,8 @@ import com.example.evshop.domain.models.ApiEnvelope;
 import com.example.evshop.domain.models.LoginRequest;
 import com.example.evshop.domain.models.LoginResult;
 
-import javax.inject.Inject; // <-- Chuyển sang dùng javax.inject
+import javax.inject.Inject;
+import javax.inject.Named; // << THÊM IMPORT NÀY
 import javax.inject.Singleton;
 
 import retrofit2.Call;
@@ -26,7 +27,7 @@ public class AuthRepository {
     private static final boolean TEST_MODE = true; // Đổi thành false khi deploy production
 
     @Inject
-    public AuthRepository(ApiService api, TokenManager tm) {
+    public AuthRepository(@Named("AuthApiService") ApiService api, TokenManager tm) { // << SỬA Ở ĐÂY
         this.api = api;
         this.tokenManager = tm;
         checkInitialLoginStatus();
