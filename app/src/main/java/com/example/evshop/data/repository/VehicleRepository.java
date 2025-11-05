@@ -8,7 +8,7 @@ import com.example.evshop.domain.models.VersionDetails;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Named; // << THÊM IMPORT NÀY
+import javax.inject.Named;
 import javax.inject.Singleton;
 
 import retrofit2.Call;
@@ -19,7 +19,7 @@ public class VehicleRepository {
     private final ApiService apiService;
 
     @Inject
-    public VehicleRepository(@Named("AuthApiService") ApiService apiService) { // << SỬA Ở ĐÂY
+    public VehicleRepository(@Named("AuthApiService") ApiService apiService) {
         this.apiService = apiService;
     }
 

@@ -1,17 +1,19 @@
 package com.example.evshop.domain.models;
 
-public class CartItem {
-    private Product product;
+import java.io.Serializable;
+
+public class CartItem implements Serializable {
+    private final TemplateVehicle vehicle;
     private int quantity;
 
-    public CartItem() {
-    }
-    public CartItem(Product product, int quantity) {
-        this.product = product;
+    public CartItem(TemplateVehicle vehicle, int quantity) {
+        this.vehicle = vehicle;
         this.quantity = quantity;
-
     }
 
+    public TemplateVehicle getVehicle() {
+        return vehicle;
+    }
 
     public int getQuantity() {
         return quantity;
@@ -21,15 +23,7 @@ public class CartItem {
         this.quantity = quantity;
     }
 
-    public Product getProduct() {
-        return product;
-    }
-
-    public void setProduct(Product product) {
-        this.product = product;
-    }
-
-    public long totalPrice() {
-        return product.getPriceVnd() * quantity;
+    public double getTotalPrice() {
+        return vehicle.getPrice() * quantity;
     }
 }

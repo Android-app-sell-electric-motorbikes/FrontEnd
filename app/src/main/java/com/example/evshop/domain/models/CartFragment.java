@@ -4,60 +4,68 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.evshop.R;
-import com.example.evshop.domain.models.CartItem;
+import com.example.evshop.databinding.FragmentCartBinding;
 import com.example.evshop.ui.CartAdapter;
 import com.example.evshop.util.CartManager;
+import com.example.evshop.util.Formatters;
 
-import java.util.List;
+import java.util.List; // ** THÊM IMPORT CÒN THIẾU **
 
 public class CartFragment extends Fragment {
 
-    private RecyclerView recyclerView;
-    private TextView tvTotal;
-    private Button btnClear;
-    private CartAdapter adapter;
+    private FragmentCartBinding binding;
+    private final CartManager cartManager = CartManager.getInstance();
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_cart, container, false);
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        binding = FragmentCartBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
 
-        recyclerView = view.findViewById(R.id.recyclerCart);
-        tvTotal = view.findViewById(R.id.tvTotal);
-        btnClear = view.findViewById(R.id.btnClearCart);
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        binding.recyclerCart.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-
-        List<CartItem> cartItems = CartManager.getInstance().getCartItems();
-        adapter = new CartAdapter(cartItems, this::updateTotal);
-        recyclerView.setAdapter(adapter);
-
-        updateTotal();
-
-        btnClear.setOnClickListener(v -> {
-            CartManager.getInstance().clearCart();
-            adapter.notifyDataSetChanged();
-            updateTotal();
+        binding.btnClearCart.setOnClickListener(v -> {
+            cartManager.clearCart();
+            updateCartView(); // Cập nhật lại view sau khi xóa
         });
+    }
 
-        return view;
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateCartView();
+    }
+
+    private void updateCartView() {
+        if (binding == null) return;
+
+        List<CartItem> cartItems = cartManager.getCartItems();
+        
+        CartAdapter adapter = new CartAdapter(cartItems, this::updateTotal);
+        binding.recyclerCart.setAdapter(adapter);
+        
+        updateTotal();
     }
 
     private void updateTotal() {
-        long total = CartManager.getInstance().getTotalPrice();
-        tvTotal.setText("Tổng cộng: " + total + "₫");
+        if (binding == null) return;
+        double total = cartManager.getTotalPrice();
+        binding.tvTotal.setText("Tổng cộng: " + Formatters.currency(total));
     }
 
-
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null; // Tránh memory leak
+    }
 }

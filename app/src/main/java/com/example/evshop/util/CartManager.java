@@ -1,7 +1,7 @@
 package com.example.evshop.util;
 
 import com.example.evshop.domain.models.CartItem;
-import com.example.evshop.domain.models.Product;
+import com.example.evshop.domain.models.TemplateVehicle;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,30 +13,30 @@ public class CartManager {
 
     private CartManager() {}
 
-    public static CartManager getInstance() {
+    public static synchronized CartManager getInstance() {
         if (instance == null) {
             instance = new CartManager();
         }
         return instance;
     }
 
-    public void addToCart(Product product, int quantity) {
+    public void addToCart(TemplateVehicle vehicle) {
         for (CartItem item : cartItems) {
-            if (item.getProduct().getId().equals(product.getId())) {
-                item.setQuantity(item.getQuantity() + quantity);
+            if (item.getVehicle().getId().equals(vehicle.getId())) {
+                item.setQuantity(item.getQuantity() + 1);
                 return;
             }
         }
-        cartItems.add(new CartItem(product, quantity));
+        cartItems.add(new CartItem(vehicle, 1));
     }
 
-    public void removeFromCart(String productId) {
-        cartItems.removeIf(item -> item.getProduct().getId().equals(productId));
+    public void removeFromCart(String vehicleId) {
+        cartItems.removeIf(item -> item.getVehicle().getId().equals(vehicleId));
     }
 
-    public void updateQuantity(String productId, int newQuantity) {
+    public void updateQuantity(String vehicleId, int newQuantity) {
         for (CartItem item : cartItems) {
-            if (item.getProduct().getId().equals(productId)) {
+            if (item.getVehicle().getId().equals(vehicleId)) {
                 item.setQuantity(newQuantity);
                 break;
             }
@@ -51,10 +51,10 @@ public class CartManager {
         return new ArrayList<>(cartItems);
     }
 
-    public long getTotalAmount() {
-        long total = 0;
+    public double getTotalPrice() {
+        double total = 0;
         for (CartItem item : cartItems) {
-            total += item.totalPrice();
+            total += item.getTotalPrice();
         }
         return total;
     }
@@ -66,13 +66,4 @@ public class CartManager {
         }
         return count;
     }
-
-    public long getTotalPrice() {
-        long total = 0;
-        for (CartItem item : cartItems) {
-            total += item.getProduct().getPriceVnd() * item.getQuantity();
-        }
-        return total;
-    }
-
 }

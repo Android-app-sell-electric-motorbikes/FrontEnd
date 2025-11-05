@@ -37,13 +37,9 @@ public class LoginFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // *** THAY ĐỔI CỰC KỲ QUAN TRỌNG Ở ĐÂY ***
-        // Lấy ViewModel được chia sẻ từ Activity, thay vì tạo mới.
         authViewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
 
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).showToolbarItems(false);
-        }
+        // Dòng mã gây lỗi đã được xóa. MainActivity sẽ tự động quản lý toolbar.
 
         b.btnLogin.setOnClickListener(v -> {
             String email = String.valueOf(b.etEmail.getText());
@@ -87,9 +83,6 @@ public class LoginFragment extends Fragment {
 
             switch (event) {
                 case GO_TO_ADMIN:
-                    Snackbar.make(b.getRoot(), "Đăng nhập với quyền Admin thành công", Snackbar.LENGTH_SHORT)
-                            .setAnchorView(b.btnLogin).show();
-
                     Intent adminIntent = new Intent(getActivity(), AdminActivity.class);
                     adminIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(adminIntent);
@@ -101,12 +94,6 @@ public class LoginFragment extends Fragment {
                 case GO_TO_HOME:
                 Snackbar.make(b.getRoot(), "Đăng nhập thành công", Snackbar.LENGTH_SHORT)
                         .setAnchorView(b.btnLogin).show();
-
-                // ========================================================
-                // ***           THAY ĐỔI CỐT LÕI NẰM Ở ĐÂY           ***
-                // ========================================================
-                // THAY THẾ: NavHostFragment.findNavController(this).navigateUp();
-                // BẰNG LỆNH MỚI:
                 NavHostFragment.findNavController(this)
                         .navigate(R.id.action_loginFragment_to_homeFragment);
                 break;

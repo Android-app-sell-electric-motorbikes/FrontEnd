@@ -20,7 +20,21 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Material3.DayNight.NoActionBar"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="true"> 
+
+        <!-- ** KHAI BÁO ACTIVITY CÒN THIẾU ** -->
+        <activity
+            android:name=".ui.transaction.TransactionHistoryActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.cart.CartActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.payment.PaymentActivity"
+            android:exported="false" />
+
         <activity
             android:name=".ui.vehicle.VehicleDetailActivity"
             android:exported="false" />
@@ -58,7 +72,6 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

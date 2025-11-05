@@ -1,11 +1,12 @@
 package com.example.evshop.domain.models;
 
 import com.google.gson.annotations.SerializedName;
-import java.util.List;
+import java.io.Serializable;
 
-public class UserData {
-    // Giữ lại các trường cũ của bạn
-    @SerializedName("email") // Thêm @SerializedName để đảm bảo ánh xạ đúng
+public class UserData implements Serializable {
+
+    // Các trường này đến từ JSON body của API response
+    @SerializedName("email")
     public String email;
 
     @SerializedName("fullName")
@@ -20,26 +21,12 @@ public class UserData {
     @SerializedName("dateOfBirth")
     public String dateOfBirth;
 
-    // *** 1. THÊM TRƯỜNG "ROLES" ĐỂ NHẬN DỮ LIỆU TỪ API ***
-    @SerializedName("roles")
-    public List<String> roles;
+    // Trường role sẽ được điền vào theo cách thủ công sau khi giải mã token,
+    // không phải từ Gson.
+    public String role;
 
-    // *** 2. THÊM HÀM "ISADMIN()" ĐỂ KIỂM TRA QUYỀN ***
+    // Hàm này sẽ được gọi sau khi trường 'role' được điền vào.
     public boolean isAdmin() {
-        // Nếu danh sách vai trò không tồn tại hoặc rỗng, thì chắc chắn không phải admin
-        if (roles == null || roles.isEmpty()) {
-            return false;
-        }
-
-        // Duyệt qua từng vai trò trong danh sách
-        for (String role : roles) {
-            // So sánh không phân biệt hoa thường với "ROLE_ADMIN"
-            if ("ROLE_ADMIN".equalsIgnoreCase(role)) {
-                return true; // Tìm thấy vai trò admin, trả về true ngay lập tức
-            }
-        }
-
-        // Nếu duyệt hết mà không tìm thấy, trả về false
-        return false;
+        return "Admin".equalsIgnoreCase(role);
     }
 }

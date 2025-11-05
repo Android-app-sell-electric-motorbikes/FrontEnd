@@ -31,9 +31,7 @@ public class RegisterFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         // vm = new ViewModelProvider(this).get(RegisterViewModel.class); // Sẽ mở ra khi có ViewModel
 
-        if (getActivity() instanceof MainActivity) {
-            ((MainActivity) getActivity()).showToolbarItems(false);
-        }
+        // Dòng mã gây lỗi đã được xóa. MainActivity sẽ tự động quản lý toolbar.
 
         // Sự kiện nhấn nút đăng ký
         binding.btnRegister.setOnClickListener(v -> {

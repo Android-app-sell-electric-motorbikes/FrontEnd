@@ -7,16 +7,14 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".ui.admin.AdminActivity"
-    android:background="@color/admin_background_color"> <!-- SỬA Ở ĐÂY -->
+    android:background="@color/admin_background_color">
 
-    <!-- Toolbar cho trang Admin (giữ nguyên) -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         app:title="Trang Quản Trị" />
 
-    <!-- Các nội dung còn lại giữ nguyên -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
@@ -33,7 +31,6 @@
                 android:text="Bảng điều khiển"
                 android:textAppearance="@style/TextAppearance.Material3.TitleLarge"/>
 
-            <!-- Nút Quản lý Xe -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnManageVehicles"
                 style="@style/Widget.Material3.Button.OutlinedButton"
@@ -67,7 +64,6 @@
                 android:text="Thêm Mẫu Xe Mới"
                 app:icon="@drawable/ic_add" />
 
-            <!-- Nút Quản lý Người dùng -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnManageUsers"
                 style="@style/Widget.Material3.Button.OutlinedButton"
@@ -79,7 +75,6 @@
                 android:paddingVertical="12dp"
                 android:gravity="start|center_vertical"/>
 
-            <!-- Nút Quản lý Đơn hàng -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnManageOrders"
                 style="@style/Widget.Material3.Button.OutlinedButton"
@@ -88,6 +83,18 @@
                 android:layout_marginTop="16dp"
                 android:text="Quản lý Đơn hàng"
                 app:icon="@drawable/ic_round_receipt_long_24"
+                android:paddingVertical="12dp"
+                android:gravity="start|center_vertical"/>
+            
+            <!-- ** NÚT MỚI ĐƯỢC THÊM VÀO ĐÂY ** -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnTransactionHistory"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Lịch sử Giao dịch"
+                app:icon="@drawable/ic_history"
                 android:paddingVertical="12dp"
                 android:gravity="start|center_vertical"/>
 
