@@ -1,40 +1,95 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/md_bg">
 
+    <!-- Toolbar kiểu Messenger -->
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar_chat"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:title="Chat" />
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/md_theme_primary"
+        android:titleTextColor="@android:color/white"
+        app:title=""
+        app:contentInsetStart="0dp">
 
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="8dp">
+
+            <!-- Avatar người chat -->
+            <ImageView
+                android:id="@+id/img_chat_avatar"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_avatar_placeholder"
+                android:contentDescription="Avatar"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_avatar_circle"/>
+
+            <!-- Tên người chat -->
+            <TextView
+                android:id="@+id/tv_chat_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tên người chat"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
+        </LinearLayout>
+    </androidx.appcompat.widget.Toolbar>
+
+    <!-- RecyclerView hiển thị tin nhắn -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_chat"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:padding="8dp"/>
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="64dp"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        android:scrollbars="vertical"/>
 
+    <!-- Nhập tin nhắn -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="8dp">
+        android:padding="8dp"
+        android:background="@color/md_card"
+        android:elevation="4dp">
 
         <EditText
             android:id="@+id/et_message"
             android:layout_width="0dp"
             android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:hint="Nhập tin nhắn..." />
+            android:layout_height="48dp"
+            android:hint="Nhập tin nhắn..."
+            android:background="@drawable/bg_edittext_rounded"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:gravity="center_vertical"
+            android:textColor="@color/md_text_primary"
+            android:textColorHint="@color/md_text_secondary"
+            android:inputType="textMultiLine"/>
 
         <ImageButton
             android:id="@+id/btn_send"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_menu_send"
-            android:contentDescription="Send"
-            android:background="?attr/selectableItemBackgroundBorderless"/>
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_send_button"
+            android:src="@drawable/ic_send_24"
+            app:tint="@android:color/white"
+            android:contentDescription="Send"/>
     </LinearLayout>
 </LinearLayout>

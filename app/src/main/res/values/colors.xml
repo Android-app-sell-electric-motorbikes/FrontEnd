@@ -27,5 +27,12 @@
     <color name="gray_dark">#616161</color>
     <color name="admin_background_color">#263238</color> <!-- Màu xám rất nhạt -->
 
+    <color name="primary_500">#2196F3</color> <!-- tin nhắn gửi, xanh -->
+    <color name="surface_variant">#E0E0E0</color> <!-- tin nhắn nhận, xám nhạt -->
+    <color name="chat_time">#888888</color> <!-- thời gian chat, xám trung -->
+    <color name="chat_background">#F5F5F5</color> <!-- background tổng thể chat -->
+    <color name="chat_message_in_text">#000000</color> <!-- chữ tin nhắn nhận -->
+    <color name="chat_message_out_text">#FFFFFF</color> <!-- chữ tin nhắn gửi -->
+    <color name="chat_divider">#DDDDDD</color> <!-- phân cách, nếu dùng -->
 </resources>
     

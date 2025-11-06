@@ -26,19 +26,20 @@
                 android:layout_height="wrap_content"
                 android:padding="16dp">
 
-                <!-- Lời chào khi ĐÃ ĐĂNG NHẬP -->
+                <!-- Lời chào khi đã đăng nhập -->
                 <TextView
                     android:id="@+id/tvWelcome"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:textAppearance="?attr/textAppearanceHeadline5"
+                    android:textStyle="bold"
                     tools:text="Chào, Gemini!"
                     android:visibility="gone"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/btnLogout"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"/>
 
-                <!-- Nút Đăng xuất, chỉ hiện khi ĐÃ ĐĂNG NHẬP -->
+                <!-- Nút Đăng xuất -->
                 <Button
                     android:id="@+id/btnLogout"
                     style="?attr/materialButtonOutlinedStyle"
@@ -47,9 +48,9 @@
                     android:text="Đăng xuất"
                     android:visibility="gone"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toTopOf="parent"/>
 
-                <!-- Panel cho người CHƯA ĐĂNG NHẬP -->
+                <!-- Panel cho người chưa đăng nhập -->
                 <LinearLayout
                     android:id="@+id/panelAuth"
                     android:layout_width="0dp"
@@ -63,7 +64,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Khám phá EVShop"
-                        android:textAppearance="?attr/textAppearanceHeadline5"/>
+                        android:textAppearance="?attr/textAppearanceHeadline5"
+                        android:textStyle="bold"/>
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -77,7 +79,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Đăng Ký" />
+                            android:text="Đăng Ký"/>
 
                         <Button
                             android:id="@+id/btnSignIn"
@@ -86,7 +88,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="8dp"
                             android:layout_weight="1"
-                            android:text="Đăng Nhập" />
+                            android:text="Đăng Nhập"/>
                     </LinearLayout>
                 </LinearLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -111,7 +113,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:text="Tìm kiếm xe, phụ kiện..."/>
+                        android:text="Tìm kiếm xe, phụ kiện..."
+                        android:textColor="?attr/colorOnSurfaceVariant"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
@@ -137,7 +140,9 @@
                 android:layout_marginHorizontal="16dp"
                 android:layout_marginTop="24dp"
                 android:text="Xem bản đồ cửa hàng"
-                app:icon="@drawable/ic_round_map_24" />
+                app:icon="@drawable/ic_round_map_24"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp"/>
 
             <!-- Tiêu đề Xe nổi bật -->
             <RelativeLayout
@@ -152,8 +157,8 @@
                     android:layout_alignParentStart="true"
                     android:layout_centerVertical="true"
                     android:text="Xe nổi bật"
-                    android:textAppearance="?attr/textAppearanceHeadline5"
-                    android:textStyle="bold" />
+                    android:textAppearance="?attr/textAppearanceHeadline6"
+                    android:textStyle="bold"/>
 
                 <Button
                     android:id="@+id/btnViewAll"
@@ -163,7 +168,7 @@
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
                     android:text="Xem tất cả"
-                    android:textAllCaps="false" />
+                    android:textAllCaps="false"/>
             </RelativeLayout>
 
             <!-- Lưới sản phẩm -->
@@ -178,8 +183,21 @@
                 app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
                 app:spanCount="2"
                 tools:itemCount="6"
-                tools:listitem="@layout/item_vehicle" />
+                tools:listitem="@layout/item_vehicle"/>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <!-- FAB Chat -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabChat"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:contentDescription="Chat với cửa hàng"
+        android:src="@drawable/ic_send_24"
+        android:visibility="gone"
+        app:tint="@android:color/white"/>
+
 </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

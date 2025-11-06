@@ -4,7 +4,7 @@ package com.example.evshop.data;
 import com.example.evshop.data.network.requests.CreateTemplateVehicleRequest;
 // *** THÊM IMPORT MỚI ***
 import com.example.evshop.data.network.requests.GetUploadUrlRequest;
-import com.example.evshop.data.network.responses.UploadUrlResponse;
+import com.example.evshop.data.network.response.UploadUrlResponse;
 import com.example.evshop.domain.models.ApiEnvelope;
 import com.example.evshop.domain.models.Color;
 import com.example.evshop.domain.models.LoginRequest;
@@ -70,12 +70,7 @@ public interface ApiService {
         // =========================================================================
         // *** STEP 2: API ĐỂ UPLOAD FILE LÊN URL CỦA AMAZON S3                  ***
         // =========================================================================
-        /**
-         * Upload một file ảnh bằng phương thức PUT lên một URL động (lấy từ Step 1).
-         * @param url Đây là `uploadUrl` nhận được từ API getUploadUrl().
-         * @param imageBody Nội dung của file ảnh.
-         * @param contentType Kiểu của file, ví dụ "image/jpeg".
-         */
+
         @Headers("Accept: application/json") // Giữ lại header này cho an toàn
         @PUT
         Call<ResponseBody> uploadImageToS3(

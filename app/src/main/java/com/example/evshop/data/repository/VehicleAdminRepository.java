@@ -4,7 +4,7 @@ import com.example.evshop.data.ApiService;
 import com.example.evshop.data.network.requests.CreateTemplateVehicleRequest;
 // *** SỬA LẠI: Import đúng các lớp Request và Response đang được sử dụng ***
 import com.example.evshop.data.network.requests.GetUploadUrlRequest;
-import com.example.evshop.data.network.responses.UploadUrlResponse;
+import com.example.evshop.data.network.response.UploadUrlResponse;
 import com.example.evshop.domain.models.ApiEnvelope;
 import com.example.evshop.domain.models.Color;
 import com.example.evshop.domain.models.Version;

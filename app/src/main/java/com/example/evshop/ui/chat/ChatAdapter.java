@@ -1,97 +1,89 @@
 package com.example.evshop.ui.chat;
 
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.example.evshop.R;
 import com.example.evshop.data.chat.model.ChatMessage;
+import com.example.evshop.databinding.ItemChatMessageInBinding;
+import com.example.evshop.databinding.ItemChatMessageOutBinding;
+import java.util.ArrayList;
 import java.util.List;
 
-/**
- * ChatAdapter hiển thị danh sách tin nhắn, gồm hai loại layout:
- * - Tin nhắn gửi đi (Sent)
- * - Tin nhắn nhận được (Received)
- */
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private final List<ChatMessage> items;
     private final String currentUserId;
+    private final List<ChatMessage> messages = new ArrayList<>();
 
-    // Loại view cho 2 kiểu tin nhắn
-    private static final int TYPE_SENT = 1;
-    private static final int TYPE_RECEIVED = 2;
+    private static final int TYPE_IN = 0;
+    private static final int TYPE_OUT = 1;
 
-    public ChatAdapter(List<ChatMessage> items, String currentUserId) {
-        this.items = items;
+    public ChatAdapter(String currentUserId) {
         this.currentUserId = currentUserId;
+    }
+
+    public void submitList(List<ChatMessage> list) {
+        messages.clear();
+        messages.addAll(list);
+        notifyDataSetChanged();
     }
 
     @Override
     public int getItemViewType(int position) {
-        ChatMessage msg = items.get(position);
-        if (msg == null || msg.getSenderId() == null) return TYPE_RECEIVED;
-        return currentUserId.equals(msg.getSenderId()) ? TYPE_SENT : TYPE_RECEIVED;
+        ChatMessage msg = messages.get(position);
+        return msg.getSenderId().equals(currentUserId) ? TYPE_OUT : TYPE_IN;
     }
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-
-        if (viewType == TYPE_SENT) {
-            View view = inflater.inflate(R.layout.item_message_sent, parent, false);
-            return new SentHolder(view);
+        if (viewType == TYPE_IN) {
+            ItemChatMessageInBinding binding = ItemChatMessageInBinding.inflate(
+                    LayoutInflater.from(parent.getContext()), parent, false
+            );
+            return new InViewHolder(binding);
         } else {
-            View view = inflater.inflate(R.layout.item_message_received, parent, false);
-            return new ReceivedHolder(view);
+            ItemChatMessageOutBinding binding = ItemChatMessageOutBinding.inflate(
+                    LayoutInflater.from(parent.getContext()), parent, false
+            );
+            return new OutViewHolder(binding);
         }
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        ChatMessage msg = items.get(position);
-        if (msg == null) return;
-
-        if (holder instanceof SentHolder) {
-            ((SentHolder) holder).bind(msg);
-        } else if (holder instanceof ReceivedHolder) {
-            ((ReceivedHolder) holder).bind(msg);
+        ChatMessage msg = messages.get(position);
+        if (holder instanceof InViewHolder) {
+            ((InViewHolder) holder).bind(msg);
+        } else if (holder instanceof OutViewHolder) {
+            ((OutViewHolder) holder).bind(msg);
         }
     }
 
     @Override
     public int getItemCount() {
-        return items == null ? 0 : items.size();
+        return messages.size();
     }
 
-    // ViewHolder cho tin nhắn gửi
-    static class SentHolder extends RecyclerView.ViewHolder {
-        private final TextView tvMessage;
-
-        SentHolder(View itemView) {
-            super(itemView);
-            tvMessage = itemView.findViewById(R.id.tv_message_sent);
+    static class InViewHolder extends RecyclerView.ViewHolder {
+        private final ItemChatMessageInBinding binding;
+        public InViewHolder(ItemChatMessageInBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
         }
-
-        void bind(ChatMessage msg) {
-            tvMessage.setText(msg.getMessage());
+        public void bind(ChatMessage msg) {
+            binding.tvMessage.setText(msg.getText());
         }
     }
 
-    // ViewHolder cho tin nhắn nhận
-    static class ReceivedHolder extends RecyclerView.ViewHolder {
-        private final TextView tvMessage;
-
-        ReceivedHolder(View itemView) {
-            super(itemView);
-            tvMessage = itemView.findViewById(R.id.tv_message_received);
+    static class OutViewHolder extends RecyclerView.ViewHolder {
+        private final ItemChatMessageOutBinding binding;
+        public OutViewHolder(ItemChatMessageOutBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
         }
-
-        void bind(ChatMessage msg) {
-            tvMessage.setText(msg.getMessage());
+        public void bind(ChatMessage msg) {
+            binding.tvMessage.setText(msg.getText());
         }
     }
 }

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp">
+
+    <!-- Avatar người khác -->
+    <ImageView
+        android:id="@+id/img_avatar"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@drawable/ic_avatar_placeholder"
+        android:contentDescription="Avatar"
+        android:layout_gravity="bottom"
+        android:background="@drawable/bg_avatar_circle"
+        android:scaleType="centerCrop"/>
+
+    <!-- Bubble tin nhắn -->
+    <TextView
+        android:id="@+id/tv_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:padding="12dp"
+        android:background="@drawable/bg_chat_in"
+        android:textColor="@color/md_text_primary"
+        android:textSize="16sp"
+        android:maxWidth="240dp"/>
+</LinearLayout>

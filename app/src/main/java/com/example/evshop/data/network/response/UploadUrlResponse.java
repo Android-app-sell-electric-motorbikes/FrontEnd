@@ -1,4 +1,4 @@
-package com.example.evshop.data.network.responses;
+package com.example.evshop.data.network.response;
 
 import com.google.gson.annotations.SerializedName;
 
