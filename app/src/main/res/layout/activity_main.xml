@@ -14,17 +14,20 @@
         app:title="@string/title_evshop"
         app:titleTextColor="@color/white"
         app:menu="@menu/menu_home"/>
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabChat"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:contentDescription="Chat với cửa hàng"
-        android:src="@drawable/ic_send_24"
-        android:visibility="gone"
-        app:tint="@android:color/white"/>
+    <!-- Nút Chat với cửa hàng, xuống dòng và align bên phải -->
 
+
+    <Button
+        android:id="@+id/btnChatStore"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:layout_marginTop="8dp"
+        android:backgroundTint="@color/teal_700"
+        android:padding="6dp"
+        android:text="Chat với cửa hàng"
+        android:textColor="@android:color/white"
+        android:textSize="12sp" />
 
     <fragment
         android:id="@+id/nav_host"
