@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.evshop.R;
 import com.example.evshop.databinding.FragmentHomeBinding;
+import com.example.evshop.databinding.ItemBannerBinding;
 import com.example.evshop.domain.models.UserData;
 import com.example.evshop.ui.adapter.VehicleAdapter;
 import com.example.evshop.ui.auth.AuthViewModel;
@@ -39,12 +40,6 @@ public class HomeFragment extends Fragment {
     private HomeViewModel homeViewModel;
     private NavController navController;
     private VehicleAdapter vehicleAdapter;
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setHasOptionsMenu(true);
-    }
 
     @Nullable
     @Override
@@ -161,6 +156,7 @@ public class HomeFragment extends Fragment {
 
     // --- Banner Adapter ---
     public static class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.BannerViewHolder> {
+
         private final List<Integer> images;
 
         public BannerAdapter(List<Integer> images) {
@@ -170,7 +166,8 @@ public class HomeFragment extends Fragment {
         @NonNull
         @Override
         public BannerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new BannerViewHolder(FragmentHomeBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
+            ItemBannerBinding itemBinding = ItemBannerBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+            return new BannerViewHolder(itemBinding);
         }
 
         @Override
@@ -184,9 +181,9 @@ public class HomeFragment extends Fragment {
         }
 
         static class BannerViewHolder extends RecyclerView.ViewHolder {
-            FragmentHomeBinding binding;
+            ItemBannerBinding binding;
 
-            public BannerViewHolder(FragmentHomeBinding binding) {
+            public BannerViewHolder(ItemBannerBinding binding) {
                 super(binding.getRoot());
                 this.binding = binding;
             }
