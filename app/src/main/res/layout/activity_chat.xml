@@ -12,16 +12,17 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/md_theme_primary"
-        android:titleTextColor="@android:color/white"
-        app:title=""
-        app:contentInsetStart="0dp">
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:elevation="4dp"
+        android:theme="@style/ThemeOverlay.Material3.Dark.ActionBar"
+        app:titleTextColor="@android:color/white">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingStart="8dp">
+            android:gravity="center_vertical">
 
             <!-- Avatar người chat -->
             <ImageView
@@ -30,9 +31,9 @@
                 android:layout_height="40dp"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_avatar_placeholder"
-                android:contentDescription="Avatar"
+                android:contentDescription="@string/avatar"
                 android:layout_marginEnd="8dp"
-                android:background="@drawable/bg_avatar_circle"/>
+                android:background="@drawable/bg_avatar_circle" />
 
             <!-- Tên người chat -->
             <TextView
@@ -42,7 +43,7 @@
                 android:text="Tên người chat"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
         </LinearLayout>
     </androidx.appcompat.widget.Toolbar>
 
@@ -54,33 +55,36 @@
         android:layout_weight="1"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
-        android:paddingBottom="64dp"
+        android:paddingBottom="72dp"
         android:clipToPadding="false"
         android:overScrollMode="never"
-        android:scrollbars="vertical"/>
+        android:scrollbars="none" />
 
-    <!-- Nhập tin nhắn -->
+    <!-- Ô nhập tin nhắn -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="8dp"
         android:background="@color/md_card"
-        android:elevation="4dp">
+        android:elevation="8dp"
+        android:gravity="center_vertical">
 
         <EditText
             android:id="@+id/et_message"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="48dp"
+            android:layout_weight="1"
             android:hint="Nhập tin nhắn..."
             android:background="@drawable/bg_edittext_rounded"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:gravity="center_vertical"
+            android:maxLines="3"
+            android:scrollbars="vertical"
+            android:inputType="textMultiLine|textCapSentences"
             android:textColor="@color/md_text_primary"
-            android:textColorHint="@color/md_text_secondary"
-            android:inputType="textMultiLine"/>
+            android:textColorHint="@color/md_text_secondary" />
 
         <ImageButton
             android:id="@+id/btn_send"
@@ -90,6 +94,6 @@
             android:background="@drawable/bg_send_button"
             android:src="@drawable/ic_send_24"
             app:tint="@android:color/white"
-            android:contentDescription="Send"/>
+            android:contentDescription="@string/send" />
     </LinearLayout>
 </LinearLayout>
