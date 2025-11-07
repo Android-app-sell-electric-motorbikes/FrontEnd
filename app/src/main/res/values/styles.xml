@@ -25,4 +25,6 @@
     <style name="Widget.EV.Toolbar.WithBlackNavIcon" parent="Widget.Material3.Toolbar">
         <item name="colorControlNormal">@android:color/black</item>
     </style>
+
+
 </resources>

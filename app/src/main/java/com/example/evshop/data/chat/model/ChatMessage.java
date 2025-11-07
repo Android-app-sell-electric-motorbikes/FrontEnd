@@ -1,5 +1,8 @@
 package com.example.evshop.data.chat.model;
 
+import androidx.annotation.NonNull;
+import java.util.Objects;
+
 public class ChatMessage {
     private String id;
     private String roomId;
@@ -32,4 +35,39 @@ public class ChatMessage {
 
     public long getTimestamp() { return timestamp; }
     public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ChatMessage)) return false;
+        ChatMessage that = (ChatMessage) o;
+
+        // Ưu tiên so sánh theo id (nếu có)
+        if (id != null && that.id != null) {
+            return id.equals(that.id);
+        }
+
+        // Nếu id chưa được Firebase set, fallback so sánh theo nội dung
+        return timestamp == that.timestamp &&
+                Objects.equals(roomId, that.roomId) &&
+                Objects.equals(senderId, that.senderId) &&
+                Objects.equals(text, that.text);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, roomId, senderId, text, timestamp);
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "ChatMessage{" +
+                "id='" + id + '\'' +
+                ", roomId='" + roomId + '\'' +
+                ", senderId='" + senderId + '\'' +
+                ", text='" + text + '\'' +
+                ", timestamp=" + timestamp +
+                '}';
+    }
 }

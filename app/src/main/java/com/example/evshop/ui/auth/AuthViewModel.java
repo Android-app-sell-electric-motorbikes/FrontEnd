@@ -71,7 +71,7 @@ public class AuthViewModel extends ViewModel {
 
                 // ** BƯỚC 3: GÁN ROLE VÀO ĐỐI TƯỢNG USERDATA **
                 data.userData.role = role;
-                
+
                 // ** BƯỚC 4: LƯU ĐỐI TƯỢNG USERDATA HOÀN CHỈNH VÀO REPOSITORY **
                 userRepository.setCurrentUser(data.userData);
 

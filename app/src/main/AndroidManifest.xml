@@ -2,16 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- 🔒 Quyền cần thiết -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission
-        android:name="android.permission.READ_EXTERNAL_STORAGE"
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
 
     <application
@@ -22,38 +20,31 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Material3.DayNight.NoActionBar"
-        android:usesCleartextTraffic="true"
-        tools:targetApi="34">
+        android:usesCleartextTraffic="true">
 
-        <!-- 🧭 VietMap Service -->
+        <!-- ** KHAI BÁO ACTIVITY CÒN THIẾU ** -->
+        <activity
+            android:name=".ui.transaction.TransactionHistoryActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.cart.CartActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.payment.PaymentActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.vehicle.VehicleDetailActivity"
+            android:exported="false" />
+
         <service
             android:name="vn.vietmap.services.android.navigation.v5.navigation.NavigationService"
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="location" />
 
-        <!-- 💬 Firebase Cloud Messaging -->
-        <service
-            android:name=".util.MyFirebaseMessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-
-        <!-- 🚀 Activity danh sách -->
-        <activity
-            android:name=".ui.transaction.TransactionHistoryActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.cart.CartActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.payment.PaymentActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ui.vehicle.VehicleDetailActivity"
-            android:exported="false" />
         <activity
             android:name=".VietMapNavigationV2"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
@@ -74,11 +65,6 @@
             android:name=".ui.admin.AddTemplateVehicleActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.vehicle.TemplateVehicleListActivity"
-            android:exported="false" />
-
-        <!-- 🏠 MainActivity -->
-        <activity
             android:name=".ui.main.MainActivity"
             android:exported="true">
             <intent-filter>
@@ -86,6 +72,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ui.vehicle.TemplateVehicleListActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
