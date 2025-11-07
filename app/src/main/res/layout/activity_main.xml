@@ -4,54 +4,72 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- 1. Dùng AppBarLayout để chứa Toolbar -->
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout"
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        style="@style/Widget.Material3.Toolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/title_evshop"
+        app:title="@string/title_evshop"
+        app:titleTextColor="@color/white"
+        app:menu="@menu/menu_home"/>
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            style="@style/Widget.Material3.Toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:contentDescription="@string/title_evshop"
-            app:title="@string/title_evshop"
-            app:titleTextColor="@color/white"
-            app:menu="@menu/menu_home" />
 
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <!-- 2. Thêm "layout_behavior" để fragment tự động nằm dưới AppBarLayout -->
-    <!-- Xóa bỏ layout_marginTop thủ công -->
     <fragment
         android:id="@+id/nav_host"
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginTop="?attr/actionBarSize"
         app:defaultNavHost="true"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        app:navGraph="@navigation/nav_main" />
+        app:navGraph="@navigation/nav_main"/>
 
-    <!-- Các nút này đã được đặt đúng cách với layout_gravity, chúng sẽ nổi lên trên fragment -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabChat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:contentDescription="Chat với cửa hàng"
-        android:src="@drawable/ic_send_24"
-        android:visibility="gone"
-        app:tint="@android:color/white" />
+    <!--    <Button-->
+    <!--        android:id="@+id/pushToNavigationScreen"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_marginTop="36dp"-->
+    <!--        android:text="Navigation Screen"-->
+    <!--        app:layout_constraintEnd_toEndOf="parent"-->
+    <!--        app:layout_constraintHorizontal_bias="0.494"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        app:layout_constraintTop_toTopOf="parent"-->
+    <!--        />-->
+
+    <!--    <TextView-->
+    <!--        android:id="@+id/guideText"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_marginLeft="15dp"-->
+    <!--        android:layout_marginTop="36dp"-->
+    <!--        android:layout_marginRight="15dp"-->
+    <!--        android:text="@string/tts_guide"-->
+    <!--        android:textSize="16dp"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        app:layout_constraintTop_toBottomOf="@+id/pushToNavigationScreen" />-->
+
+    <!--    <Button-->
+    <!--        android:id="@+id/testSpeech"-->
+    <!--        android:layout_width="wrap_content"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        android:layout_marginTop="36dp"-->
+    <!--        android:text="System text to speech setting"-->
+    <!--        app:layout_constraintEnd_toEndOf="parent"-->
+    <!--        app:layout_constraintHorizontal_bias="0.494"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        app:layout_constraintTop_toBottomOf="@+id/guideText" />-->
 
     <Button
         android:id="@+id/speechAgain"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="36dp"
         android:text="Speech again"
         android:visibility="gone"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="32dp" />
-
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.494"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/testSpeech"
+        />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

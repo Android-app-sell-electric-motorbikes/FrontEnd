@@ -92,11 +92,11 @@ public class LoginFragment extends Fragment {
                     break;
 
                 case GO_TO_HOME:
-                Snackbar.make(b.getRoot(), "Đăng nhập thành công", Snackbar.LENGTH_SHORT)
-                        .setAnchorView(b.btnLogin).show();
-                NavHostFragment.findNavController(this)
-                        .navigate(R.id.action_loginFragment_to_homeFragment);
-                break;
+                    Snackbar.make(b.getRoot(), "Đăng nhập thành công", Snackbar.LENGTH_SHORT)
+                            .setAnchorView(b.btnLogin).show();
+                    NavHostFragment.findNavController(this)
+                            .navigate(R.id.action_loginFragment_to_homeFragment);
+                    break;
             }
 
             authViewModel.onNavigationComplete();

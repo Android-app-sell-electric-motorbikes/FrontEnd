@@ -49,7 +49,7 @@ public class TokenManager {
 
         try {
             JWT jwt = new JWT(token);
-            
+
             // ** SỬA LẠI CÚ PHÁP CHO ĐÚNG PHIÊN BẢN THƯ VIỆN **
             Claim roleClaim = jwt.getClaim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role");
             String role = roleClaim.asString();
