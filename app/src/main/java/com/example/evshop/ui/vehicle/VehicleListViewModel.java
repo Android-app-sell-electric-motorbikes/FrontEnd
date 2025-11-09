@@ -1,11 +1,13 @@
 package com.example.evshop.ui.vehicle;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.evshop.data.ApiService;
 import com.example.evshop.domain.models.ApiEnvelope;
+import com.example.evshop.domain.models.TemplateResult;
 import com.example.evshop.domain.models.TemplateVehicle;
 
 import java.util.List;
@@ -44,19 +46,32 @@ public class VehicleListViewModel extends ViewModel {
 
     public void fetchVehicles() {
         _loading.setValue(true);
-        apiService.getAllTemplateVehicles().enqueue(new Callback<ApiEnvelope<List<TemplateVehicle>>>() {
+
+        // <<< BƯỚC 2: SỬA KIỂU DỮ LIỆU CỦA CALL VÀ CALLBACK >>>
+        apiService.getAllTemplateVehicles().enqueue(new Callback<ApiEnvelope<TemplateResult>>() {
             @Override
-            public void onResponse(Call<ApiEnvelope<List<TemplateVehicle>>> call, Response<ApiEnvelope<List<TemplateVehicle>>> response) {
+            public void onResponse(@NonNull Call<ApiEnvelope<TemplateResult>> call, @NonNull Response<ApiEnvelope<TemplateResult>> response) {
                 _loading.setValue(false);
-                if (response.isSuccessful() && response.body() != null && response.body().isSuccess) {
-                    _vehicles.setValue(response.body().result);
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiEnvelope<TemplateResult> apiResponse = response.body();
+
+                    // <<< BƯỚC 3: SỬA LOGIC LẤY DỮ LIỆU >>>
+                    // Dữ liệu bây giờ nằm trong result.getData()
+                    if (apiResponse.isSuccess && apiResponse.result != null && apiResponse.result.getData() != null) {
+                        _vehicles.setValue(apiResponse.result.getData());
+                    } else {
+                        // Xử lý lỗi từ API
+                        String message = apiResponse.message != null ? apiResponse.message : "Không có dữ liệu";
+                        _error.setValue("Lỗi tải dữ liệu: " + message);
+                    }
                 } else {
+                    // Xử lý lỗi HTTP
                     _error.setValue("Lỗi tải dữ liệu: " + response.code());
                 }
             }
 
             @Override
-            public void onFailure(Call<ApiEnvelope<List<TemplateVehicle>>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiEnvelope<TemplateResult>> call, @NonNull Throwable t) {
                 _loading.setValue(false);
                 _error.setValue("Lỗi mạng: " + t.getMessage());
             }

@@ -1,10 +1,12 @@
 package com.example.evshop.ui.vehicle;
 
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
-import com.example.evshop.data.repository.VehicleRepository;
-import com.example.evshop.domain.models.ApiEnvelope;
+import com.example.evshop.data.repository.VehicleRepository;import com.example.evshop.domain.models.ApiEnvelope;
+// <<< BƯỚC 1: THÊM IMPORT MỚI >>>
+import com.example.evshop.domain.models.TemplateResult;
 import com.example.evshop.domain.models.TemplateVehicle;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,24 +40,37 @@ public class TemplateVehicleListViewModel extends ViewModel {
 
     public void loadAllVehicles() {
         _loading.postValue(true);
-        // *** SỬA LẠI CÁCH GỌI Ở ĐÂY ***
-        // Gọi repository.getAllTemplateVehicles() trước, sau đó mới .enqueue()
-        repository.getAllTemplateVehicles().enqueue(new Callback<ApiEnvelope<List<TemplateVehicle>>>() {
+        // <<< BƯỚC 2: SỬA KIỂU DỮ LIỆU CỦA CALL VÀ CALLBACK >>>
+        repository.getAllTemplateVehicles().enqueue(new Callback<ApiEnvelope<TemplateResult>>() {
             @Override
-            public void onResponse(Call<ApiEnvelope<List<TemplateVehicle>>> call, Response<ApiEnvelope<List<TemplateVehicle>>> response) {
-                if (response.isSuccessful() && response.body() != null && response.body().isSuccess) {
-                    originalVehicleList = response.body().result != null ? response.body().result : new ArrayList<>();
-                    _vehicles.postValue(originalVehicleList);
+            public void onResponse(@NonNull Call<ApiEnvelope<TemplateResult>> call, @NonNull Response<ApiEnvelope<TemplateResult>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiEnvelope<TemplateResult> apiResponse = response.body();
+
+                    // <<< BƯỚC 3: SỬA LOGIC LẤY DỮ LIỆU >>>
+                    // Dữ liệu bây giờ nằm trong result.getData()
+                    if (apiResponse.isSuccess && apiResponse.result != null && apiResponse.result.getData() != null) {
+                        originalVehicleList = apiResponse.result.getData();
+                        _vehicles.postValue(originalVehicleList);
+                    } else {
+                        // Xử lý lỗi từ API, ví dụ: hiển thị danh sách rỗng
+                        originalVehicleList = new ArrayList<>();
+                        _vehicles.postValue(originalVehicleList);
+                    }
                 } else {
-                    // Xử lý lỗi, có thể cập nhật một LiveData lỗi khác
+                    // Xử lý lỗi HTTP
+                    originalVehicleList = new ArrayList<>();
+                    _vehicles.postValue(originalVehicleList);
                 }
                 _loading.postValue(false);
             }
 
             @Override
-            public void onFailure(Call<ApiEnvelope<List<TemplateVehicle>>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiEnvelope<TemplateResult>> call, @NonNull Throwable t) {
                 _loading.postValue(false);
-                // Xử lý lỗi, có thể cập nhật một LiveData lỗi khác
+                // Xử lý lỗi mạng
+                originalVehicleList = new ArrayList<>();
+                _vehicles.postValue(originalVehicleList);
             }
         });
     }
@@ -68,7 +83,6 @@ public class TemplateVehicleListViewModel extends ViewModel {
         List<TemplateVehicle> filteredList = new ArrayList<>();
         String lowerCaseQuery = query.toLowerCase().trim();
         for (TemplateVehicle vehicle : originalVehicleList) {
-            // Đảm bảo không bị NullPointerException
             if (vehicle.getVersion() != null &&
                     vehicle.getVersion().getVersionName() != null &&
                     vehicle.getVersion().getVersionName().toLowerCase().contains(lowerCaseQuery)) {

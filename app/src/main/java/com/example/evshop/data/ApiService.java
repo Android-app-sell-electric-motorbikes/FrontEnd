@@ -7,8 +7,10 @@ import com.example.evshop.data.network.requests.GetUploadUrlRequest;
 import com.example.evshop.data.network.responses.UploadUrlResponse;
 import com.example.evshop.domain.models.ApiEnvelope;
 import com.example.evshop.domain.models.Color;
+import com.example.evshop.domain.models.InventoryResult;
 import com.example.evshop.domain.models.LoginRequest;
 import com.example.evshop.domain.models.LoginResult;
+import com.example.evshop.domain.models.TemplateResult;
 import com.example.evshop.domain.models.TemplateVehicle;
 import com.example.evshop.domain.models.Version;
 import com.example.evshop.domain.models.VersionDetails;
@@ -39,7 +41,7 @@ public interface ApiService {
 
         //---Vehicle----
         @GET("api/EVTemplate/Get-all-template-vehicles")
-        Call<ApiEnvelope<List<TemplateVehicle>>> getAllTemplateVehicles();
+        Call<ApiEnvelope<TemplateResult>> getAllTemplateVehicles(); // <-- SỬA KIỂU TRẢ VỀ Ở ĐÂY
 
         @GET("api/EVTemplate/get-template-by-id/{id}")
         Call<ApiEnvelope<TemplateVehicle>> getVehicleById(@Path("id") String vehicleId);
@@ -85,7 +87,7 @@ public interface ApiService {
         );
 
         @GET("api/ElectricVehicle/get-evc-inventory")
-        Call<ApiEnvelope<List<InventoryItem>>> getInventory();
+        Call<ApiEnvelope<InventoryResult>> getInventory(); // << SỬA Ở ĐÂY
 
         // =========================================================================
         // *** STEP 3: API ĐỂ TẠO TEMPLATE (Đã có, giữ nguyên)                     ***
