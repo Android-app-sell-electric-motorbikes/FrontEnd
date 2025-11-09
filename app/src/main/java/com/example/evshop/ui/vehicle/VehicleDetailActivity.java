@@ -17,9 +17,8 @@ import com.bumptech.glide.Glide;
 import com.example.evshop.R;
 import com.example.evshop.domain.models.TemplateVehicle;
 import com.example.evshop.ui.cart.CartManager;
-import com.example.evshop.util.AppNotificationManager;
 import com.example.evshop.util.Formatters;
-import com.example.evshop.util.NotificationHelper; // **THÊM IMPORT**
+import com.example.evshop.util.NotificationHelper;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -29,7 +28,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class VehicleDetailActivity extends AppCompatActivity {
 
     private VehicleDetailViewModel viewModel;
-    private TemplateVehicle currentVehicle;
+    private TemplateVehicle currentVehicle; // Giữ lại để thêm vào giỏ hàng
 
     private MaterialToolbar toolbar;
     private ImageView imgVehicleDetail;
@@ -38,6 +37,7 @@ public class VehicleDetailActivity extends AppCompatActivity {
     private View scrollView;
     private Button btnAddToCart;
 
+    // Các View cho thông số kỹ thuật
     private View specMotorPower, specBattery, specRange, specTopSpeed, specWeight, specHeight, specYear, specModelName;
 
     @Override
@@ -47,7 +47,7 @@ public class VehicleDetailActivity extends AppCompatActivity {
 
         viewModel = new ViewModelProvider(this).get(VehicleDetailViewModel.class);
         initViews();
-        observeViewModel();
+        observeViewModel(); // << Sửa logic trong hàm này
 
         String vehicleId = getIntent().getStringExtra("VEHICLE_ID");
         if (!TextUtils.isEmpty(vehicleId)) {
@@ -69,6 +69,7 @@ public class VehicleDetailActivity extends AppCompatActivity {
         txtVersionDescription = findViewById(R.id.txtVersionDescription);
         btnAddToCart = findViewById(R.id.btnAddToCart);
 
+        // Lấy view cho từng thông số
         specMotorPower = findViewById(R.id.specMotorPower);
         specBattery = findViewById(R.id.specBattery);
         specRange = findViewById(R.id.specRange);
@@ -79,72 +80,70 @@ public class VehicleDetailActivity extends AppCompatActivity {
         specModelName = findViewById(R.id.specModelName);
 
         toolbar.setNavigationOnClickListener(v -> finish());
-
-        btnAddToCart.setOnClickListener(v -> {
-            if (currentVehicle != null) {
-                // 1. Thêm vào giỏ hàng
-                CartManager.getInstance().addToCart(currentVehicle);
-
-                // 2. Hiển thị Snackbar
-                Snackbar.make(findViewById(android.R.id.content), "Đã thêm vào giỏ hàng", Snackbar.LENGTH_LONG).show();
-
-                // 3. **HIỂN THỊ THÔNG BÁO HỆ THỐNG**
-                NotificationHelper notificationHelper = new NotificationHelper(this);
-                int cartItemCount = CartManager.getInstance().getTotalItemCount();
-                notificationHelper.updateAppBadge(cartItemCount);
-
-            } else {
-                Snackbar.make(findViewById(android.R.id.content), "Không thể thêm vào giỏ hàng, vui lòng thử lại.", Snackbar.LENGTH_LONG).show();
-            }
-        });
+        btnAddToCart.setOnClickListener(v -> addToCart());
     }
 
+    // ========================================================
+    // ***           SỬA LỖI LOGIC Ở ĐÂY                    ***
+    // ========================================================
     private void observeViewModel() {
+        // Lắng nghe trạng thái loading
         viewModel.loading.observe(this, isLoading -> {
             progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+            // Chỉ hiện nội dung khi đã load xong
             scrollView.setVisibility(isLoading ? View.INVISIBLE : View.VISIBLE);
             btnAddToCart.setVisibility(isLoading ? View.GONE : View.VISIBLE);
         });
 
+        // Lắng nghe lỗi
         viewModel.error.observe(this, errorMsg -> {
             if (errorMsg != null) {
                 Toast.makeText(this, errorMsg, Toast.LENGTH_LONG).show();
             }
         });
 
-        viewModel.vehicleDetails.observe(this, vehicle -> {
-            if (vehicle == null) return;
+        // 1. LẮNG NGHE THÔNG TIN CHUNG (Tên, Giá, Màu, Ảnh...)
+        viewModel.getTemplateVehicle().observe(this, template -> {
+            if (template == null) return;
 
-            this.currentVehicle = vehicle;
+            // Lưu lại xe hiện tại để dùng cho chức năng "Thêm vào giỏ"
+            this.currentVehicle = template;
 
-            if (vehicle.getImgUrl() != null && !vehicle.getImgUrl().isEmpty()) {
-                Glide.with(this).load(vehicle.getImgUrl().get(0)).placeholder(R.drawable.placeholder_vehicle).into(imgVehicleDetail);
+            // Hiển thị ảnh
+            if (template.getImgUrl() != null && !template.getImgUrl().isEmpty()) {
+                Glide.with(this).load(template.getImgUrl().get(0)).placeholder(R.drawable.placeholder_vehicle).into(imgVehicleDetail);
             } else {
                 imgVehicleDetail.setImageResource(R.drawable.placeholder_vehicle);
             }
 
-            if (vehicle.getColor() != null) {
-                txtColorDetail.setText(vehicle.getColor().getColorName());
+            // Hiển thị thông tin chung
+            if (template.getVersion() != null) {
+                toolbar.setTitle(template.getVersion().getVersionName());
+                txtVersionNameDetail.setText(template.getVersion().getVersionName());
+                // Hiển thị dòng xe (modelName) từ template
+                setSpec("Dòng xe", template.getVersion().getModelName(), specModelName);
+            }
+            if (template.getColor() != null) {
+                txtColorDetail.setText(template.getColor().getColorName());
             } else {
                 txtColorDetail.setText("N/A");
             }
-            txtPriceDetail.setText(Formatters.currency(vehicle.getPrice()));
+            txtPriceDetail.setText(Formatters.currency(template.getPrice()));
+            txtVersionDescription.setText(template.getDescription()); // Mô tả chung từ template
+        });
 
-            TemplateVehicle.Version version = vehicle.getVersion();
-            if (version != null) {
-                toolbar.setTitle(version.getVersionName());
-                txtVersionNameDetail.setText(version.getVersionName());
-                txtVersionDescription.setText(version.getDescription());
+        // 2. LẮNG NGHE THÔNG SỐ KỸ THUẬT CHI TIẾT
+        viewModel.getVersionDetails().observe(this, details -> {
+            if (details == null) return;
 
-                setSpec("Dòng xe", version.getModelName(), specModelName);
-                setSpec("Công suất", version.getMotorPower() + " W", specMotorPower);
-                setSpec("Quãng đường / 1 lần sạc", version.getRangePerCharge() + " km", specRange);
-                setSpec("Tốc độ tối đa", version.getTopSpeed() + " km/h", specTopSpeed);
-                setSpec("Năm sản xuất", String.valueOf(version.getProductionYear()), specYear);
-                setSpec("Dung lượng pin", version.getBatteryCapacity() + " Ah", specBattery);
-                setSpec("Cân nặng", version.getWeight() + " kg", specWeight);
-                setSpec("Chiều cao", version.getHeight() + " mm", specHeight);
-            }
+            // Hiển thị các thông số kỹ thuật từ `details`
+            setSpec("Công suất", details.getMotorPower() + " W", specMotorPower);
+            setSpec("Dung lượng pin", details.getBatteryCapacity() + " Ah", specBattery);
+            setSpec("Quãng đường / 1 lần sạc", details.getRangePerCharge() + " km", specRange);
+            setSpec("Tốc độ tối đa", details.getTopSpeed() + " km/h", specTopSpeed);
+            setSpec("Năm sản xuất", String.valueOf(details.getProductionYear()), specYear);
+            setSpec("Cân nặng", details.getWeight() + " kg", specWeight);
+            setSpec("Chiều cao", details.getHeight() + " mm", specHeight);
         });
     }
 
@@ -152,7 +151,21 @@ public class VehicleDetailActivity extends AppCompatActivity {
         if (specView == null || value == null) return;
         TextView txtLabel = specView.findViewById(R.id.txtSpecLabel);
         TextView txtValue = specView.findViewById(R.id.txtSpecValue);
-        txtLabel.setText(label);
-        txtValue.setText(value);
+        if (txtLabel != null && txtValue != null) {
+            txtLabel.setText(label);
+            txtValue.setText(value);
+        }
+    }
+
+    private void addToCart() {
+        if (currentVehicle != null) {
+            CartManager.getInstance().addToCart(currentVehicle);
+            Snackbar.make(findViewById(android.R.id.content), "Đã thêm vào giỏ hàng", Snackbar.LENGTH_LONG).show();
+            NotificationHelper notificationHelper = new NotificationHelper(this);
+            int cartItemCount = CartManager.getInstance().getTotalItemCount();
+            notificationHelper.updateAppBadge(cartItemCount);
+        } else {
+            Snackbar.make(findViewById(android.R.id.content), "Không thể thêm vào giỏ hàng, vui lòng thử lại.", Snackbar.LENGTH_LONG).show();
+        }
     }
 }

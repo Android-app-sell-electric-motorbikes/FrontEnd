@@ -3,6 +3,8 @@ package com.example.evshop.data.repository;
 import com.example.evshop.data.ApiService;
 import com.example.evshop.domain.models.ApiEnvelope;
 import com.example.evshop.domain.models.TemplateVehicle;
+// *** THÊM IMPORT CHO TEMPLATERESULT ***
+import com.example.evshop.domain.models.TemplateResult;
 import com.example.evshop.domain.models.VersionDetails;
 
 import java.util.List;
@@ -23,7 +25,15 @@ public class VehicleRepository {
         this.apiService = apiService;
     }
 
-    public Call<ApiEnvelope<List<TemplateVehicle>>> getAllTemplateVehicles() {
+    // ========================================================
+    // ***           SỬA LẠI KIỂU TRẢ VỀ Ở ĐÂY             ***
+    // ========================================================
+    /**
+     * Phương thức này bây giờ trả về Call<ApiEnvelope<TemplateResult>>
+     * để đồng bộ với ApiService.
+     */
+    public Call<ApiEnvelope<TemplateResult>> getAllTemplateVehicles() {
+        // Bây giờ kiểu dữ liệu đã khớp
         return apiService.getAllTemplateVehicles();
     }
 
