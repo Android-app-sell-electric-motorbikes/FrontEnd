@@ -26,7 +26,7 @@ public class TemplateVehicle {
 
     @SerializedName("color")
     private Color color;
-
+    private transient double rating;
     // --- Getters và Setters đã được sửa lại ---
 
     public String getId() { // Sửa 'getVehicleId' thành 'getId'
@@ -84,7 +84,13 @@ public class TemplateVehicle {
     public void setColor(Color color) {
         this.color = color;
     }
+    public double getRating() {
+        return rating;
+    }
 
+    public void setRating(double rating) {
+        this.rating = rating;
+    }
     // --- Lớp con cho Version (sửa lại cho khớp JSON) ---
     // Trong file TemplateVehicle.java
 // ... (Các phần khác giữ nguyên)// --- Lớp con cho Version (sửa lại cho khớp JSON) ---

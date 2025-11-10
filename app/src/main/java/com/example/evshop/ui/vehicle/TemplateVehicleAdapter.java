@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+// *** BƯỚC 4.1: THÊM IMPORT CHO RATINGBAR ***
+import android.widget.RatingBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,10 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-// Adapter được đơn giản hóa cho giao diện lưới
 public class TemplateVehicleAdapter extends RecyclerView.Adapter<TemplateVehicleAdapter.ViewHolder> {
 
-    // Interface để xử lý sự kiện click. Activity sẽ implement nó.
+    // ... (phần interface, constructor, và các phương thức chính không đổi) ...
     public interface OnItemClickListener {
         void onItemClick(TemplateVehicle vehicle);
     }
@@ -34,7 +35,6 @@ public class TemplateVehicleAdapter extends RecyclerView.Adapter<TemplateVehicle
         this.listener = listener;
     }
 
-    // Phương thức cập nhật danh sách
     public void updateVehicles(List<TemplateVehicle> newVehicles) {
         this.vehicles.clear();
         this.vehicles.addAll(newVehicles);
@@ -50,9 +50,7 @@ public class TemplateVehicleAdapter extends RecyclerView.Adapter<TemplateVehicle
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        TemplateVehicle vehicle = vehicles.get(position);
-        // Truyền cả vehicle và listener vào ViewHolder
-        holder.bind(vehicle, listener);
+        holder.bind(vehicles.get(position), listener);
     }
 
     @Override
@@ -61,42 +59,42 @@ public class TemplateVehicleAdapter extends RecyclerView.Adapter<TemplateVehicle
     }
 
     // =========================================================================
-    // ***           VIEW HOLDER ĐÃ ĐƯỢC CẬP NHẬT CHO ĐÚNG LAYOUT          ***
+    // ***           BƯỚC 4.2: CẬP NHẬT VIEW HOLDER                        ***
     // =========================================================================
     static class ViewHolder extends RecyclerView.ViewHolder {
-        // Khai báo thêm TextView cho description
         final ImageView imgVehicle;
-        final TextView txtModel, txtColor, txtPrice, txtDescription; // <<< THÊM TXTDESCRIPTION
+        final TextView txtModel, txtColor, txtPrice, txtDescription;
+        // Khai báo thêm RatingBar
+        final RatingBar ratingBar;
         private final Context context;
 
         ViewHolder(@NonNull View itemView) {
             super(itemView);
             context = itemView.getContext();
 
-            // Ánh xạ các View ID
+            // Ánh xạ các View ID đã có
             imgVehicle = itemView.findViewById(R.id.imgVehicle);
             txtModel = itemView.findViewById(R.id.txtModel);
             txtColor = itemView.findViewById(R.id.txtColor);
             txtPrice = itemView.findViewById(R.id.txtPrice);
+            txtDescription = itemView.findViewById(R.id.txtDescription);
 
-            // Ánh xạ ID của TextView mới
-            txtDescription = itemView.findViewById(R.id.txtDescription); // <<< THÊM DÒNG NÀY
+            // Ánh xạ ID của RatingBar
+            ratingBar = itemView.findViewById(R.id.rating_bar);
         }
 
         void bind(final TemplateVehicle vehicle, final OnItemClickListener listener) {
             if (vehicle == null) return;
 
-            // 1. Gán dữ liệu cho các View cơ bản (phần này không đổi)
+            // ... (Code gán dữ liệu cho imgVehicle, txtModel, txtColor, txtPrice không đổi)
             if (vehicle.getVersion() != null) {
                 txtModel.setText(vehicle.getVersion().getVersionName());
             }
             if (vehicle.getColor() != null) {
                 txtColor.setText(vehicle.getColor().getColorName());
             }
-
             NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
             txtPrice.setText(currencyFormatter.format(vehicle.getPrice()));
-
             List<String> images = vehicle.getImgUrl();
             if (images != null && !images.isEmpty()) {
                 Glide.with(context)
@@ -108,19 +106,17 @@ public class TemplateVehicleAdapter extends RecyclerView.Adapter<TemplateVehicle
                 imgVehicle.setImageResource(R.drawable.ic_placeholder);
             }
 
-            // ==================================================================
-            // *** 2. GÁN DỮ LIỆU CHO TEXTVIEW DESCRIPTION (PHẦN QUAN TRỌNG) ***
-            // ==================================================================
-            // Giả sử model TemplateVehicle của bạn có phương thức `getDescription()`
+            // *** BƯỚC 4.3: GÁN DỮ LIỆU CHO RATINGBAR ***
+            // Ép kiểu `double` của rating thành `float` mà RatingBar yêu cầu
+            ratingBar.setRating((float) vehicle.getRating());
+
+            // ... (Code gán dữ liệu cho txtDescription và setOnClickListener không đổi)
             if (vehicle.getDescription() != null && !vehicle.getDescription().isEmpty()) {
                 txtDescription.setVisibility(View.VISIBLE);
                 txtDescription.setText(vehicle.getDescription());
             } else {
-                // Nếu không có description, hãy ẩn TextView đi để không chiếm khoảng trống
                 txtDescription.setVisibility(View.GONE);
             }
-
-            // 3. Thiết lập sự kiện click cho toàn bộ item (không đổi)
             itemView.setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onItemClick(vehicle);
@@ -128,5 +124,4 @@ public class TemplateVehicleAdapter extends RecyclerView.Adapter<TemplateVehicle
             });
         }
     }
-    
 }
