@@ -1,13 +1,12 @@
+// File: D:/PRM391/FrontEnd/app/src/main/java/com/example/evshop/data/repository/VehicleRepository.java
+
 package com.example.evshop.data.repository;
 
 import com.example.evshop.data.ApiService;
 import com.example.evshop.domain.models.ApiEnvelope;
-import com.example.evshop.domain.models.TemplateVehicle;
-// *** THÊM IMPORT CHO TEMPLATERESULT ***
 import com.example.evshop.domain.models.TemplateResult;
+import com.example.evshop.domain.models.TemplateVehicle;
 import com.example.evshop.domain.models.VersionDetails;
-
-import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -26,15 +25,23 @@ public class VehicleRepository {
     }
 
     // ========================================================
-    // ***           SỬA LẠI KIỂU TRẢ VỀ Ở ĐÂY             ***
+    // ***           SỬA LẠI CHỮ KÝ PHƯƠNG THỨC Ở ĐÂY       ***
     // ========================================================
     /**
-     * Phương thức này bây giờ trả về Call<ApiEnvelope<TemplateResult>>
-     * để đồng bộ với ApiService.
+     * Phương thức này bây giờ nhận đầy đủ các tham số để truyền xuống ApiService.
      */
-    public Call<ApiEnvelope<TemplateResult>> getAllTemplateVehicles(int pageNumber, int pageSize, String searchTerm) {
-        // Bây giờ kiểu dữ liệu đã khớp
-        return apiService.getAllTemplateVehicles(pageNumber, pageSize, searchTerm);
+    public Call<ApiEnvelope<TemplateResult>> getAllTemplateVehicles(
+            int pageNumber,
+            int pageSize,
+            String searchTerm,
+            Long minPrice,
+            Long maxPrice,
+            Boolean sortByPriceAsc
+    ) {
+        // Bây giờ, tất cả tham số đều hợp lệ và được truyền xuống lớp service
+        return apiService.getAllTemplateVehicles(
+                pageNumber, pageSize, searchTerm, minPrice, maxPrice, sortByPriceAsc
+        );
     }
 
     public Call<ApiEnvelope<TemplateVehicle>> getVehicleById(String vehicleId) {
