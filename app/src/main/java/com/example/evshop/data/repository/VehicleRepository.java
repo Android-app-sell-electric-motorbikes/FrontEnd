@@ -32,9 +32,9 @@ public class VehicleRepository {
      * Phương thức này bây giờ trả về Call<ApiEnvelope<TemplateResult>>
      * để đồng bộ với ApiService.
      */
-    public Call<ApiEnvelope<TemplateResult>> getAllTemplateVehicles() {
+    public Call<ApiEnvelope<TemplateResult>> getAllTemplateVehicles(int pageNumber, int pageSize, String searchTerm) {
         // Bây giờ kiểu dữ liệu đã khớp
-        return apiService.getAllTemplateVehicles();
+        return apiService.getAllTemplateVehicles(pageNumber, pageSize, searchTerm);
     }
 
     public Call<ApiEnvelope<TemplateVehicle>> getVehicleById(String vehicleId) {

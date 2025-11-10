@@ -1,26 +1,29 @@
-package com.example.evshop.ui.vehicle;import android.content.Intent;
+package com.example.evshop.ui.vehicle;
+
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.lifecycle.ViewModelProvider;
-import com.example.evshop.databinding.ActivityVehicleListBinding; // <-- Chú ý: Tên file binding có thể khác
-import com.example.evshop.ui.adapter.FeaturedVehicleAdapter; // <-- Tái sử dụng Adapter của HomeFragment
+import androidx.recyclerview.widget.GridLayoutManager; // **THÊM IMPORT**
+
+import com.example.evshop.databinding.ActivityVehicleListBinding;
+import com.example.evshop.ui.adapter.VehicleAdapter; // **DÙNG ADAPTER CHUNG**
 
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
 public class TemplateVehicleListActivity extends AppCompatActivity {
 
-    private ActivityVehicleListBinding b; // <-- Thay đổi tên này nếu file layout của bạn có tên khác
+    private ActivityVehicleListBinding b;
     private TemplateVehicleListViewModel vm;
-    private FeaturedVehicleAdapter adapter; // Tái sử dụng adapter cũ
+    private VehicleAdapter adapter; // **SỬA LẠI THÀNH VehicleAdapter**
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Sử dụng ViewBinding
-        b = ActivityVehicleListBinding.inflate(getLayoutInflater()); // <-- Sửa ở đây nếu cần
+        b = ActivityVehicleListBinding.inflate(getLayoutInflater());
         setContentView(b.getRoot());
 
         // Khởi tạo ViewModel
@@ -28,38 +31,51 @@ public class TemplateVehicleListActivity extends AppCompatActivity {
 
         setupToolbar();
         setupRecyclerView();
-        setupSearchView();
+        setupSearchView(); // << SỬA LOGIC TRONG HÀM NÀY
         observeViewModel();
     }
 
     private void setupToolbar() {
-        // Gán sự kiện cho nút quay về
         b.toolbar.setNavigationOnClickListener(v -> finish());
     }
 
     private void setupRecyclerView() {
-        // Tái sử dụng adapter từ HomeFragment vì item layout giống nhau
-        adapter = new FeaturedVehicleAdapter(template -> {
-            // Xử lý khi click vào một xe, mở màn hình chi tiết
+        // Sử dụng adapter chung, có thể tái sử dụng từ HomeFragment nếu cấu trúc item giống hệt
+        adapter = new VehicleAdapter(template -> {
             Intent intent = new Intent(this, VehicleDetailActivity.class);
             intent.putExtra("VEHICLE_ID", template.getId());
             startActivity(intent);
         });
-        b.rvAllVehicles.setAdapter(adapter); // <-- Đảm bảo ID trong XML là rvAllVehicles
+        // Thiết lập layout manager để hiển thị dạng lưới
+        b.rvAllVehicles.setLayoutManager(new GridLayoutManager(this, 2));
+        b.rvAllVehicles.setAdapter(adapter);
     }
 
+    // ========================================================
+    // ***           SỬA LẠI LOGIC TÌM KIẾM Ở ĐÂY          ***
+    // ========================================================
     private void setupSearchView() {
         b.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            /**
+             * Được gọi khi người dùng nhấn nút tìm kiếm trên bàn phím.
+             * Đây là thời điểm tốt nhất để gọi API.
+             */
             @Override
             public boolean onQueryTextSubmit(String query) {
-                // Thường không cần xử lý ở đây vì onQueryTextChange đã đủ
-                return false;
+                vm.searchVehicles(query);
+                b.searchView.clearFocus(); // Ẩn bàn phím đi cho gọn
+                return true; // Báo cho hệ thống là đã xử lý sự kiện
             }
 
+            /**
+             * Được gọi mỗi khi text thay đổi. Không nên gọi API ở đây để tránh quá tải.
+             */
             @Override
             public boolean onQueryTextChange(String newText) {
-                // Mỗi khi người dùng gõ chữ, gọi ViewModel để lọc
-                vm.searchVehicles(newText);
+                // Nếu người dùng xóa hết chữ trong ô tìm kiếm, tự động tải lại danh sách đầy đủ
+                if (newText.isEmpty()) {
+                    vm.searchVehicles(null);
+                }
                 return true;
             }
         });
@@ -77,7 +93,7 @@ public class TemplateVehicleListActivity extends AppCompatActivity {
         vm.getLoading().observe(this, isLoading -> {
             if (isLoading != null) {
                 b.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-                // Ẩn RecyclerView khi đang tải để ProgressBar không bị che
+                // Ẩn RecyclerView khi đang tải để người dùng thấy ProgressBar
                 b.rvAllVehicles.setVisibility(isLoading ? View.GONE : View.VISIBLE);
             }
         });

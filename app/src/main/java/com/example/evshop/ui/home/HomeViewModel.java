@@ -44,7 +44,7 @@ public class HomeViewModel extends ViewModel {
 
         // BƯỚC 2: SỬA KIỂU DỮ LIỆU CỦA CALL VÀ CALLBACK
         // Kiểu dữ liệu bây giờ là ApiEnvelope<TemplateResult>
-        vehicleRepository.getAllTemplateVehicles().enqueue(new Callback<ApiEnvelope<TemplateResult>>() {
+        vehicleRepository.getAllTemplateVehicles(1,10,null).enqueue(new Callback<ApiEnvelope<TemplateResult>>() {
             @Override
             public void onResponse(@NonNull Call<ApiEnvelope<TemplateResult>> call, @NonNull Response<ApiEnvelope<TemplateResult>> response) {
                 if (response.isSuccessful() && response.body() != null) {

@@ -30,6 +30,7 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 // *** THÊM IMPORT MỚI ***
+import retrofit2.http.Query;
 import retrofit2.http.Url;
 
 
@@ -41,8 +42,11 @@ public interface ApiService {
 
         //---Vehicle----
         @GET("api/EVTemplate/Get-all-template-vehicles")
-        Call<ApiEnvelope<TemplateResult>> getAllTemplateVehicles(); // <-- SỬA KIỂU TRẢ VỀ Ở ĐÂY
-
+        Call<ApiEnvelope<TemplateResult>> getAllTemplateVehicles(
+                @Query("pageNumber") int pageNumber,
+                @Query("pageSize") int pageSize,
+                @Query("search") String searchTerm // << THÊM THAM SỐ NÀY
+        );
         @GET("api/EVTemplate/get-template-by-id/{id}")
         Call<ApiEnvelope<TemplateVehicle>> getVehicleById(@Path("id") String vehicleId);
 
