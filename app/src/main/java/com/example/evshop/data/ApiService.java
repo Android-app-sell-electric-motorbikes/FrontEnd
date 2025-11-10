@@ -45,7 +45,10 @@ public interface ApiService {
         Call<ApiEnvelope<TemplateResult>> getAllTemplateVehicles(
                 @Query("pageNumber") int pageNumber,
                 @Query("pageSize") int pageSize,
-                @Query("search") String searchTerm // << THÊM THAM SỐ NÀY
+                @Query("search") String searchTerm,
+                @Query("minPrice") Long minPrice,                  // << THÊM MỚI
+                @Query("maxPrice") Long maxPrice,                  // << THÊM MỚI
+                @Query("sortByPriceAsc") Boolean sortByPriceAsc    // << THÊM MỚI
         );
         @GET("api/EVTemplate/get-template-by-id/{id}")
         Call<ApiEnvelope<TemplateVehicle>> getVehicleById(@Path("id") String vehicleId);

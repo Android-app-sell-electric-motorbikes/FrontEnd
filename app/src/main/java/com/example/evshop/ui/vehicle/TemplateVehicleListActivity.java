@@ -1,24 +1,39 @@
+// File: D:/PRM391/FrontEnd/app/src/main/java/com/example/evshop/ui/vehicle/TemplateVehicleListActivity.java
 package com.example.evshop.ui.vehicle;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.GridLayoutManager; // **THÊM IMPORT**
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.evshop.R;
 import com.example.evshop.databinding.ActivityVehicleListBinding;
-import com.example.evshop.ui.adapter.VehicleAdapter; // **DÙNG ADAPTER CHUNG**
+// *** BƯỚC 1: SỬA LẠI IMPORT ĐỂ DÙNG ĐÚNG ADAPTER ***
+import com.example.evshop.domain.models.TemplateVehicle;
 
 import dagger.hilt.android.AndroidEntryPoint;
 
+// *** BƯỚC 2: IMPLEMENT INTERFACE MỚI CỦA ADAPTER ***
 @AndroidEntryPoint
-public class TemplateVehicleListActivity extends AppCompatActivity {
+public class TemplateVehicleListActivity extends AppCompatActivity
+        implements FilterSortSheet.FilterListener, TemplateVehicleAdapter.OnItemClickListener {
 
     private ActivityVehicleListBinding b;
     private TemplateVehicleListViewModel vm;
-    private VehicleAdapter adapter; // **SỬA LẠI THÀNH VehicleAdapter**
+    // Sửa lại tên lớp Adapter
+    private TemplateVehicleAdapter adapter;
+
+    // Biến để lưu trạng thái lọc hiện tại (không đổi)
+    private String currentSearchTerm = null;
+    private Long currentMinPrice = null;
+    private Long currentMaxPrice = null;
+    private Boolean currentSortByPriceAsc = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,76 +41,116 @@ public class TemplateVehicleListActivity extends AppCompatActivity {
         b = ActivityVehicleListBinding.inflate(getLayoutInflater());
         setContentView(b.getRoot());
 
-        // Khởi tạo ViewModel
         vm = new ViewModelProvider(this).get(TemplateVehicleListViewModel.class);
 
         setupToolbar();
         setupRecyclerView();
-        setupSearchView(); // << SỬA LOGIC TRONG HÀM NÀY
+        setupSearchView();
         observeViewModel();
+
+        // Gọi fetch lần đầu tiên khi Activity được tạo
+        vm.fetchVehicles(currentSearchTerm, currentMinPrice, currentMaxPrice, currentSortByPriceAsc);
     }
 
+    // setupToolbar() và setupSearchView() không thay đổi
     private void setupToolbar() {
         b.toolbar.setNavigationOnClickListener(v -> finish());
+        b.toolbar.inflateMenu(R.menu.menu_vehicle_list);
+        b.toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_filter) {
+                FilterSortSheet bottomSheet = FilterSortSheet.newInstance();
+                bottomSheet.setFilterListener(this);
+                bottomSheet.show(getSupportFragmentManager(), "FilterSortSheet");
+                return true;
+            }
+            return false;
+        });
     }
 
+    // *** BƯỚC 3: SỬA LẠI CÁCH KHỞI TẠO ADAPTER ***
     private void setupRecyclerView() {
-        // Sử dụng adapter chung, có thể tái sử dụng từ HomeFragment nếu cấu trúc item giống hệt
-        adapter = new VehicleAdapter(template -> {
-            Intent intent = new Intent(this, VehicleDetailActivity.class);
-            intent.putExtra("VEHICLE_ID", template.getId());
-            startActivity(intent);
-        });
-        // Thiết lập layout manager để hiển thị dạng lưới
+        // Khởi tạo adapter và truyền "this" (chính Activity này) làm listener
+        adapter = new TemplateVehicleAdapter(this);
         b.rvAllVehicles.setLayoutManager(new GridLayoutManager(this, 2));
         b.rvAllVehicles.setAdapter(adapter);
     }
 
-    // ========================================================
-    // ***           SỬA LẠI LOGIC TÌM KIẾM Ở ĐÂY          ***
-    // ========================================================
     private void setupSearchView() {
         b.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            /**
-             * Được gọi khi người dùng nhấn nút tìm kiếm trên bàn phím.
-             * Đây là thời điểm tốt nhất để gọi API.
-             */
             @Override
             public boolean onQueryTextSubmit(String query) {
-                vm.searchVehicles(query);
-                b.searchView.clearFocus(); // Ẩn bàn phím đi cho gọn
-                return true; // Báo cho hệ thống là đã xử lý sự kiện
+                currentSearchTerm = query;
+                vm.fetchVehicles(currentSearchTerm, currentMinPrice, currentMaxPrice, currentSortByPriceAsc);
+                b.searchView.clearFocus();
+                return true;
             }
 
-            /**
-             * Được gọi mỗi khi text thay đổi. Không nên gọi API ở đây để tránh quá tải.
-             */
             @Override
             public boolean onQueryTextChange(String newText) {
-                // Nếu người dùng xóa hết chữ trong ô tìm kiếm, tự động tải lại danh sách đầy đủ
-                if (newText.isEmpty()) {
-                    vm.searchVehicles(null);
+                if (newText.isEmpty() && currentSearchTerm != null) {
+                    currentSearchTerm = null;
+                    vm.fetchVehicles(currentSearchTerm, currentMinPrice, currentMaxPrice, currentSortByPriceAsc);
                 }
                 return true;
             }
         });
     }
 
+    // *** BƯỚC 4: SỬA LẠI CÁCH CẬP NHẬT DỮ LIỆU CHO ADAPTER ***
     private void observeViewModel() {
-        // Lắng nghe danh sách xe từ ViewModel
         vm.getVehicles().observe(this, vehicles -> {
             if (vehicles != null) {
-                adapter.submitList(vehicles);
+                // Sử dụng phương thức updateVehicles của adapter mới
+                adapter.updateVehicles(vehicles);
+
+                // Cuộn lên đầu danh sách
+                if (!vehicles.isEmpty()) {
+                    b.rvAllVehicles.scrollToPosition(0);
+                }
+
+                // Cập nhật giao diện cho trường hợp danh sách rỗng (không đổi)
+                boolean isListEmpty = vehicles.isEmpty();
+                b.tvEmptyMessage.setVisibility(isListEmpty ? View.VISIBLE : View.GONE);
+                b.rvAllVehicles.setVisibility(isListEmpty ? View.GONE : View.VISIBLE);
             }
         });
 
-        // Lắng nghe trạng thái loading để hiện/ẩn ProgressBar
+        // Phần lắng nghe getLoading() và getError() không thay đổi
         vm.getLoading().observe(this, isLoading -> {
             if (isLoading != null) {
                 b.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-                // Ẩn RecyclerView khi đang tải để người dùng thấy ProgressBar
-                b.rvAllVehicles.setVisibility(isLoading ? View.GONE : View.VISIBLE);
+                if (isLoading) {
+                    b.rvAllVehicles.setVisibility(View.GONE);
+                    b.tvEmptyMessage.setVisibility(View.GONE);
+                }
             }
         });
+
+        vm.getError().observe(this, error -> {
+            if (error != null && !error.isEmpty()) {
+                Toast.makeText(this, error, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    // Phương thức nhận kết quả từ BottomSheet (không đổi)
+    @Override
+    public void onFilterApplied(Long minPrice, Long maxPrice, Boolean sortByPriceAsc) {
+        this.currentMinPrice = minPrice;
+        this.currentMaxPrice = maxPrice;
+        this.currentSortByPriceAsc = sortByPriceAsc;
+        vm.fetchVehicles(currentSearchTerm, currentMinPrice, currentMaxPrice, currentSortByPriceAsc);
+        Toast.makeText(this, "Đã áp dụng bộ lọc!", Toast.LENGTH_SHORT).show();
+    }
+
+    // *** BƯỚC 5: IMPLEMENT PHƯƠNG THỨC CỦA OnItemClickListener ***
+    @Override
+    public void onItemClick(TemplateVehicle vehicle) {
+        // Đây là nơi xử lý sự kiện khi một item trong RecyclerView được click
+        Intent intent = new Intent(this, VehicleDetailActivity.class);
+        // Truyền ID hoặc toàn bộ object vehicle sang màn hình chi tiết
+        // Truyền ID sẽ an toàn hơn và giúp màn hình chi tiết luôn lấy dữ liệu mới nhất
+        intent.putExtra("VEHICLE_ID", vehicle.getId());
+        startActivity(intent);
     }
 }
