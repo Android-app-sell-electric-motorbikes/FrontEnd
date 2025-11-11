@@ -54,16 +54,16 @@ public class InventoryAdapter extends RecyclerView.Adapter<InventoryAdapter.Inve
         InventoryItem currentItem = inventoryList.get(position);
 
         // Gán dữ liệu vào các TextView
-        holder.modelName.setText(currentItem.modelName);
-        holder.versionName.setText(currentItem.versionName);
-        holder.colorName.setText("Màu: " + currentItem.colorName); // Thêm chữ "Màu: " cho rõ
-        holder.quantity.setText(String.valueOf(currentItem.quantity));
+        holder.modelName.setText(currentItem.getModelName());
+        holder.versionName.setText(currentItem.getVersionName());
+        holder.colorName.setText("Màu: " + currentItem.getColorName()); // Thêm chữ "Màu: " cho rõ
+        holder.quantity.setText(String.valueOf(currentItem.getQuantity()));
 
         // Bỏ phần xử lý giá tiền
 
         // Xử lý logic để hiển thị tên các kho hàng (giữ nguyên)
-        if (currentItem.vehicles != null && !currentItem.vehicles.isEmpty()) {
-            String warehouses = currentItem.vehicles.stream()
+        if (currentItem.getVehicles() != null && !currentItem.getVehicles().isEmpty()) {
+            String warehouses = currentItem.getVehicles().stream()
                     .map(vehicle -> vehicle.warehouseName)
                     .distinct()
                     .map(name -> "- " + name)

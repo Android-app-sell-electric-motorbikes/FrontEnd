@@ -2,84 +2,45 @@ package com.example.evshop.data;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 
-import com.auth0.android.jwt.Claim;
-import com.auth0.android.jwt.JWT;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
-import dagger.hilt.android.qualifiers.ApplicationContext;
-
-@Singleton
 public class TokenManager {
-    private final SharedPreferences prefs;
     private static final String PREFS_NAME = "auth_prefs";
+    private static final String KEY_ACCESS_TOKEN = "access_token";
+    private static final String KEY_REFRESH_TOKEN = "refresh_token";
+    private static final String KEY_USER_ROLE = "user_role"; // ** DÒNG MỚI **
 
-    @Inject
-    public TokenManager(@ApplicationContext Context context) {
-        prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+    private final SharedPreferences sharedPreferences;
+
+    public TokenManager(Context context) {
+        sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
     }
 
-    public void saveAccessToken(String t) {
-        prefs.edit().putString("access_token", t).apply();
+    public void saveAccessToken(String token) {
+        sharedPreferences.edit().putString(KEY_ACCESS_TOKEN, token).apply();
     }
 
     public String getAccessToken() {
-        return prefs.getString("access_token", null);
+        return sharedPreferences.getString(KEY_ACCESS_TOKEN, null);
     }
 
-    public void clear() {
-        prefs.edit().clear().apply();
+    public void saveRefreshToken(String token) {
+        sharedPreferences.edit().putString(KEY_REFRESH_TOKEN, token).apply();
     }
 
-    // --- JWT thật ---
-    private JWT getDecodedJwt() {
-        String token = getAccessToken();
-        if (token == null || token.isEmpty()) return null;
-        try {
-            return new JWT(token);
-        } catch (Exception e) {
-            Log.e("TokenManager", "Failed to decode JWT", e);
-            return null;
-        }
+    public String getRefreshToken() {
+        return sharedPreferences.getString(KEY_REFRESH_TOKEN, null);
     }
 
-    public String getUserId() {
-        JWT jwt = getDecodedJwt();
-        if (jwt != null) {
-            Claim idClaim = jwt.getClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
-            return idClaim.asString();
-        }
-        // Demo fallback
-        return prefs.getString("demo_user_id", null);
-    }
-
-    public String getUsername() {
-        JWT jwt = getDecodedJwt();
-        if (jwt != null) {
-            Claim nameClaim = jwt.getClaim("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name");
-            return nameClaim.asString();
-        }
-        return prefs.getString("demo_username", null);
+    // ** CÁC PHƯƠNG THỨC MỚI ĐỂ LƯU VÀ LẤY VAI TRÒ **
+    public void saveUserRole(String role) {
+        sharedPreferences.edit().putString(KEY_USER_ROLE, role).apply();
     }
 
     public String getUserRole() {
-        JWT jwt = getDecodedJwt();
-        if (jwt != null) {
-            Claim roleClaim = jwt.getClaim("http://schemas.microsoft.com/ws/2008/06/identity/claims/role");
-            return roleClaim.asString();
-        }
-        return prefs.getString("demo_role", null);
+        return sharedPreferences.getString(KEY_USER_ROLE, null);
     }
 
-    // --- Chế độ demo ---
-    public void setDemoUser(String userId, String username, String role) {
-        prefs.edit()
-                .putString("demo_user_id", userId)
-                .putString("demo_username", username)
-                .putString("demo_role", role)
-                .apply();
+    public void clear() {
+        sharedPreferences.edit().clear().apply();
     }
 }

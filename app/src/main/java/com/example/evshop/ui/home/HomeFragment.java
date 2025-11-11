@@ -20,14 +20,12 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.evshop.R;
-// SỬA: Thêm các import cần thiết
-import com.example.evshop.data.TokenManager;
 import com.example.evshop.databinding.FragmentHomeBinding;
 import com.example.evshop.databinding.ItemBannerBinding;
 import com.example.evshop.domain.models.UserData;
 import com.example.evshop.ui.adapter.VehicleAdapter;
 import com.example.evshop.ui.auth.AuthViewModel;
-import com.example.evshop.ui.chat.ChatListActivity; // Thêm import này
+import com.example.evshop.ui.cart.CartActivity; // **THÊM IMPORT**
 import com.example.evshop.ui.map.VietMapMapViewActivity;
 import com.example.evshop.ui.vehicle.TemplateVehicleListActivity;
 import com.example.evshop.ui.vehicle.VehicleDetailActivity;
@@ -45,9 +43,6 @@ public class HomeFragment extends Fragment {
     private NavController navController;
     private HomeViewModel homeViewModel;
     private VehicleAdapter vehicleAdapter;
-
-    // SỬA: Khai báo TokenManager
-    private TokenManager tokenManager;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -70,32 +65,27 @@ public class HomeFragment extends Fragment {
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         authViewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
 
-        // SỬA: Khởi tạo TokenManager
-        tokenManager = new TokenManager(requireContext());
-
         setupBanner();
         setupRecyclerView();
         setupClickListeners();
-        observeLoginState();
+        observeAuthState();
         observeHomeViewModel();
 
         homeViewModel.refresh();
     }
 
-    private void observeLoginState() {
-        authViewModel.getIsLoggedInState().observe(getViewLifecycleOwner(), isLoggedIn -> {
+    private void observeAuthState() {
+        authViewModel.getCurrentUser().observe(getViewLifecycleOwner(), user -> {
             if (b == null) return;
-            boolean loggedIn = isLoggedIn != null && isLoggedIn;
+            
+            boolean isLoggedIn = (user != null);
 
-            b.panelAuth.setVisibility(loggedIn ? View.GONE : View.VISIBLE);
-            b.tvWelcome.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
-            b.btnLogout.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
+            b.panelAuth.setVisibility(isLoggedIn ? View.GONE : View.VISIBLE);
+            b.tvWelcome.setVisibility(isLoggedIn ? View.VISIBLE : View.GONE);
+            b.btnLogout.setVisibility(isLoggedIn ? View.VISIBLE : View.GONE);
 
-            if (loggedIn) {
-                UserData user = authViewModel.getCurrentUser().getValue();
-                if (user != null) {
-                    b.tvWelcome.setText("Chào, " + user.fullName + "!");
-                }
+            if (isLoggedIn && user.username != null) {
+                b.tvWelcome.setText("Chào, " + user.username + "!");
             }
         });
     }
@@ -164,27 +154,16 @@ public class HomeFragment extends Fragment {
             Intent intent = new Intent(getContext(), VietMapMapViewActivity.class);
             startActivity(intent);
         });
-
-        // ========================================================
-        // SỬA: THÊM LOGIC XỬ LÝ SỰ KIỆN CHO NÚT CHAT (FAB)
-        // ========================================================
-        b.fabChat.setOnClickListener(v -> {
-            // Kiểm tra xem người dùng đã đăng nhập chưa bằng cách lấy access token
-            if (tokenManager.getAccessToken() != null && !tokenManager.getAccessToken().isEmpty()) {
-                // Nếu đã đăng nhập, mở màn hình danh sách chat
-                Intent intent = new Intent(getActivity(), ChatListActivity.class);
-                startActivity(intent);
-            } else {
-                // Nếu chưa đăng nhập, hiển thị thông báo yêu cầu
-                Toast.makeText(getActivity(), "Vui lòng đăng nhập để sử dụng tính năng này.", Toast.LENGTH_SHORT).show();
-            }
-        });
-        // ========================================================
     }
 
+    // ** SỬA LẠI: XỬ LÝ CLICK GIỎ HÀNG VÀ TÀI KHOẢN **
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_account_menu) {
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_open_cart) {
+            startActivity(new Intent(getActivity(), CartActivity.class));
+            return true;
+        } else if (itemId == R.id.action_account_menu) {
             View menuItemView = requireActivity().findViewById(R.id.action_account_menu);
             if (menuItemView != null) {
                 showUserPopupMenu(menuItemView);
@@ -222,7 +201,7 @@ public class HomeFragment extends Fragment {
             return;
         }
         StringBuilder messageBuilder = new StringBuilder();
-        messageBuilder.append("Tên: ").append(currentUser.fullName).append("\n\n");
+        messageBuilder.append("Tên đăng nhập: ").append(currentUser.username).append("\n\n");
         messageBuilder.append("Email: ").append(currentUser.email).append("\n\n");
         String roleString = "N/A";
         if (currentUser.role != null && !currentUser.role.isEmpty()) {

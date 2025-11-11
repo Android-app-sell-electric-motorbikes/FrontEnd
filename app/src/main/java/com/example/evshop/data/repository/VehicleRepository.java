@@ -2,13 +2,11 @@ package com.example.evshop.data.repository;
 
 import com.example.evshop.data.ApiService;
 import com.example.evshop.domain.models.ApiEnvelope;
+import com.example.evshop.domain.models.TemplateResult;
 import com.example.evshop.domain.models.TemplateVehicle;
 import com.example.evshop.domain.models.VersionDetails;
 
-import java.util.List;
-
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import retrofit2.Call;
@@ -19,12 +17,14 @@ public class VehicleRepository {
     private final ApiService apiService;
 
     @Inject
-    public VehicleRepository(@Named("AuthApiService") ApiService apiService) {
+    public VehicleRepository(ApiService apiService) {
         this.apiService = apiService;
     }
 
-    public Call<ApiEnvelope<List<TemplateVehicle>>> getAllTemplateVehicles() {
-        return apiService.getAllTemplateVehicles();
+    // ** SỬA LẠI: SỬ DỤNG TemplateResult VÀ THÊM CÁC THAM SỐ LỌC **
+    public Call<ApiEnvelope<TemplateResult>> getAllTemplateVehicles(
+            int page, int pageSize, String search, Long minPrice, Long maxPrice, Boolean sortByPriceAsc) {
+        return apiService.getAllTemplateVehicles(page, pageSize, search, minPrice, maxPrice, sortByPriceAsc);
     }
 
     public Call<ApiEnvelope<TemplateVehicle>> getVehicleById(String vehicleId) {

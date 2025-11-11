@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context=".ui.vehicle.TemplateVehicleListActivity">
 
-    <!-- 1. Thêm Toolbar để có tiêu đề và nút quay về -->
+    <!-- 1. Toolbar để có tiêu đề và nút quay về -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
@@ -18,7 +18,7 @@
         app:title="Tất cả sản phẩm"
         app:navigationIcon="@drawable/ic_arrow_back" />
 
-    <!-- 2. Thêm SearchView để tìm kiếm -->
+    <!-- 2. SearchView để tìm kiếm -->
     <androidx.appcompat.widget.SearchView
         android:id="@+id/searchView"
         android:layout_width="0dp"
@@ -31,7 +31,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- 3. Sửa lại ID và các ràng buộc của RecyclerView -->
+    <!-- 3. RecyclerView để hiển thị danh sách -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvAllVehicles"
         android:layout_width="0dp"
@@ -44,16 +44,33 @@
         app:layout_constraintEnd_toEndOf="parent"
         tools:listitem="@layout/item_vehicle" />
 
-    <!-- ProgressBar giữ nguyên, nằm ở giữa màn hình -->
+    <!-- ProgressBar hiển thị khi đang tải -->
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
         tools:visibility="visible"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/searchView"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- ======================================================== -->
+    <!-- ***           THÊM TEXTVIEW NÀY VÀO ĐÂY            *** -->
+    <!-- ======================================================== -->
+    <TextView
+        android:id="@+id/tvEmptyMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Không tìm thấy sản phẩm nào"
+        android:textSize="16sp"
+        android:textColor="?android:attr/textColorSecondary"
+        android:visibility="gone"
+        tools:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/searchView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

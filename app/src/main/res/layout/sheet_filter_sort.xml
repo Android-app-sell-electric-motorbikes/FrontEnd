@@ -1,165 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:padding="16dp"
-    android:background="?attr/colorSurface">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+
+    <TextView style="@style/TextAppearance.Material3.TitleLarge"
+        android:text="@string/sheet_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+
+    <TextView android:text="@string/sheet_sort"
+        android:layout_marginTop="12dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+
+    <RadioGroup android:id="@+id/rgSort"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <RadioButton android:id="@+id/rbPopular" android:text="@string/label_popular" android:layout_height="25dp" android:layout_width="150dp"/>
+        <RadioButton android:id="@+id/rbPriceAsc" android:text="@string/label_price_asc" android:layout_height="25dp" android:layout_width="150dp"/>
+
+        <RadioButton
+            android:id="@+id/rbPriceDesc"
+            android:layout_width="150dp"
+            android:layout_height="25dp"
+            android:text="@string/label_price_desc" />
+        <RadioButton android:id="@+id/rbRating" android:text="@string/label_rating" android:layout_height="25dp" android:layout_width="150dp"/>
+    </RadioGroup>
+
+
+    <TextView android:text="@string/sheet_filter"
+        android:layout_marginTop="8dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+
+    <TextView android:text="@string/filter_brand" android:layout_height="30dp" android:layout_width="40dp"/>
+    <LinearLayout android:id="@+id/brandContainer"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+
+    <TextView android:text="@string/filter_price" android:layout_height="30dp" android:layout_width="80dp"/>
+    <SeekBar android:id="@+id/seekPrice" android:max="200" android:layout_height="30dp" android:layout_width="80dp"/>
+    <TextView android:id="@+id/txtPriceValue" android:layout_height="30dp" android:layout_width="80dp"/>
+
+
+    <TextView android:text="@string/filter_rating" android:layout_height="30dp" android:layout_width="80dp"/>
+    <SeekBar android:id="@+id/seekRating" android:max="50" android:layout_height="30dp" android:layout_width="80dp"/>
+    <TextView android:id="@+id/txtRatingMin" android:layout_height="30dp" android:layout_width="80dp"/>
+
 
     <LinearLayout
-        android:orientation="vertical"
+        style="?android:attr/buttonBarStyle"
+        android:orientation="horizontal"
+        android:gravity="end"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- Tiêu đề -->
-        <TextView
-            android:text="@string/sheet_title"
-            android:textAppearance="@style/TextAppearance.Material3.HeadlineSmall"
-            android:textColor="?attr/colorPrimary"
-            android:layout_marginBottom="12dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/btnApply"
+            style="?android:attr/buttonBarButtonStyle"
+            android:text="@string/apply"
+            android:layout_height="60dp"
+            android:layout_width="100dp" />
 
-        <!-- Phần sắp xếp -->
-        <TextView
-            android:text="@string/sheet_sort"
-            android:textStyle="bold"
-            android:textColor="?attr/colorOnSurface"
-            android:layout_marginBottom="6dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <RadioGroup
-            android:id="@+id/rgSort"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="?attr/colorSurfaceVariant"
-            android:padding="12dp"
-            android:clipToOutline="true"
-            android:layout_marginBottom="16dp">
-
-            <RadioButton
-                android:id="@+id/rbPopular"
-                android:text="@string/label_popular"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <RadioButton
-                android:id="@+id/rbPriceAsc"
-                android:text="@string/label_price_asc"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <RadioButton
-                android:id="@+id/rbPriceDesc"
-                android:text="@string/label_price_desc"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <RadioButton
-                android:id="@+id/rbRating"
-                android:text="@string/label_rating"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </RadioGroup>
-
-        <!-- Phần lọc -->
-        <TextView
-            android:text="@string/sheet_filter"
-            android:textStyle="bold"
-            android:textColor="?attr/colorOnSurface"
-            android:layout_marginBottom="8dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <!-- Lọc theo thương hiệu -->
-        <TextView
-            android:text="@string/filter_brand"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:layout_marginBottom="4dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <LinearLayout
-            android:id="@+id/brandContainer"
-            android:orientation="vertical"
-            android:background="?attr/colorSurfaceVariant"
-            android:padding="12dp"
-            android:layout_marginBottom="16dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <!-- Lọc theo giá -->
-        <TextView
-            android:text="@string/filter_price"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:layout_marginBottom="4dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <SeekBar
-            android:id="@+id/seekPrice"
-            android:max="200"
-            android:progressTint="?attr/colorPrimary"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:id="@+id/txtPriceValue"
-            android:textColor="?attr/colorPrimary"
-            android:textStyle="bold"
-            android:gravity="end"
-            android:layout_marginBottom="16dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <!-- Lọc theo đánh giá -->
-        <TextView
-            android:text="@string/filter_rating"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:layout_marginBottom="4dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <SeekBar
-            android:id="@+id/seekRating"
-            android:max="50"
-            android:progressTint="?attr/colorPrimary"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:id="@+id/txtRatingMin"
-            android:textColor="?attr/colorPrimary"
-            android:textStyle="bold"
-            android:gravity="end"
-            android:layout_marginBottom="24dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <!-- Nút hành động -->
-        <LinearLayout
-            android:orientation="horizontal"
-            android:gravity="end"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnCancel"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:text="@string/cancel"
-                android:layout_marginEnd="8dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnApply"
-                style="@style/Widget.MaterialComponents.Button"
-                android:text="@string/apply"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
-
+        <Button
+            android:id="@+id/btnCancel"
+            style="?android:attr/buttonBarButtonStyle"
+            android:text="@string/cancel" android:layout_height="60dp" android:layout_width="80dp"/>
     </LinearLayout>
-</ScrollView>
+</LinearLayout>

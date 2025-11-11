@@ -30,9 +30,14 @@
     <string name="product_picture">Ảnh sản phẩm</string>
     <string name="star_vote">Sao đánh giá</string>
     <string name="banner">Banner</string>
-    <string name="notify_login_or_register">Đăng nhập hoặc Đăng ký để mua nhanh hơn</string>
+    
+    <!-- User Actions -->
+    <string name="cart">Giỏ hàng</string>
+    <string name="account">Tài khoản</string>
     <string name="login">Đăng nhập</string>
     <string name="register">Đăng ký</string>
+    <string name="notify_login_or_register">Đăng nhập hoặc Đăng ký để mua nhanh hơn</string>
+    
     <string name="welcome">Xin chào, Quý Khách</string>
     <string name="view_map">Bản đồ</string>
     <string name="tts_guide">tts_guide\n</string>

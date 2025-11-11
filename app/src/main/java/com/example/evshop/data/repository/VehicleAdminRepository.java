@@ -2,17 +2,16 @@ package com.example.evshop.data.repository;
 
 import com.example.evshop.data.ApiService;
 import com.example.evshop.data.network.requests.CreateTemplateVehicleRequest;
-// *** SỬA LẠI: Import đúng các lớp Request và Response đang được sử dụng ***
 import com.example.evshop.data.network.requests.GetUploadUrlRequest;
 import com.example.evshop.data.network.response.UploadUrlResponse;
 import com.example.evshop.domain.models.ApiEnvelope;
 import com.example.evshop.domain.models.Color;
+import com.example.evshop.domain.models.InventoryResult; // **THÊM IMPORT**
 import com.example.evshop.domain.models.Version;
 
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 import okhttp3.RequestBody;
@@ -22,53 +21,35 @@ import retrofit2.Call;
 @Singleton
 public class VehicleAdminRepository {
 
-    private final ApiService authApiService;
-    private final ApiService publicApiService;
+    private final ApiService apiService;
 
     @Inject
-    public VehicleAdminRepository(
-            @Named("AuthApiService") ApiService authApiService,
-            @Named("PublicApiService") ApiService publicApiService
-    ) {
-        this.authApiService = authApiService;
-        this.publicApiService = publicApiService;
+    public VehicleAdminRepository(ApiService apiService) {
+        this.apiService = apiService;
     }
 
-    // Các hàm getVersions, getColors đã đúng (giữ nguyên)
+    // ** SỬA LẠI KIỂU DỮ LIỆU TRẢ VỀ **
+    public Call<ApiEnvelope<InventoryResult>> getInventory() {
+        return apiService.getInventory();
+    }
+
     public Call<ApiEnvelope<List<Version>>> getVersions() {
-        return authApiService.getVersions();
+        return apiService.getVersions();
     }
 
     public Call<ApiEnvelope<List<Color>>> getColors() {
-        return authApiService.getColors();
+        return apiService.getColors();
     }
 
-
-    // =================================================================
-    // ***        QUY TRÌNH UPLOAD 3 BƯỚC - ĐÃ ĐỒNG BỘ               ***
-    // =================================================================
-
-    /**
-     * BƯỚC 1: Lấy URL. Hàm này bây giờ sẽ khớp với ApiService và ViewModel.
-     */
     public Call<UploadUrlResponse> getUploadUrl(GetUploadUrlRequest request) {
-        // Gọi bằng authApiService
-        return authApiService.getUploadUrl(request);
+        return apiService.getUploadUrl(request);
     }
 
-    /**
-     * BƯỚC 2: Upload lên S3. Hàm này đã đúng (giữ nguyên).
-     */
     public Call<ResponseBody> uploadImageToS3(String uploadUrl, RequestBody imageBody) {
-        // Gọi bằng publicApiService để không dính token
-        return publicApiService.uploadImageToS3(uploadUrl, imageBody);
+        return apiService.uploadImageToS3(uploadUrl, imageBody);
     }
 
-    /**
-     * BƯỚC 3: Tạo template. Hàm này đã đúng (giữ nguyên).
-     */
     public Call<ApiEnvelope<Boolean>> createTemplateVehicle(CreateTemplateVehicleRequest request) {
-        // Gọi bằng authApiService
-        return authApiService.createTemplateVehicle(request);
+        return apiService.createTemplateVehicle(request);
     }
 }

@@ -3,7 +3,7 @@ package com.example.evshop.data;
 
 import android.content.Context;
 
-import com.example.evshop.data.api.ChatApi;
+import com.example.evshop.data.auth.AuthInterceptor;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
@@ -45,24 +45,6 @@ public class RetrofitClient {
         }
         return api;
     }
-    public static ChatApi getChatApi(Context ctx) {
-        if (retrofit == null) {
-            TokenManager tm = new TokenManager(ctx.getApplicationContext());
-            HttpLoggingInterceptor log = new HttpLoggingInterceptor();
-            log.setLevel(HttpLoggingInterceptor.Level.BODY);
-
-            OkHttpClient client = getUnsafeOkHttpClient(tm, log);
-            Gson gson = new GsonBuilder().setLenient().create();
-
-            retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
-                    .client(client)
-                    .addConverterFactory(GsonConverterFactory.create(gson))
-                    .build();
-        }
-        return retrofit.create(ChatApi.class);
-    }
-
 
     // PHƯƠNG THỨC NÀY TẠO RA MỘT CLIENT BỎ QUA VIỆC XÁC THỰC SSL
     private static OkHttpClient getUnsafeOkHttpClient(TokenManager tm, HttpLoggingInterceptor log) {
