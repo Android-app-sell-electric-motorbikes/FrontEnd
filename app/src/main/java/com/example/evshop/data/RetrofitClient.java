@@ -3,15 +3,13 @@ package com.example.evshop.data;
 
 import android.content.Context;
 
-import com.example.evshop.data.network.ChatApiService;
+import com.example.evshop.data.api.ChatApi;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.security.cert.CertificateException;
 
-import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -47,7 +45,7 @@ public class RetrofitClient {
         }
         return api;
     }
-    public static ChatApiService getChatApi(Context ctx) {
+    public static ChatApi getChatApi(Context ctx) {
         if (retrofit == null) {
             TokenManager tm = new TokenManager(ctx.getApplicationContext());
             HttpLoggingInterceptor log = new HttpLoggingInterceptor();
@@ -62,7 +60,7 @@ public class RetrofitClient {
                     .addConverterFactory(GsonConverterFactory.create(gson))
                     .build();
         }
-        return retrofit.create(ChatApiService.class);
+        return retrofit.create(ChatApi.class);
     }
 
 

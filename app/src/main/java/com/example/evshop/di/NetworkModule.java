@@ -1,11 +1,9 @@
 package com.example.evshop.di;
 
 import com.example.evshop.data.ApiService;
+import com.example.evshop.data.api.ChatApi; // Import ChatApi
 import com.example.evshop.data.network.PaymentApiService;
-
-import javax.inject.Named;
 import javax.inject.Singleton;
-
 import dagger.Module;
 import dagger.Provides;
 import dagger.hilt.InstallIn;
@@ -17,7 +15,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 @InstallIn(SingletonComponent.class)
 public class NetworkModule {
 
-    // ** SỬA LẠI BASE URL CHO ĐÚNG **
     @Provides
     @Singleton
     public Retrofit provideRetrofit() {
@@ -27,17 +24,17 @@ public class NetworkModule {
                 .build();
     }
 
+    // --- THÊM PROVIDER CHO CHAT API ---
     @Provides
     @Singleton
-    @Named("AuthApiService")
-    public ApiService provideAuthApiService(Retrofit retrofit) {
-        return retrofit.create(ApiService.class);
+    public ChatApi provideChatApi(Retrofit retrofit) {
+        return retrofit.create(ChatApi.class);
     }
+    // ------------------------------------
 
     @Provides
     @Singleton
-    @Named("PublicApiService")
-    public ApiService providePublicApiService(Retrofit retrofit) {
+    public ApiService provideApiService(Retrofit retrofit) {
         return retrofit.create(ApiService.class);
     }
 

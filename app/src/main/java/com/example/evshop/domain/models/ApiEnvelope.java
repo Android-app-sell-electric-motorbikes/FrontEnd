@@ -9,16 +9,53 @@ import com.google.gson.annotations.SerializedName;
 public class ApiEnvelope<T> {
 
     @SerializedName("isSuccess")
-    public boolean isSuccess;
+    private boolean isSuccess;
 
     @SerializedName("message")
-    public String message;
+    private String message;
 
     @SerializedName("statusCode")
-    public int statusCode;
+    private int statusCode;
 
-    // Rất quan trọng: Tên trường này phải khớp với key trong JSON API trả về
-    @SerializedName("result")
-    public T result;
+    // SỬA: Đổi tên trường từ 'result' thành 'data' để khớp với thói quen gọi .getData()
+    // Hoặc giữ 'result' và tạo getter tên là getData(). Cả hai đều được.
+    // Ở đây, tôi sẽ đổi tên trường để nhất quán.
+    @SerializedName("result") // Giữ nguyên SerializedName để khớp với JSON từ API
+    private T data;
 
+    // --- CÁC PHƯƠNG THỨC GETTER ĐƯỢC THÊM VÀO ---
+
+    public boolean isSuccess() {
+        return isSuccess;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public int getStatusCode() {
+        return statusCode;
+    }
+
+    // ✅ PHƯƠGN THỨC getData() MÀ BẠN YÊU CẦU
+    public T getData() {
+        return data;
+    }
+
+    // (Tùy chọn) Thêm các phương thức Setter nếu bạn cần tạo đối tượng này thủ công
+    public void setSuccess(boolean success) {
+        isSuccess = success;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public void setStatusCode(int statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public void setData(T data) {
+        this.data = data;
+    }
 }
