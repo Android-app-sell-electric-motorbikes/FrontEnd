@@ -1,13 +1,17 @@
 package com.example.evshop.domain.models;
 
-public class LoginRequest {
-    public String email;
-    public String password;
-    public boolean rememberMe;
+import com.google.gson.annotations.SerializedName;
 
-    public LoginRequest(String email, String password, boolean rememberMe){
-        this.email = email;
+public class LoginRequest {
+    
+    @SerializedName("username")
+    private final String username;
+
+    @SerializedName("password")
+    private final String password;
+
+    public LoginRequest(String username, String password) {
+        this.username = username;
         this.password = password;
-        this.rememberMe = rememberMe;
     }
 }

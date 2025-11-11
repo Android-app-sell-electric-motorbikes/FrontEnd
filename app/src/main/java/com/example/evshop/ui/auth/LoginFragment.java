@@ -14,7 +14,6 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.example.evshop.R;
 import com.example.evshop.databinding.FragmentLoginBinding;
 import com.example.evshop.ui.admin.AdminActivity;
-import com.example.evshop.ui.main.MainActivity;
 import com.google.android.material.snackbar.Snackbar;
 
 import javax.annotation.Nullable;
@@ -39,12 +38,11 @@ public class LoginFragment extends Fragment {
 
         authViewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
 
-        // Dòng mã gây lỗi đã được xóa. MainActivity sẽ tự động quản lý toolbar.
-
         b.btnLogin.setOnClickListener(v -> {
-            String email = String.valueOf(b.etEmail.getText());
+            // ** SỬA LẠI: LẤY DỮ LIỆU TỪ etUsername **
+            String username = String.valueOf(b.etUsername.getText());
             String pass = String.valueOf(b.etPassword.getText());
-            authViewModel.login(email, pass);
+            authViewModel.login(username, pass);
         });
 
         b.tvSignup.setOnClickListener(v -> {
@@ -61,7 +59,7 @@ public class LoginFragment extends Fragment {
             if (isLoading != null) {
                 b.loading.setVisibility(isLoading ? View.VISIBLE : View.GONE);
                 b.btnLogin.setEnabled(!isLoading);
-                b.etEmail.setEnabled(!isLoading);
+                b.tilUsername.setEnabled(!isLoading);
                 b.etPassword.setEnabled(!isLoading);
             }
         });
