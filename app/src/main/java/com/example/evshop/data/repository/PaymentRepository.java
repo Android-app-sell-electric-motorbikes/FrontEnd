@@ -1,6 +1,6 @@
 package com.example.evshop.data.repository;
 
-import com.example.evshop.data.network.PaymentApiService;
+import com.example.evshop.data.ApiService;
 import com.example.evshop.domain.models.VnpayResponse;
 
 import javax.inject.Inject;
@@ -12,10 +12,10 @@ import retrofit2.Response;
 @Singleton
 public class PaymentRepository {
 
-    private final PaymentApiService apiService;
+    private final ApiService apiService;
 
     @Inject
-    public PaymentRepository(PaymentApiService apiService) {
+    public PaymentRepository(ApiService apiService) { // ** SỬA LẠI: SỬ DỤNG ApiService DUY NHẤT **
         this.apiService = apiService;
     }
 
@@ -24,7 +24,6 @@ public class PaymentRepository {
         void onError(String message);
     }
 
-    // ** SỬA LẠI: CHỈ CẦN AMOUNT **
     public void createVnpayPayment(long amount, Callback<VnpayResponse> callback) {
         apiService.createVnpayPayment(amount).enqueue(new retrofit2.Callback<VnpayResponse>() {
             @Override

@@ -25,6 +25,7 @@ import com.example.evshop.databinding.ItemBannerBinding;
 import com.example.evshop.domain.models.UserData;
 import com.example.evshop.ui.adapter.VehicleAdapter;
 import com.example.evshop.ui.auth.AuthViewModel;
+import com.example.evshop.ui.cart.CartActivity; // **THÊM IMPORT**
 import com.example.evshop.ui.map.VietMapMapViewActivity;
 import com.example.evshop.ui.vehicle.TemplateVehicleListActivity;
 import com.example.evshop.ui.vehicle.VehicleDetailActivity;
@@ -67,26 +68,24 @@ public class HomeFragment extends Fragment {
         setupBanner();
         setupRecyclerView();
         setupClickListeners();
-        observeLoginState();
+        observeAuthState();
         observeHomeViewModel();
 
         homeViewModel.refresh();
     }
 
-    private void observeLoginState() {
-        authViewModel.getIsLoggedInState().observe(getViewLifecycleOwner(), isLoggedIn -> {
+    private void observeAuthState() {
+        authViewModel.getCurrentUser().observe(getViewLifecycleOwner(), user -> {
             if (b == null) return;
-            boolean loggedIn = isLoggedIn != null && isLoggedIn;
+            
+            boolean isLoggedIn = (user != null);
 
-            b.panelAuth.setVisibility(loggedIn ? View.GONE : View.VISIBLE);
-            b.tvWelcome.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
-            b.btnLogout.setVisibility(loggedIn ? View.VISIBLE : View.GONE);
+            b.panelAuth.setVisibility(isLoggedIn ? View.GONE : View.VISIBLE);
+            b.tvWelcome.setVisibility(isLoggedIn ? View.VISIBLE : View.GONE);
+            b.btnLogout.setVisibility(isLoggedIn ? View.VISIBLE : View.GONE);
 
-            if (loggedIn) {
-                UserData user = authViewModel.getCurrentUser().getValue();
-                if (user != null) {
-                    b.tvWelcome.setText("Chào, " + user.fullName + "!");
-                }
+            if (isLoggedIn && user.username != null) {
+                b.tvWelcome.setText("Chào, " + user.username + "!");
             }
         });
     }
@@ -157,9 +156,14 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    // ** SỬA LẠI: XỬ LÝ CLICK GIỎ HÀNG VÀ TÀI KHOẢN **
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.action_account_menu) {
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_open_cart) {
+            startActivity(new Intent(getActivity(), CartActivity.class));
+            return true;
+        } else if (itemId == R.id.action_account_menu) {
             View menuItemView = requireActivity().findViewById(R.id.action_account_menu);
             if (menuItemView != null) {
                 showUserPopupMenu(menuItemView);
@@ -197,7 +201,7 @@ public class HomeFragment extends Fragment {
             return;
         }
         StringBuilder messageBuilder = new StringBuilder();
-        messageBuilder.append("Tên: ").append(currentUser.fullName).append("\n\n");
+        messageBuilder.append("Tên đăng nhập: ").append(currentUser.username).append("\n\n");
         messageBuilder.append("Email: ").append(currentUser.email).append("\n\n");
         String roleString = "N/A";
         if (currentUser.role != null && !currentUser.role.isEmpty()) {

@@ -16,19 +16,8 @@ public class Pagination {
     private int totalPages;
 
     // Getters
-    public int getPageNumber() {
-        return pageNumber;
-    }
-
-    public int getPageSize() {
-        return pageSize;
-    }
-
-    public int getTotalItems() {
-        return totalItems;
-    }
-
-    public int getTotalPages() {
-        return totalPages;
-    }
+    public int getPageNumber() { return pageNumber; }
+    public int getPageSize() { return pageSize; }
+    public int getTotalItems() { return totalItems; }
+    public int getTotalPages() { return totalPages; }
 }

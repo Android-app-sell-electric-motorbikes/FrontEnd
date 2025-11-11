@@ -2,16 +2,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <!-- ** SỬA LẠI ID CHO GIỎ HÀNG ** -->
     <item
-        android:id="@+id/cartFragment" 
-        android:icon="@drawable/ic_cart"
-        android:title="Giỏ hàng"
-        app:showAsAction="ifRoom" />
+        android:id="@+id/action_open_cart"
+        android:icon="@drawable/ic_shopping_cart"
+        android:title="@string/cart"
+        app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/action_account_menu"
-        android:icon="@drawable/ic_round_person_24"
-        android:title="Tài khoản"
-        app:showAsAction="always" />
+        android:icon="@drawable/ic_round_account_circle_24"
+        android:title="@string/account"
+        app:showAsAction="ifRoom"/>
 
 </menu>

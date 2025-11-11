@@ -5,7 +5,9 @@ import java.io.Serializable;
 
 public class UserData implements Serializable {
 
-    // Các trường này đến từ JSON body của API response
+    // ** THÊM TRƯỜNG USERNAME **
+    public String username;
+
     @SerializedName("email")
     public String email;
 
@@ -21,11 +23,8 @@ public class UserData implements Serializable {
     @SerializedName("dateOfBirth")
     public String dateOfBirth;
 
-    // Trường role sẽ được điền vào theo cách thủ công sau khi giải mã token,
-    // không phải từ Gson.
     public String role;
 
-    // Hàm này sẽ được gọi sau khi trường 'role' được điền vào.
     public boolean isAdmin() {
         return "Admin".equalsIgnoreCase(role);
     }
