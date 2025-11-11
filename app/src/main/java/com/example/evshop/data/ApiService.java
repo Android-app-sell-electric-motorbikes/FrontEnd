@@ -70,7 +70,7 @@ public interface ApiService {
     Call<ApiEnvelope<List<Color>>> getColors();
 
     @Headers("Content-Type: application/json")
-    @POST("api/Image/get-upload-url") // << GIỮ ĐÚNG ENDPOINT LẤY URL
+    @POST("api/ElectricVehicle/upload-file-url-electric-vehicle") // << THAY ĐỔI TẠI ĐÂY
     Call<UploadUrlResponse> getUploadUrl(@Body GetUploadUrlRequest request);
 
     @PUT
@@ -78,7 +78,7 @@ public interface ApiService {
             @Url String url,
             @Body RequestBody imageBody
     );
-    @POST("api/EVTemplate/create-template-vehicle")
+    @POST("api/EVTemplate/create-template-vehicles")
     Call<ApiEnvelope<Boolean>> createTemplateVehicle(@Body CreateTemplateVehicleRequest request);
 
     // ** SỬA LẠI KIỂU DỮ LIỆU TRẢ VỀ **
