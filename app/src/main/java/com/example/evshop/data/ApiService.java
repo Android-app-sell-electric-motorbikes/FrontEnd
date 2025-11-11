@@ -6,7 +6,7 @@ import com.example.evshop.data.network.responses.UploadUrlResponse;
 import com.example.evshop.domain.models.ApiEnvelope;
 import com.example.evshop.domain.models.Color;
 import com.example.evshop.domain.models.InventoryItem;
-import com.example.evshop.domain.models.InventoryResult; // **THÊM IMPORT**
+import com.example.evshop.domain.models.InventoryResult;
 import com.example.evshop.domain.models.LoginRequest;
 import com.example.evshop.domain.models.LoginResult;
 import com.example.evshop.domain.models.RegisterRequest;
@@ -15,7 +15,6 @@ import com.example.evshop.domain.models.TemplateVehicle;
 import com.example.evshop.domain.models.TransactionResult;
 import com.example.evshop.domain.models.Version;
 import com.example.evshop.domain.models.VersionDetails;
-import com.example.evshop.domain.models.VnpayResponse;
 
 import java.util.List;
 
@@ -37,9 +36,6 @@ public interface ApiService {
     @POST("api/Auth/register-mobile")
     Call<ApiEnvelope<String>> register(@Body RegisterRequest registerRequest);
 
-    @POST("api/Payment/create-vnpay-mobile/{amount}")
-    Call<VnpayResponse> createVnpayPayment(@Path("amount") long amount);
-
     @GET("api/Payment/get-all-transactions-mobile")
     Call<ApiEnvelope<TransactionResult>> getAllTransactions(
         @Query("pageNumber") int pageNumber,
@@ -56,7 +52,7 @@ public interface ApiService {
             @Query("sortByPriceAsc") Boolean sortByPriceAsc
     );
 
-    @GET("api/EVTemplate/get-template-vehicle-by-id/{id}")
+    @GET("api/EVTemplate/get-template-by-id/{id}")
     Call<ApiEnvelope<TemplateVehicle>> getVehicleById(@Path("id") String id);
 
     @GET("api/Version/get-version-by-id/{id}")
@@ -77,7 +73,6 @@ public interface ApiService {
     @POST("api/EVTemplate/create-template-vehicle")
     Call<ApiEnvelope<Boolean>> createTemplateVehicle(@Body CreateTemplateVehicleRequest request);
 
-    // ** SỬA LẠI KIỂU DỮ LIỆU TRẢ VỀ **
     @GET("api/Inventory/get-all")
     Call<ApiEnvelope<InventoryResult>> getInventory();
 }

@@ -4,11 +4,13 @@ import android.content.Context;
 
 import com.example.evshop.data.ApiService;
 import com.example.evshop.data.auth.AuthInterceptor;
+import com.example.evshop.data.network.PaymentApiService;
 import com.example.evshop.data.TokenManager;
 
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
+import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -39,33 +41,26 @@ public class NetworkModule {
 
     @Provides
     @Singleton
-    public OkHttpClient provideOkHttpClient(TokenManager tokenManager) {
+    public X509TrustManager provideTrustManager() {
+        return new X509TrustManager() {
+            @Override
+            public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
+            @Override
+            public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
+            @Override
+            public X509Certificate[] getAcceptedIssuers() {
+                return new X509Certificate[]{};
+            }
+        };
+    }
+
+    @Provides
+    @Singleton
+    public SSLSocketFactory provideSslSocketFactory(X509TrustManager trustManager) {
         try {
-            final TrustManager[] trustAllCerts = new TrustManager[]{
-                    new X509TrustManager() {
-                        @Override
-                        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
-                        @Override
-                        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
-                        @Override
-                        public X509Certificate[] getAcceptedIssuers() {
-                            return new X509Certificate[]{};
-                        }
-                    }
-            };
-
-            final SSLContext sslContext = SSLContext.getInstance("SSL");
-            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-            final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-
-            HttpLoggingInterceptor logging = new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY);
-
-            return new OkHttpClient.Builder()
-                    .sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0])
-                    .hostnameVerifier((hostname, session) -> true)
-                    .addInterceptor(new AuthInterceptor(tokenManager)) // Interceptor thông minh sẽ tự xử lý
-                    .addInterceptor(logging)
-                    .build();
+            SSLContext sslContext = SSLContext.getInstance("SSL");
+            sslContext.init(null, new TrustManager[]{trustManager}, new java.security.SecureRandom());
+            return sslContext.getSocketFactory();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -73,12 +68,50 @@ public class NetworkModule {
 
     @Provides
     @Singleton
-    public ApiService provideApiService(OkHttpClient client) {
+    @Named("AuthClient")
+    public OkHttpClient provideAuthOkHttpClient(SSLSocketFactory sslSocketFactory, X509TrustManager trustManager, TokenManager tokenManager) {
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY);
+        return new OkHttpClient.Builder()
+                .sslSocketFactory(sslSocketFactory, trustManager)
+                .hostnameVerifier((hostname, session) -> true)
+                .addInterceptor(new AuthInterceptor(tokenManager))
+                .addInterceptor(logging)
+                .build();
+    }
+
+    @Provides
+    @Singleton
+    @Named("PublicClient")
+    public OkHttpClient providePublicOkHttpClient(SSLSocketFactory sslSocketFactory, X509TrustManager trustManager) {
+        HttpLoggingInterceptor logging = new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY);
+        return new OkHttpClient.Builder()
+                .sslSocketFactory(sslSocketFactory, trustManager)
+                .hostnameVerifier((hostname, session) -> true)
+                .addInterceptor(logging)
+                .build();
+    }
+
+    // ** CUNG CẤP ApiService VỚI AuthClient **
+    @Provides
+    @Singleton
+    public ApiService provideApiService(@Named("AuthClient") OkHttpClient client) {
         return new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .client(client)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
                 .create(ApiService.class);
+    }
+
+    // ** CUNG CẤP PaymentApiService VỚI PublicClient **
+    @Provides
+    @Singleton
+    public PaymentApiService providePaymentApiService(@Named("PublicClient") OkHttpClient client) {
+        return new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .client(client)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(PaymentApiService.class);
     }
 }

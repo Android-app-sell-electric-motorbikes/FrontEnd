@@ -19,10 +19,6 @@
             android:id="@+id/action_homeFragment_to_registerFragment"
             app:destination="@id/registerFragment" />
         
-        <action
-            android:id="@+id/action_global_cartFragment"
-            app:destination="@id/cartFragment" />
-
     </fragment>
 
     <fragment
@@ -53,12 +49,5 @@
             app:popUpTo="@id/loginFragment"
             app:popUpToInclusive="true" />
     </fragment>
-
-    <!-- ** SỬA LẠI ĐƯỜNG DẪN ĐẾN CARTFRAGMENT ** -->
-    <fragment
-        android:id="@+id/cartFragment"
-        android:name="com.example.evshop.ui.cart.CartFragment"
-        android:label="Giỏ hàng"
-        tools:layout="@layout/fragment_cart" />
 
 </navigation>
