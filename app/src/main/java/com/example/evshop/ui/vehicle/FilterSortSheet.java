@@ -1,8 +1,7 @@
 package com.example.evshop.ui.vehicle;
 
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.view.LayoutInflater;
+import android.text.TextUtils;import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -13,6 +12,7 @@ import androidx.annotation.Nullable;
 
 import com.example.evshop.R;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+// SỬA 1: Import các lớp mới cần thiết
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -25,6 +25,7 @@ public class FilterSortSheet extends BottomSheetDialogFragment {
     private FilterListener listener;
     private TextInputEditText etMinPrice;
     private TextInputEditText etMaxPrice;
+    // SỬA 2: Thay thế RadioGroup bằng ChipGroup
     private ChipGroup cgSort;
 
     public static FilterSortSheet newInstance() {
@@ -40,44 +41,52 @@ public class FilterSortSheet extends BottomSheetDialogFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.sheet_filter_sort, container, false);
 
+        // Ánh xạ các view
         etMinPrice = view.findViewById(R.id.etMinPrice);
         etMaxPrice = view.findViewById(R.id.etMaxPrice);
+        // SỬA 3: Ánh xạ tới ChipGroup
         cgSort = view.findViewById(R.id.cgSort);
         Button btnApply = view.findViewById(R.id.btnApply);
         Button btnCancel = view.findViewById(R.id.btnCancel);
 
         btnApply.setOnClickListener(v -> {
             try {
+                // ========================================================
+                // ***      SỬA 4: LẤY DỮ LIỆU TỪ CHIPGROUP            ***
+                // ========================================================
                 Boolean sortByPriceAsc = null;
+                // Lấy ID của Chip đang được chọn
                 int selectedSortId = cgSort.getCheckedChipId();
 
+                // So sánh với ID của các Chip trong file XML
                 if (selectedSortId == R.id.chipPriceAsc) {
                     sortByPriceAsc = true;
                 } else if (selectedSortId == R.id.chipPriceDesc) {
                     sortByPriceAsc = false;
                 }
+                // Các trường hợp khác như Popular, Rating sẽ không thay đổi giá trị sortByPriceAsc (vẫn là null)
 
+                // ========================================================
+                // ***      ĐỌC DỮ LIỆU TỪ HAI Ô NHẬP LIỆU (Giữ nguyên) ***
+                // ========================================================
                 Long minPrice = null;
                 Long maxPrice = null;
 
-                if (etMinPrice.getText() != null) {
-                    String minPriceStr = etMinPrice.getText().toString();
-                    if (!TextUtils.isEmpty(minPriceStr)) {
-                        minPrice = Long.parseLong(minPriceStr);
-                    }
+                String minPriceStr = etMinPrice.getText().toString();
+                if (!TextUtils.isEmpty(minPriceStr)) {
+                    minPrice = Long.parseLong(minPriceStr);
                 }
 
-                if (etMaxPrice.getText() != null) {
-                    String maxPriceStr = etMaxPrice.getText().toString();
-                    if (!TextUtils.isEmpty(maxPriceStr)) {
-                        maxPrice = Long.parseLong(maxPriceStr);
-                    }
+                String maxPriceStr = etMaxPrice.getText().toString();
+                if (!TextUtils.isEmpty(maxPriceStr)) {
+                    maxPrice = Long.parseLong(maxPriceStr);
                 }
 
+                // Gửi kết quả về Activity (Giữ nguyên)
                 if (listener != null) {
                     listener.onFilterApplied(minPrice, maxPrice, sortByPriceAsc);
                 }
-                dismiss();
+                dismiss(); // Đóng BottomSheet
             } catch (NumberFormatException e) {
                 if (getContext() != null) {
                     Toast.makeText(getContext(), "Giá trị nhập vào quá lớn!", Toast.LENGTH_LONG).show();
