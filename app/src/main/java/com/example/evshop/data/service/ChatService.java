@@ -1,37 +1,31 @@
 package com.example.evshop.data.service;
 
-import android.content.Context;
 import android.util.Log;
 
 import com.example.evshop.data.TokenManager;
-import com.example.evshop.data.api.ChatApi;
-import com.example.evshop.data.modelchat.request.SendMessageRequest;
 import com.example.evshop.data.modelchat.ChatMessage;
 import com.example.evshop.data.modelchat.ChatRoom;
-import com.example.evshop.domain.models.ApiEnvelope;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 public class ChatService {
+
     private static final String TAG = "ChatService";
 
-    // NHỚ THAY BẰNG URL FIREBASE CỦA DỰ ÁN EVSHOP
-    private static final String FIREBASE_DATABASE_URL = "https://your-evshop-project-rtdb.firebaseio.com";
-
-    private final ChatApi chatApi;
     private final TokenManager tokenManager;
+    private final FirebaseDatabase database;
 
-    public ChatService(ChatApi chatApi, Context context) {
-        this.chatApi = chatApi;
-        this.tokenManager = new TokenManager(context);
+    public ChatService(TokenManager tokenManager) {
+        this.tokenManager = tokenManager;
+        this.database = FirebaseDatabase.getInstance("https://your-evshop-project-rtdb.firebaseio.com/");
     }
 
-    // --- INTERFACES ---
+    // --- CALLBACK INTERFACES ---
     public interface ChatRoomsCallback {
         void onSuccess(List<ChatRoom> chatRooms);
         void onError(String error);
@@ -47,104 +41,79 @@ public class ChatService {
         void onError(String error);
     }
 
-    // --- PHƯƠNG THỨC GỌI API ---
-
+    // --- LẤY DANH SÁCH CHAT ROOM ---
     public void getChatRooms(ChatRoomsCallback callback) {
-        chatApi.getChatRooms().enqueue(new Callback<ApiEnvelope<List<ChatRoom>>>() {
-            @Override
-            public void onResponse(Call<ApiEnvelope<List<ChatRoom>>> call, Response<ApiEnvelope<List<ChatRoom>>> response) {
-                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    callback.onSuccess(response.body().getData());
-                } else {
-                    String errorMsg = "Failed to get chat rooms";
-                    if (response.body() != null && response.body().getMessage() != null) {
-                        errorMsg = response.body().getMessage();
+        DatabaseReference ref = database.getReference("Conversations");
+        ref.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                List<ChatRoom> rooms = new ArrayList<>();
+                DataSnapshot snapshot = task.getResult();
+                if (snapshot != null) {
+                    for (DataSnapshot child : snapshot.getChildren()) {
+                        ChatRoom room = child.getValue(ChatRoom.class);
+                        if (room != null) rooms.add(room);
                     }
-                    callback.onError(errorMsg);
                 }
-            }
-
-            @Override
-            public void onFailure(Call<ApiEnvelope<List<ChatRoom>>> call, Throwable t) {
-                Log.e(TAG, "Error getting chat rooms", t);
-                callback.onError(t.getMessage());
+                callback.onSuccess(rooms);
+            } else {
+                callback.onError("Failed to fetch chat rooms: " + task.getException());
             }
         });
     }
 
+    // --- LẤY TIN NHẮN TRONG ROOM ---
     public void getMessagesForRoom(String roomId, MessagesCallback callback) {
-        chatApi.getMessagesForRoom(roomId).enqueue(new Callback<ApiEnvelope<List<ChatMessage>>>() {
-            @Override
-            public void onResponse(Call<ApiEnvelope<List<ChatMessage>>> call, Response<ApiEnvelope<List<ChatMessage>>> response) {
-                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    List<ChatMessage> messages = response.body().getData() != null ? response.body().getData() : new ArrayList<>();
-                    String currentUserId = tokenManager.getUserId();
-                    if (currentUserId != null) {
-                        for (ChatMessage message : messages) {
-                            message.setMe(currentUserId.equals(message.getSenderId()));
+        if (roomId == null) {
+            callback.onError("RoomId is null");
+            return;
+        }
+        DatabaseReference ref = database.getReference("Messages").child(roomId);
+        ref.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                List<ChatMessage> messages = new ArrayList<>();
+                DataSnapshot snapshot = task.getResult();
+                if (snapshot != null) {
+                    for (DataSnapshot child : snapshot.getChildren()) {
+                        ChatMessage msg = child.getValue(ChatMessage.class);
+                        if (msg != null) {
+                            msg.setMessageId(child.getKey());
+                            msg.setMe(tokenManager.getUserId() != null &&
+                                    tokenManager.getUserId().equals(msg.getSenderId()));
+                            messages.add(msg);
                         }
                     }
-                    callback.onSuccess(messages);
-                } else {
-                    String errorMsg = "Failed to get messages";
-                    if (response.body() != null && response.body().getMessage() != null) {
-                        errorMsg = response.body().getMessage();
-                    }
-                    callback.onError(errorMsg);
                 }
-            }
-
-            @Override
-            public void onFailure(Call<ApiEnvelope<List<ChatMessage>>> call, Throwable t) {
-                Log.e(TAG, "Error getting messages", t);
-                callback.onError(t.getMessage());
+                callback.onSuccess(messages);
+            } else {
+                callback.onError("Failed to fetch messages: " + task.getException());
             }
         });
     }
 
+    // --- GỬI TIN NHẮN ---
     public void sendMessage(String roomId, String message, SendMessageCallback callback) {
-        SendMessageRequest request = new SendMessageRequest(roomId, message);
-        chatApi.sendMessage(request).enqueue(new Callback<ApiEnvelope<String>>() {
-            @Override
-            public void onResponse(Call<ApiEnvelope<String>> call, Response<ApiEnvelope<String>> response) {
-                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    callback.onSuccess();
-                } else {
-                    callback.onError("Failed to send message");
-                }
-            }
+        if (roomId == null || message == null || message.isEmpty()) {
+            callback.onError("Invalid room or message");
+            return;
+        }
+        DatabaseReference ref = database.getReference("Messages").child(roomId).push();
+        ChatMessage msg = new ChatMessage();
+        msg.setMessage(message);
+        msg.setSenderId(tokenManager.getUserId());
+        msg.setSenderName(tokenManager.getUsername());
+        msg.setTimestampFromLong(System.currentTimeMillis());
+        msg.setMe(true);
 
-            @Override
-            public void onFailure(Call<ApiEnvelope<String>> call, Throwable t) {
-                Log.e(TAG, "Error sending message", t);
-                callback.onError(t.getMessage());
-            }
+        ref.setValue(msg).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) callback.onSuccess();
+            else callback.onError("Failed to send message: " + task.getException());
         });
     }
 
-    // ✅ BỔ SUNG LẠI PHƯƠNG THỨC NÀY
+    // --- ĐÁNH DẤU ĐÃ ĐỌC ---
     public void markMessagesAsRead(String roomId, SendMessageCallback callback) {
-        chatApi.markMessagesAsRead(roomId).enqueue(new Callback<ApiEnvelope<String>>() {
-            @Override
-            public void onResponse(Call<ApiEnvelope<String>> call, Response<ApiEnvelope<String>> response) {
-                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    Log.d(TAG, "API call to mark messages as read was successful.");
-                    callback.onSuccess();
-                } else {
-                    String errorMsg = "Failed to mark messages as read";
-                    if(response.body() != null && response.body().getMessage() != null){
-                        errorMsg = response.body().getMessage();
-                    }
-                    Log.e(TAG, errorMsg);
-                    callback.onError(errorMsg);
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ApiEnvelope<String>> call, Throwable t) {
-                Log.e(TAG, "Error marking messages as read", t);
-                callback.onError(t.getMessage());
-            }
-        });
+        // Demo: chỉ log, chưa thực sự đánh dấu
+        Log.d(TAG, "Mark messages as read for room: " + roomId);
+        callback.onSuccess();
     }
 }

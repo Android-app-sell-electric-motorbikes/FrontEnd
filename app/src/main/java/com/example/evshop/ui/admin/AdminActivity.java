@@ -20,8 +20,10 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.evshop.R;
 import com.example.evshop.domain.models.UserData;
-import com.example.evshop.ui.main.MainActivity;
 import com.example.evshop.ui.auth.AuthViewModel;
+// SỬA: Thêm các import cần thiết
+import com.example.evshop.ui.chat.ChatListActivity;
+import com.example.evshop.ui.main.MainActivity;
 import com.example.evshop.ui.transaction.TransactionHistoryActivity;
 import com.google.android.material.appbar.MaterialToolbar;
 
@@ -75,7 +77,6 @@ public class AdminActivity extends AppCompatActivity {
         findViewById(R.id.btn_manage_inventory).setOnClickListener(v ->
                 startActivity(new Intent(AdminActivity.this, VehicleInventoryActivity.class)));
 
-        // ** KÍCH HOẠT NÚT MỚI **
         findViewById(R.id.btnTransactionHistory).setOnClickListener(v ->
                 startActivity(new Intent(AdminActivity.this, TransactionHistoryActivity.class)));
 
@@ -87,6 +88,16 @@ public class AdminActivity extends AppCompatActivity {
 
         findViewById(R.id.btnManageOrders).setOnClickListener(v ->
                 Toast.makeText(this, "Chức năng Quản lý Đơn hàng sắp ra mắt", Toast.LENGTH_SHORT).show());
+
+        // ========================================================
+        // SỬA: THÊM LOGIC XỬ LÝ SỰ KIỆN CHO NÚT CHAT
+        // ========================================================
+        findViewById(R.id.btnChatSupport).setOnClickListener(v -> {
+            Intent intent = new Intent(AdminActivity.this, ChatListActivity.class);
+            startActivity(intent);
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        });
+        // ========================================================
     }
 
     @Override

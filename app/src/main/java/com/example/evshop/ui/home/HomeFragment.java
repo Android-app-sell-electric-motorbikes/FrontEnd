@@ -20,11 +20,14 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.evshop.R;
+// SỬA: Thêm các import cần thiết
+import com.example.evshop.data.TokenManager;
 import com.example.evshop.databinding.FragmentHomeBinding;
 import com.example.evshop.databinding.ItemBannerBinding;
 import com.example.evshop.domain.models.UserData;
 import com.example.evshop.ui.adapter.VehicleAdapter;
 import com.example.evshop.ui.auth.AuthViewModel;
+import com.example.evshop.ui.chat.ChatListActivity; // Thêm import này
 import com.example.evshop.ui.map.VietMapMapViewActivity;
 import com.example.evshop.ui.vehicle.TemplateVehicleListActivity;
 import com.example.evshop.ui.vehicle.VehicleDetailActivity;
@@ -42,6 +45,9 @@ public class HomeFragment extends Fragment {
     private NavController navController;
     private HomeViewModel homeViewModel;
     private VehicleAdapter vehicleAdapter;
+
+    // SỬA: Khai báo TokenManager
+    private TokenManager tokenManager;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -63,6 +69,9 @@ public class HomeFragment extends Fragment {
         navController = Navigation.findNavController(view);
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
         authViewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
+
+        // SỬA: Khởi tạo TokenManager
+        tokenManager = new TokenManager(requireContext());
 
         setupBanner();
         setupRecyclerView();
@@ -155,6 +164,22 @@ public class HomeFragment extends Fragment {
             Intent intent = new Intent(getContext(), VietMapMapViewActivity.class);
             startActivity(intent);
         });
+
+        // ========================================================
+        // SỬA: THÊM LOGIC XỬ LÝ SỰ KIỆN CHO NÚT CHAT (FAB)
+        // ========================================================
+        b.fabChat.setOnClickListener(v -> {
+            // Kiểm tra xem người dùng đã đăng nhập chưa bằng cách lấy access token
+            if (tokenManager.getAccessToken() != null && !tokenManager.getAccessToken().isEmpty()) {
+                // Nếu đã đăng nhập, mở màn hình danh sách chat
+                Intent intent = new Intent(getActivity(), ChatListActivity.class);
+                startActivity(intent);
+            } else {
+                // Nếu chưa đăng nhập, hiển thị thông báo yêu cầu
+                Toast.makeText(getActivity(), "Vui lòng đăng nhập để sử dụng tính năng này.", Toast.LENGTH_SHORT).show();
+            }
+        });
+        // ========================================================
     }
 
     @Override

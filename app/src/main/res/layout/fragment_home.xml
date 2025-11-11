@@ -1,185 +1,204 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+<!-- BƯỚC 1: Bọc tất cả bằng CoordinatorLayout -->
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/swipeRefresh"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorSurfaceContainerLowest"
     tools:context=".ui.home.HomeFragment">
 
-    <androidx.core.widget.NestedScrollView
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefresh"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:background="?attr/colorSurfaceContainerLowest">
 
-        <LinearLayout
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:paddingBottom="24dp">
+            android:fillViewport="true">
 
-            <!-- Header -->
-            <androidx.constraintlayout.widget.ConstraintLayout
+            <!-- BƯỚC 2: Sửa layout_height và thêm paddingBottom để nội dung không bị FAB che khuất -->
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="16dp">
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="96dp">
 
-                <!-- Lời chào khi ĐÃ ĐĂNG NHẬP -->
-                <TextView
-                    android:id="@+id/tvWelcome"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:textAppearance="?attr/textAppearanceHeadline5"
-                    tools:text="Chào, Gemini!"
-                    android:visibility="gone"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toStartOf="@+id/btnLogout"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <!-- Nút Đăng xuất, chỉ hiện khi ĐÃ ĐĂNG NHẬP -->
-                <Button
-                    android:id="@+id/btnLogout"
-                    style="?attr/materialButtonOutlinedStyle"
+                <!-- Header -->
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="Đăng xuất"
-                    android:visibility="gone"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    android:layout_height="wrap_content"
+                    android:padding="16dp">
 
-                <!-- Panel cho người CHƯA ĐĂNG NHẬP -->
-                <LinearLayout
-                    android:id="@+id/panelAuth"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent">
-
+                    <!-- Lời chào khi ĐÃ ĐĂNG NHẬP -->
                     <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:text="Khám phá EVShop"
-                        android:textAppearance="?attr/textAppearanceHeadline5"/>
+                        android:id="@+id/tvWelcome"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?attr/textAppearanceHeadline5"
+                        tools:text="Chào, Gemini!"
+                        android:visibility="gone"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toStartOf="@+id/btnLogout"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginTop="16dp"
-                        android:orientation="horizontal">
-
-                        <Button
-                            android:id="@+id/btnSignUp"
-                            style="?attr/materialButtonOutlinedStyle"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Đăng Ký" />
-
-                        <Button
-                            android:id="@+id/btnSignIn"
-                            style="?attr/materialButtonStyle"
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:layout_weight="1"
-                            android:text="Đăng Nhập" />
-                    </LinearLayout>
-                </LinearLayout>
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <!-- Thanh tìm kiếm giả -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="8dp"
-                app:cardCornerRadius="24dp">
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center_vertical"
-                    android:padding="12dp">
-                    <ImageView
+                    <!-- Nút Đăng xuất, chỉ hiện khi ĐÃ ĐĂNG NHẬP -->
+                    <Button
+                        android:id="@+id/btnLogout"
+                        style="?attr/materialButtonOutlinedStyle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:src="@drawable/ic_search_24"/>
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginStart="8dp"
-                        android:text="Tìm kiếm xe, phụ kiện..."/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+                        android:text="Đăng xuất"
+                        android:visibility="gone"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Banner -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginTop="24dp"
-                android:layout_marginHorizontal="16dp"
-                app:cardCornerRadius="16dp">
-                <androidx.viewpager2.widget.ViewPager2
-                    android:id="@+id/viewPager"
+                    <!-- Panel cho người CHƯA ĐĂNG NHẬP -->
+                    <LinearLayout
+                        android:id="@+id/panelAuth"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        app:layout_constraintTop_toTopOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Khám phá EVShop"
+                            android:textAppearance="?attr/textAppearanceHeadline5"/>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:orientation="horizontal">
+
+                            <Button
+                                android:id="@+id/btnSignUp"
+                                style="?attr/materialButtonOutlinedStyle"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Đăng Ký" />
+
+                            <Button
+                                android:id="@+id/btnSignIn"
+                                style="?attr/materialButtonStyle"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:layout_weight="1"
+                                android:text="Đăng Nhập" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <!-- Thanh tìm kiếm giả -->
+                <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
-                    android:layout_height="180dp"/>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Nút xem bản đồ -->
-            <Button
-                android:id="@+id/btnMap"
-                style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="24dp"
-                android:text="Xem bản đồ cửa hàng"
-                app:icon="@drawable/ic_round_map_24" />
-
-            <!-- Tiêu đề Xe nổi bật -->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:paddingHorizontal="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-                    android:text="Xe nổi bật"
-                    android:textAppearance="?attr/textAppearanceHeadline5"
-                    android:textStyle="bold" />
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="8dp"
+                    app:cardCornerRadius="24dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:padding="12dp">
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_search_24"
+                            android:contentDescription="Tìm kiếm" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            android:text="Tìm kiếm xe, phụ kiện..."/>
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
 
+                <!-- Banner -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginHorizontal="16dp"
+                    app:cardCornerRadius="16dp">
+                    <androidx.viewpager2.widget.ViewPager2
+                        android:id="@+id/viewPager"
+                        android:layout_width="match_parent"
+                        android:layout_height="180dp"/>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Nút xem bản đồ -->
                 <Button
-                    android:id="@+id/btnViewAll"
-                    style="?attr/borderlessButtonStyle"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/btnMap"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:text="Xem tất cả"
-                    android:textAllCaps="false" />
-            </RelativeLayout>
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginTop="24dp"
+                    android:text="Xem bản đồ cửa hàng"
+                    app:icon="@drawable/ic_round_map_24" />
 
-            <!-- Lưới sản phẩm -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvFeaturedVehicles"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:clipToPadding="false"
-                android:nestedScrollingEnabled="false"
-                android:paddingHorizontal="12dp"
-                android:paddingTop="8dp"
-                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                app:spanCount="2"
-                tools:itemCount="6"
-                tools:listitem="@layout/item_vehicle" />
+                <!-- Tiêu đề Xe nổi bật -->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:paddingHorizontal="16dp">
 
-        </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
-</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:text="Xe nổi bật"
+                        android:textAppearance="?attr/textAppearanceHeadline5"
+                        android:textStyle="bold" />
+
+                    <Button
+                        android:id="@+id/btnViewAll"
+                        style="?attr/borderlessButtonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:text="Xem tất cả"
+                        android:textAllCaps="false" />
+                </RelativeLayout>
+
+                <!-- Lưới sản phẩm -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvFeaturedVehicles"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clipToPadding="false"
+                    android:nestedScrollingEnabled="false"
+                    android:paddingHorizontal="12dp"
+                    android:paddingTop="8dp"
+                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                    app:spanCount="2"
+                    tools:itemCount="6"
+                    tools:listitem="@layout/item_vehicle" />
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <!-- BƯỚC 3: Thêm FAB vào đây, bên trong CoordinatorLayout -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabChat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:contentDescription="Hỗ trợ qua chat"
+        app:srcCompat="@drawable/ic_chat" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
