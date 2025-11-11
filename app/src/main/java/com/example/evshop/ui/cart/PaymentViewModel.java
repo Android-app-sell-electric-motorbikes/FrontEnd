@@ -15,33 +15,36 @@ public class PaymentViewModel extends ViewModel {
 
     private final PaymentRepository paymentRepository;
     private final MutableLiveData<String> _paymentUrl = new MutableLiveData<>();
-    public LiveData<String> paymentUrl = _paymentUrl;
+    public final LiveData<String> paymentUrl = _paymentUrl;
 
     private final MutableLiveData<String> _error = new MutableLiveData<>();
-    public LiveData<String> error = _error;
+    public final LiveData<String> error = _error;
 
     @Inject
     public PaymentViewModel(PaymentRepository paymentRepository) {
         this.paymentRepository = paymentRepository;
     }
 
-    // ** SỬA LẠI: CHỈ CẦN AMOUNT **
     public void createPayment(long amount) {
         paymentRepository.createVnpayPayment(amount, new PaymentRepository.Callback<VnpayResponse>() {
             @Override
             public void onSuccess(VnpayResponse response) {
-                if (response != null && response.isSuccess() && response.getResult() != null) {
+                if (response.isSuccess() && response.getResult() != null) {
                     _paymentUrl.postValue(response.getResult());
                 } else {
-                    String errorMessage = (response != null) ? response.getMessage() : "Không nhận được URL thanh toán.";
-                    _error.postValue(errorMessage);
+                    _error.postValue(response.getMessage() != null ? response.getMessage() : "Lỗi không xác định từ server.");
                 }
             }
 
             @Override
             public void onError(String message) {
-                _error.postValue("Lỗi tạo thanh toán: " + message);
+                _error.postValue(message);
             }
         });
+    }
+
+    // ** PHƯƠNG THỨC MỚI ĐỂ RESET URL **
+    public void onPaymentUrlHandled() {
+        _paymentUrl.setValue(null);
     }
 }

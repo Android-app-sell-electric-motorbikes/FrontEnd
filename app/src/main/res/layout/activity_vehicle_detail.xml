@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".ui.vehicle.VehicleDetailActivity">
 
-    <!-- Toolbar -->
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -15,13 +14,12 @@
         app:navigationIcon="@drawable/ic_arrow_back"
         tools:title="Chi tiết xe" />
 
-    <!-- ScrollView được điều chỉnh để không bị nút che khuất -->
+    <!-- ** SỬA LẠI: ScrollView sẽ nằm trên cụm điều khiển số lượng ** -->
     <ScrollView
         android:id="@+id/scrollView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnAddToCart"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_controls"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/toolbar">
@@ -31,7 +29,6 @@
             android:layout_height="wrap_content"
             android:paddingBottom="24dp">
 
-            <!-- Ảnh của xe -->
             <ImageView
                 android:id="@+id/imgVehicleDetail"
                 android:layout_width="0dp"
@@ -43,7 +40,6 @@
                 app:layout_constraintTop_toTopOf="parent"
                 tools:src="@drawable/placeholder_vehicle" />
 
-            <!-- Phần thông tin chung -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/generalInfoLayout"
                 android:layout_width="0dp"
@@ -90,7 +86,6 @@
                     tools:text="25.000.000 ₫" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <!-- Dấu gạch ngang phân cách -->
             <View
                 android:id="@+id/divider1"
                 android:layout_width="match_parent"
@@ -99,7 +94,6 @@
                 android:background="?android:attr/listDivider"
                 app:layout_constraintTop_toBottomOf="@id/generalInfoLayout" />
 
-            <!-- Phần mô tả -->
             <LinearLayout
                 android:id="@+id/descriptionLayout"
                 android:layout_width="match_parent"
@@ -122,7 +116,6 @@
                     tools:text="Phiên bản thành phố, nhỏ gọn, dễ điều khiển và tiết kiệm điện năng." />
             </LinearLayout>
 
-            <!-- Dấu gạch ngang phân cách -->
             <View
                 android:id="@+id/divider2"
                 android:layout_width="match_parent"
@@ -130,7 +123,6 @@
                 android:background="?android:attr/listDivider"
                 app:layout_constraintTop_toBottomOf="@id/descriptionLayout" />
 
-            <!-- Phần thông số kỹ thuật -->
             <LinearLayout
                 android:id="@+id/specsLayout"
                 android:layout_width="match_parent"
@@ -159,7 +151,6 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
-    <!-- Vòng quay loading -->
     <ProgressBar
         android:id="@+id/progressBar"
         style="?android:attr/progressBarStyle"
@@ -172,20 +163,60 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible" />
 
-    <!-- NÚT THÊM VÀO GIỎ HÀNG -->
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnAddToCart"
-        style="@style/Widget.Material3.Button.Icon"
-        android:layout_width="0dp"
+    <!-- ** CỤM ĐIỀU KHIỂN SỐ LƯỢNG VÀ NÚT THÊM ** -->
+    <LinearLayout
+        android:id="@+id/bottom_controls"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="16dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
         android:padding="16dp"
-        android:text="Thêm vào giỏ hàng"
-        app:icon="@drawable/ic_add_to_cart"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:background="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/quantity_selector_bg"
+            android:padding="4dp">
+
+            <Button
+                android:id="@+id/btn_minus"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                app:icon="@drawable/ic_remove" />
+
+            <TextView
+                android:id="@+id/tv_quantity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="1"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btn_plus"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                app:icon="@drawable/ic_add" />
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAddToCart"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_weight="1"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp"
+            android:text="Thêm vào giỏ" />
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

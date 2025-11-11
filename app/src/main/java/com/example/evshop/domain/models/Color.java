@@ -1,42 +1,23 @@
-// File: Color.java
 package com.example.evshop.domain.models;
 
-import androidx.annotation.NonNull; // Import để dùng @NonNull
-
+import androidx.annotation.NonNull;
 import com.google.gson.annotations.SerializedName;
+import java.io.Serializable;
 
-public class Color {    // Sửa lại tên các trường cho khớp với JSON
-    @SerializedName("id")
-    private String id;
+public class Color implements Serializable {
+    @SerializedName("colorId")
+    private String colorId;
+
+    @SerializedName("colorName")
     private String colorName;
-    private String colorCode;
-    private double extraCost;
 
-    // --- Getters ---
-    public String getId() {
-        return id;
-    }
+    // Getters
+    public String getColorId() { return colorId; }
+    public String getColorName() { return colorName; }
 
-    public String getColorName() {
-        return colorName;
-    }
-
-    public String getColorCode() {
-        return colorCode;
-    }
-
-    public double getExtraCost() {
-        return extraCost;
-    }
-
-    /**
-     * Hàm này rất quan trọng. ArrayAdapter sẽ gọi nó để biết
-     * phải hiển thị chuỗi gì trong Spinner.
-     */
     @NonNull
     @Override
     public String toString() {
-        // Trả về colorName để hiển thị.
         return colorName != null ? colorName : "Màu không xác định";
     }
 }

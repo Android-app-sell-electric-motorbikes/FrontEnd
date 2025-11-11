@@ -6,7 +6,7 @@ import com.example.evshop.data.network.responses.UploadUrlResponse;
 import com.example.evshop.domain.models.ApiEnvelope;
 import com.example.evshop.domain.models.Color;
 import com.example.evshop.domain.models.InventoryItem;
-import com.example.evshop.domain.models.InventoryResult; // **THÊM IMPORT**
+import com.example.evshop.domain.models.InventoryResult;
 import com.example.evshop.domain.models.LoginRequest;
 import com.example.evshop.domain.models.LoginResult;
 import com.example.evshop.domain.models.RegisterRequest;
@@ -37,9 +37,6 @@ public interface ApiService {
 
     @POST("api/Auth/register-mobile")
     Call<ApiEnvelope<String>> register(@Body RegisterRequest registerRequest);
-
-    @POST("api/Payment/create-vnpay-mobile/{amount}")
-    Call<VnpayResponse> createVnpayPayment(@Path("amount") long amount);
 
     @GET("api/Payment/get-all-transactions-mobile")
     Call<ApiEnvelope<TransactionResult>> getAllTransactions(

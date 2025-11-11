@@ -17,17 +17,15 @@ public class TransactionRepository {
     private final ApiService apiService;
 
     @Inject
-    public TransactionRepository(ApiService apiService) {
+    public TransactionRepository(ApiService apiService) { // **YÊU CẦU ApiService**
         this.apiService = apiService;
     }
 
-    // ** ĐỊNH NGHĨA CALLBACK INTERFACE CÒN THIẾU **
     public interface TransactionCallback {
         void onSuccess(TransactionResult result);
         void onError(String message);
     }
 
-    // ** SỬA LẠI PHƯƠNG THỨC ĐỂ NHẬN CALLBACK **
     public void getTransactions(int page, int pageSize, TransactionCallback callback) {
         apiService.getAllTransactions(page, pageSize).enqueue(new Callback<ApiEnvelope<TransactionResult>>() {
             @Override
