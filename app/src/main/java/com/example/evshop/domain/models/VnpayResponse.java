@@ -13,8 +13,9 @@ public class VnpayResponse {
     private int statusCode;
 
     @SerializedName("result")
-    private String result; // This contains the URL
+    private String result;
 
+    // Getters
     public boolean isSuccess() {
         return isSuccess;
     }

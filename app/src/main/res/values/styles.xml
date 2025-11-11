@@ -24,5 +24,10 @@
     <!-- Style mới cho Toolbar có icon màu đen -->
     <style name="Widget.EV.Toolbar.WithBlackNavIcon" parent="Widget.Material3.Toolbar">
         <item name="colorControlNormal">@android:color/black</item>
-    </style>
+    </style>    <style name="RatingBar" parent="Theme.AppCompat">
+    <item name="colorControlNormal">@android:color/darker_gray</item>
+    <item name="colorControlActivated">@color/yellow_star</item>
+</style>
+
+
 </resources>

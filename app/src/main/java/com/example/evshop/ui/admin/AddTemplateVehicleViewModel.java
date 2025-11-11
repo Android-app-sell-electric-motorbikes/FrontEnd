@@ -124,7 +124,7 @@ public class AddTemplateVehicleViewModel extends ViewModel {
 
         String fileName = getFileName(context.getContentResolver(), imageUri);
         String contentType = getMimeType(context, imageUri);
-
+        Log.d("UploadDebug", "Chuẩn bị lấy URL upload. Tên file: " + fileName + ", ContentType: " + contentType);
         if (fileName == null || contentType == null) {
             _error.postValue("Không thể lấy thông tin file từ Uri.");
             _isLoading.postValue(false);

@@ -13,9 +13,9 @@
         android:id="@+id/root_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="8dp"> <!-- Thêm padding dưới để item có khoảng trống -->
+        android:paddingBottom="8dp">
 
-        <!-- Phần thông tin cơ bản (Ảnh, Tên, Giá) giữ nguyên -->
+        <!-- ImageView và txtModel không thay đổi -->
         <ImageView
             android:id="@+id/imgVehicle"
             android:layout_width="0dp"
@@ -56,6 +56,27 @@
             app:layout_constraintEnd_toEndOf="parent"
             tools:text="Xanh Dương" />
 
+        <!-- ======================================================= -->
+        <!-- ***           BƯỚC 3.1: THÊM RATING BAR VÀO ĐÂY       *** -->
+        <!-- ======================================================= -->
+        <RatingBar
+            android:id="@+id/rating_bar"
+            style="?android:attr/ratingBarStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginHorizontal="8dp"
+            android:numStars="5"
+            android:stepSize="0.1"
+            android:isIndicator="true"
+            android:theme="@style/RatingBar"
+            app:layout_constraintTop_toBottomOf="@id/txtColor"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:rating="4.5" />
+
+        <!-- ======================================================= -->
+        <!-- ***      BƯỚC 3.2: SỬA RÀNG BUỘC CỦA TXTPRICE       *** -->
+        <!-- ======================================================= -->
         <TextView
             android:id="@+id/txtPrice"
             android:layout_width="0dp"
@@ -65,18 +86,12 @@
             android:textAppearance="?attr/textAppearanceBody1"
             android:textColor="?attr/colorPrimary"
             android:textStyle="bold"
-            app:layout_constraintTop_toBottomOf="@id/txtColor"
+            app:layout_constraintTop_toBottomOf="@id/rating_bar"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             tools:text="25.000.000 ₫" />
 
-        <!--
-            ============================================================
-            ***           CHỈ HIỂN THỊ DUY NHẤT DESCRIPTION          ***
-            ============================================================
-            - Chỉ giữ lại TextView này để hiển thị mô tả ngắn.
-            - Tất cả FrameLayout và các TextView chi tiết khác đã được xóa.
-        -->
+        <!-- TextView cho Description không thay đổi -->
         <TextView
             android:id="@+id/txtDescription"
             android:layout_width="0dp"
@@ -91,7 +106,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            tools:text="Đây là dòng mô tả ngắn về sản phẩm xe điện, giúp người dùng có cái nhìn tổng quan nhanh chóng về các tính năng nổi bật." />
+            tools:text="Đây là dòng mô tả ngắn về sản phẩm xe điện." />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

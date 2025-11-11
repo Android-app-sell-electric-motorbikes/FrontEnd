@@ -12,6 +12,7 @@ import com.example.evshop.domain.models.LoginResult;
 import com.example.evshop.domain.models.RegisterRequest;
 import com.example.evshop.domain.models.UserData;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.inject.Inject;
@@ -115,23 +116,50 @@ public class AuthRepository {
         });
     }
 
-    // ** NÂNG CẤP HÀM XỬ LÝ LỖI **
     private void handleErrorResponse(Response<?> response, Callback<?> callback) {
-        // ** XỬ LÝ LỖI 401: TOKEN HẾT HẠN **
         if (response.code() == 401) {
-            logout(); // Tự động đăng xuất
+            logout();
             callback.onError("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
             return;
         }
 
-        String errorMessage = "Đã có lỗi xảy ra. Vui lòng thử lại."; // Mặc định
+        String errorMessage = "Đã có lỗi xảy ra. Vui lòng thử lại.";
         if (response.errorBody() != null) {
             try {
                 String errorBodyString = response.errorBody().string();
                 JSONObject errorJson = new JSONObject(errorBodyString);
-                if (errorJson.has("message")) {
+
+                // ** XỬ LÝ LỖI MẬT KHẨU KHÔNG HỢP LỆ **
+                if (errorJson.has("message") && "Cannot create new account".equals(errorJson.getString("message"))) {
+                    StringBuilder passwordErrors = new StringBuilder("Mật khẩu không hợp lệ:");
+                    if (errorJson.has("result")) {
+                        JSONObject resultObj = errorJson.getJSONObject("result");
+                        if (resultObj.has("errors")) {
+                            JSONArray errorsArray = resultObj.getJSONArray("errors");
+                            for (int i = 0; i < errorsArray.length(); i++) {
+                                JSONObject errorObj = errorsArray.getJSONObject(i);
+                                String code = errorObj.optString("code");
+                                switch (code) {
+                                    case "PasswordRequiresNonAlphanumeric":
+                                        passwordErrors.append("\n- Phải có ký tự đặc biệt.");
+                                        break;
+                                    case "PasswordRequiresLower":
+                                        passwordErrors.append("\n- Phải có chữ thường.");
+                                        break;
+                                    case "PasswordRequiresUpper":
+                                        passwordErrors.append("\n- Phải có chữ hoa.");
+                                        break;
+                                    case "PasswordRequiresDigit":
+                                        passwordErrors.append("\n- Phải có số.");
+                                        break;
+                                }
+                            }
+                            errorMessage = passwordErrors.toString();
+                        }
+                    }
+                } else if (errorJson.has("message")) {
                     String serverMessage = errorJson.getString("message");
-                    if (serverMessage.toLowerCase().contains("existed")) {
+                    if (serverMessage.toLowerCase().contains("existed") || serverMessage.toLowerCase().contains("is exist")) {
                         errorMessage = "Tên đăng nhập hoặc email đã tồn tại.";
                     } else {
                         errorMessage = serverMessage;

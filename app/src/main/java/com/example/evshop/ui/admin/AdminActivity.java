@@ -78,15 +78,6 @@ public class AdminActivity extends AppCompatActivity {
         // ** KÍCH HOẠT NÚT MỚI **
         findViewById(R.id.btnTransactionHistory).setOnClickListener(v ->
                 startActivity(new Intent(AdminActivity.this, TransactionHistoryActivity.class)));
-
-        findViewById(R.id.btnManageVehicles).setOnClickListener(v ->
-                Toast.makeText(this, "Chức năng Quản lý Xe sắp ra mắt", Toast.LENGTH_SHORT).show());
-
-        findViewById(R.id.btnManageUsers).setOnClickListener(v ->
-                Toast.makeText(this, "Chức năng Quản lý Người dùng sắp ra mắt", Toast.LENGTH_SHORT).show());
-
-        findViewById(R.id.btnManageOrders).setOnClickListener(v ->
-                Toast.makeText(this, "Chức năng Quản lý Đơn hàng sắp ra mắt", Toast.LENGTH_SHORT).show());
     }
 
     @Override

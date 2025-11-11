@@ -4,103 +4,102 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardElevation="2dp"
-    app:cardUseCompatPadding="true">
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp">
+        android:padding="12dp">
 
         <ImageView
             android:id="@+id/imgProduct"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
             android:scaleType="centerCrop"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:srcCompat="@tools:sample/backgrounds/scenic" />
+            tools:src="@drawable/placeholder_vehicle" />
 
         <TextView
             android:id="@+id/tvProductName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:layout_marginStart="12dp"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
             android:textStyle="bold"
             app:layout_constraintEnd_toStartOf="@+id/btnRemove"
             app:layout_constraintStart_toEndOf="@+id/imgProduct"
-            app:layout_constraintTop_toTopOf="@+id/imgProduct"
-            tools:text="Tên sản phẩm rất là dài để test" />
+            app:layout_constraintTop_toTopOf="@id/imgProduct"
+            tools:text="E-Scooter Pro Max 2025" />
 
         <TextView
             android:id="@+id/tvProductPrice"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:textAppearance="?attr/textAppearanceBodyMedium"
-            app:layout_constraintStart_toStartOf="@+id/tvProductName"
-            app:layout_constraintTop_toBottomOf="@+id/tvProductName"
-            tools:text="Giá: 25,000,000₫" />
-        
-        <ImageButton
-            android:id="@+id/btnRemove"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_delete_24"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:tint="?attr/colorError"/>
+            app:layout_constraintStart_toStartOf="@id/tvProductName"
+            app:layout_constraintTop_toBottomOf="@id/tvProductName"
+            tools:text="20,000,000đ" />
 
         <LinearLayout
-            android:id="@+id/quantity_control"
+            android:id="@+id/quantity_selector"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            app:layout_constraintStart_toStartOf="@+id/tvProductName"
-            app:layout_constraintTop_toBottomOf="@+id/tvProductPrice">
+            app:layout_constraintStart_toStartOf="@id/tvProductName"
+            app:layout_constraintTop_toBottomOf="@id/tvProductPrice">
 
             <Button
                 android:id="@+id/btnMinus"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.Material3.Button.IconButton.Outlined"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:minWidth="0dp"
-                android:padding="0dp"
-                android:text="-" />
+                app:icon="@drawable/ic_remove" />
 
             <TextView
                 android:id="@+id/tvQuantity"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:text="1"
                 android:textAppearance="?attr/textAppearanceBodyLarge"
-                android:textStyle="bold"
-                tools:text="1" />
+                android:textStyle="bold" />
 
             <Button
                 android:id="@+id/btnPlus"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                style="@style/Widget.Material3.Button.IconButton.Outlined"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:minWidth="0dp"
-                android:padding="0dp"
-                android:text="+" />
+                app:icon="@drawable/ic_add" />
         </LinearLayout>
 
         <TextView
             android:id="@+id/tvTotalItem"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?attr/textAppearanceTitleSmall"
+            android:layout_marginEnd="4dp"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@+id/quantity_control"
+            app:layout_constraintBottom_toBottomOf="@id/quantity_selector"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/quantity_control"
-            tools:text="Tổng: 25,000,000₫" />
+            app:layout_constraintTop_toTopOf="@id/quantity_selector"
+            tools:text="20,000,000đ" />
+
+        <ImageButton
+            android:id="@+id/btnRemove"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_delete"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

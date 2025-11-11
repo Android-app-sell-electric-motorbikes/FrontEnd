@@ -31,16 +31,6 @@
                 android:text="Bảng điều khiển"
                 android:textAppearance="@style/TextAppearance.Material3.TitleLarge"/>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnManageVehicles"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="Quản lý Xe"
-                app:icon="@drawable/ic_round_directions_car_24"
-                android:paddingVertical="12dp"
-                android:gravity="start|center_vertical"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_manage_inventory"
@@ -64,28 +54,7 @@
                 android:text="Thêm Mẫu Xe Mới"
                 app:icon="@drawable/ic_add" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnManageUsers"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Quản lý Người dùng"
-                app:icon="@drawable/ic_round_group_24"
-                android:paddingVertical="12dp"
-                android:gravity="start|center_vertical"/>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnManageOrders"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Quản lý Đơn hàng"
-                app:icon="@drawable/ic_round_receipt_long_24"
-                android:paddingVertical="12dp"
-                android:gravity="start|center_vertical"/>
-            
             <!-- ** NÚT MỚI ĐƯỢC THÊM VÀO ĐÂY ** -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnTransactionHistory"

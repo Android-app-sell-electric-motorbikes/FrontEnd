@@ -22,8 +22,10 @@ public class RegisterRequest {
     public RegisterRequest(String userName, String password, String email, String phoneNumber, String address) {
         this.userName = userName;
         this.password = password;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.address = address;
+
+        // ** XỬ LÝ CHUỖI RỖNG THÀNH NULL **
+        this.email = (email != null && email.isEmpty()) ? null : email;
+        this.phoneNumber = (phoneNumber != null && phoneNumber.isEmpty()) ? null : phoneNumber;
+        this.address = (address != null && address.isEmpty()) ? null : address;
     }
 }

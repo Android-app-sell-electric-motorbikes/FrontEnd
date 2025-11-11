@@ -1,17 +1,16 @@
 package com.example.evshop.ui.payment;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.View;
-import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.evshop.R;
@@ -19,31 +18,24 @@ import com.google.android.material.appbar.MaterialToolbar;
 
 public class PaymentActivity extends AppCompatActivity {
 
-    public static final String EXTRA_URL = "PAYMENT_URL";
-    public static final String RETURN_URL_SUCCESS_KEY = "/Checkout"; // TỪ API CỦA BẠN
+    public static final String EXTRA_URL = "EXTRA_URL";
+
+    private WebView webView;
+    private ProgressBar progressBar;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_payment);
 
+        webView = findViewById(R.id.webView);
+        progressBar = findViewById(R.id.progressBar);
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
-        WebView webView = findViewById(R.id.webView);
-        ProgressBar progressBar = findViewById(R.id.progressBar);
 
-        toolbar.setNavigationOnClickListener(v -> {
-            setResult(Activity.RESULT_CANCELED);
-            finish();
-        });
+        toolbar.setNavigationOnClickListener(v -> finish());
 
-        String paymentUrl = getIntent().getStringExtra(EXTRA_URL);
-
-        if (paymentUrl == null || paymentUrl.isEmpty()) {
-            Toast.makeText(this, "URL thanh toán không hợp lệ", Toast.LENGTH_LONG).show();
-            finish();
-            return;
-        }
+        String url = getIntent().getStringExtra(EXTRA_URL);
 
         webView.getSettings().setJavaScriptEnabled(true);
         webView.setWebViewClient(new WebViewClient() {
@@ -57,23 +49,36 @@ public class PaymentActivity extends AppCompatActivity {
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
                 progressBar.setVisibility(View.GONE);
-
-                if (url.contains(RETURN_URL_SUCCESS_KEY)) {
-                    // Bạn có thể kiểm tra thêm các tham số như vnp_ResponseCode nếu cần
-                    setResult(Activity.RESULT_OK);
-                    finish();
-                }
             }
 
             @Override
-            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
-                super.onReceivedError(view, request, error);
-                Toast.makeText(PaymentActivity.this, "Lỗi tải trang: " + error.getDescription(), Toast.LENGTH_SHORT).show();
-                setResult(Activity.RESULT_CANCELED);
-                finish();
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                String currentUrl = request.getUrl().toString();
+                // ** PHÁT HIỆN GIAO DỊCH THÀNH CÔNG **
+                if (currentUrl.contains("vnp_ResponseCode=00")) {
+                    // Gửi tín hiệu thành công về cho CartActivity
+                    setResult(RESULT_OK);
+                    finish();
+                    return true; // Đã xử lý, không load URL này nữa
+                }
+                // Các trường hợp khác (thất bại, hủy) sẽ tự động đóng khi người dùng back
+                return super.shouldOverrideUrlLoading(view, request);
             }
         });
 
-        webView.loadUrl(paymentUrl);
+        if (url != null && !url.isEmpty()) {
+            webView.loadUrl(url);
+        } else {
+            finish(); // Đóng nếu không có URL
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (webView.canGoBack()) {
+            webView.goBack();
+        } else {
+            super.onBackPressed();
+        }
     }
 }
