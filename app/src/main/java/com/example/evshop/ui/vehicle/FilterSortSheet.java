@@ -1,10 +1,16 @@
+// File: D:/PRM391/FrontEnd/app/src/main/java/com/example/evshop/ui/vehicle/FilterSortSheet.java
+
 package com.example.evshop.ui.vehicle;
 
 import android.os.Bundle;
-import android.text.TextUtils;import android.view.LayoutInflater;
+import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.RadioGroup;
+// *** BƯỚC 5.2.1: THÊM IMPORT CHO RATINGBAR ***
+import android.widget.RatingBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -12,21 +18,21 @@ import androidx.annotation.Nullable;
 
 import com.example.evshop.R;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-// SỬA 1: Import các lớp mới cần thiết
-import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.textfield.TextInputEditText;
 
 public class FilterSortSheet extends BottomSheetDialogFragment {
 
+    // *** BƯỚC 5.2.2: SỬA LẠI INTERFACE ĐỂ NHẬN THÊM RATING ***
     public interface FilterListener {
-        void onFilterApplied(Long minPrice, Long maxPrice, Boolean sortByPriceAsc);
+        void onFilterApplied(Long minPrice, Long maxPrice, Boolean sortByPriceAsc, Integer minRating);
     }
 
     private FilterListener listener;
     private TextInputEditText etMinPrice;
     private TextInputEditText etMaxPrice;
-    // SỬA 2: Thay thế RadioGroup bằng ChipGroup
-    private ChipGroup cgSort;
+    private RadioGroup rgSort;
+    // *** BƯỚC 5.2.3: KHAI BÁO RATINGBAR ***
+    private RatingBar filterRatingBar;
 
     public static FilterSortSheet newInstance() {
         return new FilterSortSheet();
@@ -39,54 +45,55 @@ public class FilterSortSheet extends BottomSheetDialogFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.sheet_filter_sort, container, false);
+        // Dòng này không thay đổi
+        return inflater.inflate(R.layout.sheet_filter_sort, container, false);
+    }
 
-        // Ánh xạ các view
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        // Ánh xạ các view đã có
         etMinPrice = view.findViewById(R.id.etMinPrice);
         etMaxPrice = view.findViewById(R.id.etMaxPrice);
-        // SỬA 3: Ánh xạ tới ChipGroup
-        cgSort = view.findViewById(R.id.cgSort);
+        rgSort = view.findViewById(R.id.rgSort);
         Button btnApply = view.findViewById(R.id.btnApply);
         Button btnCancel = view.findViewById(R.id.btnCancel);
 
+        // *** BƯỚC 5.2.4: ÁNH XẠ RATINGBAR ***
+        filterRatingBar = view.findViewById(R.id.filter_rating_bar);
+
         btnApply.setOnClickListener(v -> {
             try {
-                // ========================================================
-                // ***      SỬA 4: LẤY DỮ LIỆU TỪ CHIPGROUP            ***
-                // ========================================================
+                // 1. Lấy giá trị sắp xếp (Không đổi)
                 Boolean sortByPriceAsc = null;
-                // Lấy ID của Chip đang được chọn
-                int selectedSortId = cgSort.getCheckedChipId();
-
-                // So sánh với ID của các Chip trong file XML
-                if (selectedSortId == R.id.chipPriceAsc) {
+                int selectedSortId = rgSort.getCheckedRadioButtonId();
+                if (selectedSortId == R.id.rbPriceAsc) {
                     sortByPriceAsc = true;
-                } else if (selectedSortId == R.id.chipPriceDesc) {
+                } else if (selectedSortId == R.id.rbPriceDesc) {
                     sortByPriceAsc = false;
                 }
-                // Các trường hợp khác như Popular, Rating sẽ không thay đổi giá trị sortByPriceAsc (vẫn là null)
 
-                // ========================================================
-                // ***      ĐỌC DỮ LIỆU TỪ HAI Ô NHẬP LIỆU (Giữ nguyên) ***
-                // ========================================================
+                // 2. Lấy giá trị lọc giá (Không đổi)
                 Long minPrice = null;
                 Long maxPrice = null;
-
                 String minPriceStr = etMinPrice.getText().toString();
                 if (!TextUtils.isEmpty(minPriceStr)) {
                     minPrice = Long.parseLong(minPriceStr);
                 }
-
                 String maxPriceStr = etMaxPrice.getText().toString();
                 if (!TextUtils.isEmpty(maxPriceStr)) {
                     maxPrice = Long.parseLong(maxPriceStr);
                 }
 
-                // Gửi kết quả về Activity (Giữ nguyên)
+                // *** BƯỚC 5.2.5: LẤY GIÁ TRỊ TỪ RATINGBAR ***
+                int minRating = (int) filterRatingBar.getRating();
+
+                // 3. Gửi kết quả (đã bao gồm rating) về Activity
                 if (listener != null) {
-                    listener.onFilterApplied(minPrice, maxPrice, sortByPriceAsc);
+                    listener.onFilterApplied(minPrice, maxPrice, sortByPriceAsc, minRating);
                 }
-                dismiss(); // Đóng BottomSheet
+                dismiss();
             } catch (NumberFormatException e) {
                 if (getContext() != null) {
                     Toast.makeText(getContext(), "Giá trị nhập vào quá lớn!", Toast.LENGTH_LONG).show();
@@ -100,7 +107,5 @@ public class FilterSortSheet extends BottomSheetDialogFragment {
         });
 
         btnCancel.setOnClickListener(v -> dismiss());
-
-        return view;
     }
 }

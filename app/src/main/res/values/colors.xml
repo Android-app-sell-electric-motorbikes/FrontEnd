@@ -26,6 +26,7 @@
     <color name="gray">#9E9E9E</color>
     <color name="gray_dark">#616161</color>
     <color name="admin_background_color">#263238</color> <!-- Màu xám rất nhạt -->
+    <color name="yellow_star">#FFC107</color>
 
     <color name="primary_500">#2196F3</color> <!-- tin nhắn gửi, xanh -->
     <color name="surface_variant">#E0E0E0</color> <!-- tin nhắn nhận, xám nhạt -->

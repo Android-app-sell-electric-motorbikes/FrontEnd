@@ -1,88 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:app="http://schemas.android.com/apk/res-auto"    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:padding="16dp">
 
+    <!-- Phần Title và Sắp xếp (Sort) giữ nguyên -->
     <TextView
         style="@style/TextAppearance.Material3.TitleLarge"
-        android:text="@string/sheet_title"
-        android:layout_gravity="center_horizontal"
-        android:paddingBottom="8dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-    <!-- Phần Sắp xếp -->
-    <TextView
-        android:text="@string/sheet_sort"
-        android:textAppearance="?attr/textAppearanceTitleMedium"
-        android:layout_marginTop="16dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/cgSort"
-        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:singleSelection="true">
+        android:text="@string/sheet_title" />
 
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipPopular"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:text="@string/label_popular"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipPriceAsc"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:text="@string/label_price_asc"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipPriceDesc"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:text="@string/label_price_desc"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipRating"
-            style="@style/Widget.Material3.Chip.Filter"
-            android:text="@string/label_rating"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </com.google.android.material.chip.ChipGroup>
-
-    <!-- Phần Lọc -->
     <TextView
-        android:text="@string/sheet_filter"
-        android:textAppearance="?attr/textAppearanceTitleMedium"
-        android:layout_marginTop="24dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="@string/sheet_sort" />
 
-    <!-- Lọc theo giá -->
+    <RadioGroup
+        android:id="@+id/rgSort"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <!-- ... Các RadioButton sắp xếp giữ nguyên ... -->
+        <RadioButton
+            android:id="@+id/rbSortDefault"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Mặc định" />
+
+        <RadioButton
+            android:id="@+id/rbPriceAsc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_price_asc" />
+
+        <RadioButton
+            android:id="@+id/rbPriceDesc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/label_price_desc" />
+    </RadioGroup>
+
+    <!-- Phần lọc giá bằng ô nhập liệu giữ nguyên -->
     <TextView
-        android:text="@string/filter_price"
-        android:layout_marginTop="8dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/filter_price" />
 
-    <!-- SỬA: Thay thế SeekBar bằng hai EditText -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="8dp">
-
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
+        <!-- ... Các TextInputEditText cho min/max price giữ nguyên ... -->
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilMinPrice"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="Giá từ"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+            android:hint="Giá từ (VNĐ)">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etMinPrice"
@@ -91,14 +70,19 @@
                 android:inputType="numberDecimal" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginHorizontal="8dp"
+            android:text="-" />
+
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/tilMaxPrice"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:layout_marginStart="8dp"
-            android:hint="Giá đến"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+            android:hint="Giá đến (VNĐ)">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etMaxPrice"
@@ -106,42 +90,53 @@
                 android:layout_height="wrap_content"
                 android:inputType="numberDecimal" />
         </com.google.android.material.textfield.TextInputLayout>
+
     </LinearLayout>
 
-    <!-- Phần Lọc thương hiệu và Đánh giá (giữ nguyên) -->
+
+    <!-- ======================================================= -->
+    <!-- ***           THÊM BỘ LỌC RATING VÀO ĐÂY            *** -->
+    <!-- ======================================================= -->
     <TextView
-        android:text="@string/filter_brand"
-        android:layout_marginTop="16dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="Đánh giá tối thiểu"
+        android:textAppearance="?attr/textAppearanceBody1"/>
+
+    <RatingBar
+        android:id="@+id/filter_rating_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="8dp"
+        android:numStars="5"
+        android:stepSize="1"
+        android:rating="0"
+        android:theme="@style/RatingBar"/>
+
+
+    <!-- Phần nút bấm giữ nguyên -->
     <LinearLayout
-        android:id="@+id/brandContainer"
-        android:orientation="vertical"
+        style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
-
-    <!-- Các nút hành động -->
-    <LinearLayout
-        android:orientation="horizontal"
-        android:gravity="end"
+        android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <Button
-            android:id="@+id/btnCancel"
-            style="?attr/materialButtonOutlinedStyle"
-            android:text="@string/cancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+        android:gravity="end"
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/btnApply"
-            android:text="@string/apply"
-            android:layout_marginStart="8dp"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
+            android:layout_height="60dp"
+            android:text="@string/apply" />
 
+        <Button
+            android:id="@+id/btnCancel"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="@string/cancel" />
+    </LinearLayout>
 </LinearLayout>

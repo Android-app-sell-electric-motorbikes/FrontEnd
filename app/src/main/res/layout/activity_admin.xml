@@ -7,15 +7,13 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".ui.admin.AdminActivity"
-    android:background="?attr/colorSurfaceContainerLowest">
+    android:background="@color/admin_background_color">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        app:title="Trang Quản Trị"
-        app:titleTextColor="?attr/colorOnSurface"
-        android:background="?attr/colorSurface" />
+        app:title="Trang Quản Trị" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -31,16 +29,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Bảng điều khiển"
-                android:textAppearance="?attr/textAppearanceTitleLarge"/>
+                android:textAppearance="@style/TextAppearance.Material3.TitleLarge"/>
 
-            <!-- Nhóm Quản lý Sản phẩm -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnManageVehicles"
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:text="Quản lý Mẫu xe"
+                android:text="Quản lý Xe"
                 app:icon="@drawable/ic_round_directions_car_24"
                 android:paddingVertical="12dp"
                 android:gravity="start|center_vertical"/>
@@ -51,10 +48,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
                 android:text="Quản lý Kho (Tồn kho)"
-                app:icon="@drawable/ic_inventory"
-                android:paddingVertical="12dp"
-                android:gravity="start|center_vertical"/>
+                app:icon="@drawable/ic_inventory" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_go_to_add_template"
@@ -62,12 +59,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
                 android:text="Thêm Mẫu Xe Mới"
-                app:icon="@drawable/ic_add"
-                android:paddingVertical="12dp"
-                android:gravity="start|center_vertical"/>
+                app:icon="@drawable/ic_add" />
 
-            <!-- Nhóm Quản lý Chung -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnManageUsers"
                 style="@style/Widget.Material3.Button.OutlinedButton"
@@ -89,22 +85,8 @@
                 app:icon="@drawable/ic_round_receipt_long_24"
                 android:paddingVertical="12dp"
                 android:gravity="start|center_vertical"/>
-
-            <!-- ============================================= -->
-            <!-- **       NÚT CHAT ĐƯỢC THÊM VÀO ĐÂY       ** -->
-            <!-- ============================================= -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnChatSupport"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Hỗ trợ Chat"
-                app:icon="@drawable/ic_chat"
-                android:paddingVertical="12dp"
-                android:gravity="start|center_vertical"/>
-            <!-- ============================================= -->
-
+            
+            <!-- ** NÚT MỚI ĐƯỢC THÊM VÀO ĐÂY ** -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnTransactionHistory"
                 style="@style/Widget.Material3.Button.OutlinedButton"

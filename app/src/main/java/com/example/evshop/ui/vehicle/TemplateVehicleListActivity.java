@@ -10,30 +10,32 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+// RecyclerView không cần import vì đã có trong binding
+// import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.evshop.R;
+// Giữ nguyên tên Binding gốc của bạn
 import com.example.evshop.databinding.ActivityVehicleListBinding;
-// *** BƯỚC 1: SỬA LẠI IMPORT ĐỂ DÙNG ĐÚNG ADAPTER ***
 import com.example.evshop.domain.models.TemplateVehicle;
+// import com.example.evshop.ui.detail.VehicleDetailActivity; // Bỏ comment nếu có màn hình này
 
 import dagger.hilt.android.AndroidEntryPoint;
 
-// *** BƯỚC 2: IMPLEMENT INTERFACE MỚI CỦA ADAPTER ***
+// *** BƯỚC 1: SỬA LẠI PHẦN IMPLEMENTS INTERFACE ***
 @AndroidEntryPoint
 public class TemplateVehicleListActivity extends AppCompatActivity
         implements FilterSortSheet.FilterListener, TemplateVehicleAdapter.OnItemClickListener {
 
     private ActivityVehicleListBinding b;
     private TemplateVehicleListViewModel vm;
-    // Sửa lại tên lớp Adapter
     private TemplateVehicleAdapter adapter;
 
-    // Biến để lưu trạng thái lọc hiện tại (không đổi)
+    // *** BƯỚC 2: THÊM BIẾN LƯU TRẠNG THÁI RATING ***
     private String currentSearchTerm = null;
     private Long currentMinPrice = null;
     private Long currentMaxPrice = null;
     private Boolean currentSortByPriceAsc = null;
+    private Integer currentMinRating = null; // << THÊM DÒNG NÀY
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,11 +50,9 @@ public class TemplateVehicleListActivity extends AppCompatActivity
         setupSearchView();
         observeViewModel();
 
-        // Gọi fetch lần đầu tiên khi Activity được tạo
-        vm.fetchVehicles(currentSearchTerm, currentMinPrice, currentMaxPrice, currentSortByPriceAsc);
+        // Không cần gọi fetch ở đây nữa, vì ViewModel đã tự gọi fetchInitialData() trong constructor của nó
     }
 
-    // setupToolbar() và setupSearchView() không thay đổi
     private void setupToolbar() {
         b.toolbar.setNavigationOnClickListener(v -> finish());
         b.toolbar.inflateMenu(R.menu.menu_vehicle_list);
@@ -67,57 +67,54 @@ public class TemplateVehicleListActivity extends AppCompatActivity
         });
     }
 
-    // *** BƯỚC 3: SỬA LẠI CÁCH KHỞI TẠO ADAPTER ***
     private void setupRecyclerView() {
-        // Khởi tạo adapter và truyền "this" (chính Activity này) làm listener
         adapter = new TemplateVehicleAdapter(this);
+        // Giữ nguyên ID gốc của bạn: rvAllVehicles
         b.rvAllVehicles.setLayoutManager(new GridLayoutManager(this, 2));
         b.rvAllVehicles.setAdapter(adapter);
     }
 
+    // *** BƯỚC 3: CẬP NHẬT LOGIC TÌM KIẾM ***
     private void setupSearchView() {
         b.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 currentSearchTerm = query;
-                vm.fetchVehicles(currentSearchTerm, currentMinPrice, currentMaxPrice, currentSortByPriceAsc);
+                // Gọi phương thức lọc ở client với TẤT CẢ các tham số hiện tại
+                vm.processClientSideFilter(currentSearchTerm, currentMinPrice, currentMaxPrice, currentSortByPriceAsc, currentMinRating);
                 b.searchView.clearFocus();
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if (newText.isEmpty() && currentSearchTerm != null) {
-                    currentSearchTerm = null;
-                    vm.fetchVehicles(currentSearchTerm, currentMinPrice, currentMaxPrice, currentSortByPriceAsc);
-                }
+                // Tự động lọc khi người dùng thay đổi text
+                currentSearchTerm = newText.isEmpty() ? null : newText;
+                vm.processClientSideFilter(currentSearchTerm, currentMinPrice, currentMaxPrice, currentSortByPriceAsc, currentMinRating);
                 return true;
             }
         });
     }
 
-    // *** BƯỚC 4: SỬA LẠI CÁCH CẬP NHẬT DỮ LIỆU CHO ADAPTER ***
     private void observeViewModel() {
         vm.getVehicles().observe(this, vehicles -> {
             if (vehicles != null) {
-                // Sử dụng phương thức updateVehicles của adapter mới
                 adapter.updateVehicles(vehicles);
 
-                // Cuộn lên đầu danh sách
                 if (!vehicles.isEmpty()) {
                     b.rvAllVehicles.scrollToPosition(0);
                 }
 
-                // Cập nhật giao diện cho trường hợp danh sách rỗng (không đổi)
                 boolean isListEmpty = vehicles.isEmpty();
+                // Giữ nguyên ID gốc của bạn: tvEmptyMessage và rvAllVehicles
                 b.tvEmptyMessage.setVisibility(isListEmpty ? View.VISIBLE : View.GONE);
                 b.rvAllVehicles.setVisibility(isListEmpty ? View.GONE : View.VISIBLE);
             }
         });
 
-        // Phần lắng nghe getLoading() và getError() không thay đổi
         vm.getLoading().observe(this, isLoading -> {
             if (isLoading != null) {
+                // Giữ nguyên ID gốc của bạn: progressBar
                 b.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
                 if (isLoading) {
                     b.rvAllVehicles.setVisibility(View.GONE);
@@ -133,24 +130,28 @@ public class TemplateVehicleListActivity extends AppCompatActivity
         });
     }
 
-    // Phương thức nhận kết quả từ BottomSheet (không đổi)
+    // *** BƯỚC 4: CẬP NHẬT PHƯƠNG THỨC onFilterApplied ***
     @Override
-    public void onFilterApplied(Long minPrice, Long maxPrice, Boolean sortByPriceAsc) {
+    public void onFilterApplied(Long minPrice, Long maxPrice, Boolean sortByPriceAsc, Integer minRating) {
+        // Cập nhật lại tất cả các biến trạng thái lọc
         this.currentMinPrice = minPrice;
         this.currentMaxPrice = maxPrice;
         this.currentSortByPriceAsc = sortByPriceAsc;
-        vm.fetchVehicles(currentSearchTerm, currentMinPrice, currentMaxPrice, currentSortByPriceAsc);
+        this.currentMinRating = minRating; // << LƯU LẠI TRẠNG THÁI RATING
+
+        // GỌI PHƯƠNG THỨC LỌC Ở CLIENT, KHÔNG GỌI LẠI API
+        vm.processClientSideFilter(currentSearchTerm, currentMinPrice, currentMaxPrice, currentSortByPriceAsc, currentMinRating);
+
         Toast.makeText(this, "Đã áp dụng bộ lọc!", Toast.LENGTH_SHORT).show();
     }
 
-    // *** BƯỚC 5: IMPLEMENT PHƯƠNG THỨC CỦA OnItemClickListener ***
+    // Phương thức onItemClick không thay đổi
     @Override
     public void onItemClick(TemplateVehicle vehicle) {
-        // Đây là nơi xử lý sự kiện khi một item trong RecyclerView được click
-        Intent intent = new Intent(this, VehicleDetailActivity.class);
-        // Truyền ID hoặc toàn bộ object vehicle sang màn hình chi tiết
-        // Truyền ID sẽ an toàn hơn và giúp màn hình chi tiết luôn lấy dữ liệu mới nhất
-        intent.putExtra("VEHICLE_ID", vehicle.getId());
-        startActivity(intent);
+        Toast.makeText(this, "Clicked: " + vehicle.getVersion().getVersionName(), Toast.LENGTH_SHORT).show();
+        // Mở màn hình chi tiết
+         Intent intent = new Intent(this, VehicleDetailActivity.class);
+         intent.putExtra("VEHICLE_ID", vehicle.getId());
+         startActivity(intent);
     }
 }

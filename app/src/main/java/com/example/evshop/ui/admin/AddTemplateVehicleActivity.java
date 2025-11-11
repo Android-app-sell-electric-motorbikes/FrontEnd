@@ -167,7 +167,13 @@ public class AddTemplateVehicleActivity extends AppCompatActivity {
             Toast.makeText(this, "Vui lòng chọn một hình ảnh", Toast.LENGTH_SHORT).show();
             return;
         }
+        String contentType = getContentResolver().getType(selectedImageUri);
 
+        // 2. Kiểm tra phòng trường hợp không lấy được ContentType
+        if (contentType == null) {
+            Toast.makeText(this, "Không thể xác định loại file ảnh. Vui lòng chọn ảnh khác.", Toast.LENGTH_SHORT).show();
+            return;
+        }
         // ===================================================================
         //  NẾU ĐẾN ĐƯỢC ĐÂY, MỌI THỨ ĐỀU HỢP LỆ. BẮT ĐẦU GỌI VIEWMODEL
         // ===================================================================
