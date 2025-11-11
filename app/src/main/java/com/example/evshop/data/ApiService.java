@@ -24,6 +24,7 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
@@ -56,28 +57,31 @@ public interface ApiService {
             @Query("sortByPriceAsc") Boolean sortByPriceAsc
     );
 
-    @GET("api/EVTemplate/get-template-vehicle-by-id/{id}")
-    Call<ApiEnvelope<TemplateVehicle>> getVehicleById(@Path("id") String id);
+    @GET("api/EVTemplate/get-template-by-id/{id}") // << THAY ĐỔI TẠI ĐÂY
+    Call<ApiEnvelope<TemplateVehicle>> getVehicleById(@Path("id") String vehicleId);
 
-    @GET("api/Version/get-version-by-id/{id}")
-    Call<ApiEnvelope<VersionDetails>> getVersionDetails(@Path("id") String id);
+    @GET("api/ElectricVehicleVersion/get-version-by-id/{versionId}")
+    Call<ApiEnvelope<VersionDetails>> getVersionDetails(@Path("versionId") String versionId); // << THAY TỪ VersionDetails THÀNH Version
 
-    @GET("api/Version/get-all-versions")
+    @GET("api/ElectricVehicleVersion/get-all-versions")
     Call<ApiEnvelope<List<Version>>> getVersions();
 
-    @GET("api/Color/get-all-colors")
+    @GET("api/ElectricVehicleColor/get-all-colors")
     Call<ApiEnvelope<List<Color>>> getColors();
 
-    @POST("api/Image/get-upload-url")
+    @Headers("Content-Type: application/json")
+    @POST("api/Image/get-upload-url") // << GIỮ ĐÚNG ENDPOINT LẤY URL
     Call<UploadUrlResponse> getUploadUrl(@Body GetUploadUrlRequest request);
 
     @PUT
-    Call<ResponseBody> uploadImageToS3(@Url String uploadUrl, @Body RequestBody imageBody);
-
+    Call<ResponseBody> uploadImageToS3(
+            @Url String url,
+            @Body RequestBody imageBody
+    );
     @POST("api/EVTemplate/create-template-vehicle")
     Call<ApiEnvelope<Boolean>> createTemplateVehicle(@Body CreateTemplateVehicleRequest request);
 
     // ** SỬA LẠI KIỂU DỮ LIỆU TRẢ VỀ **
-    @GET("api/Inventory/get-all")
+    @GET("api/ElectricVehicle/get-evc-inventory")
     Call<ApiEnvelope<InventoryResult>> getInventory();
 }
