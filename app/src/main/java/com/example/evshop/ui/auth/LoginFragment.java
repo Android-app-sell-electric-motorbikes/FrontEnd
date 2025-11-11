@@ -39,10 +39,10 @@ public class LoginFragment extends Fragment {
         authViewModel = new ViewModelProvider(requireActivity()).get(AuthViewModel.class);
 
         b.btnLogin.setOnClickListener(v -> {
-            // ** SỬA LẠI: LẤY DỮ LIỆU TỪ etUsername **
-            String username = String.valueOf(b.etUsername.getText());
+            // SỬA 1: Lấy dữ liệu từ `etEmail` thay vì `etUsername`
+            String email = String.valueOf(b.etEmail.getText());
             String pass = String.valueOf(b.etPassword.getText());
-            authViewModel.login(username, pass);
+            authViewModel.login(email, pass);
         });
 
         b.tvSignup.setOnClickListener(v -> {
@@ -59,7 +59,8 @@ public class LoginFragment extends Fragment {
             if (isLoading != null) {
                 b.loading.setVisibility(isLoading ? View.VISIBLE : View.GONE);
                 b.btnLogin.setEnabled(!isLoading);
-                b.tilUsername.setEnabled(!isLoading);
+                // SỬA 2: Vô hiệu hóa `tilEmail` thay vì `tilUsername`
+                b.tilEmail.setEnabled(!isLoading);
                 b.etPassword.setEnabled(!isLoading);
             }
         });

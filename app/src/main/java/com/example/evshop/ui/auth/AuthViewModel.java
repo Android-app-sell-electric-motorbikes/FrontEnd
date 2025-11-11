@@ -8,6 +8,7 @@ import com.example.evshop.data.TokenManager;
 import com.example.evshop.data.auth.AuthRepository;
 import com.example.evshop.data.repository.UserRepository;
 import com.example.evshop.domain.models.LoginResult;
+import com.example.evshop.domain.models.RegisterRequest;
 import com.example.evshop.domain.models.UserData;
 
 import javax.inject.Inject;
@@ -63,19 +64,11 @@ public class AuthViewModel extends ViewModel {
                     return;
                 }
 
-                // ** BƯỚC 1: LƯU TOKEN **
                 tokenManager.saveAccessToken(data.accessToken);
-
-                // ** BƯỚC 2: GIẢI MÃ TOKEN ĐỂ LẤY ROLE **
                 String role = tokenManager.getUserRole();
-
-                // ** BƯỚC 3: GÁN ROLE VÀO ĐỐI TƯỢNG USERDATA **
                 data.userData.role = role;
-
-                // ** BƯỚC 4: LƯU ĐỐI TƯỢNG USERDATA HOÀN CHỈNH VÀO REPOSITORY **
                 userRepository.setCurrentUser(data.userData);
 
-                // ** BƯỚC 5: ĐIỀU HƯỚNG DỰA TRÊN DỮ LIỆU ĐÃ HOÀN CHỈNH **
                 if (data.userData.isAdmin()) {
                     _navigationEvent.postValue(NavigationEvent.GO_TO_ADMIN);
                 } else {
@@ -91,6 +84,33 @@ public class AuthViewModel extends ViewModel {
         });
     }
 
+    // ========================================================
+    // SỬA: THÊM PHƯƠNG THỨC REGISTER VÀO ĐÂY
+    // ========================================================
+    public void register(RegisterRequest request) {
+        _loading.setValue(true);
+        _error.setValue(null);
+
+        // SỬA: Đổi kiểu Callback từ <String> thành <UserData>
+        authRepository.register(request, new AuthRepository.Callback<UserData>() {
+            @Override
+            // SỬA: Tham số onSuccess bây giờ là một đối tượng UserData
+            public void onSuccess(UserData createdUser) {
+                _loading.postValue(false);
+                // Sau khi đăng ký thành công, điều hướng người dùng về trang đăng nhập
+                // để họ có thể tự đăng nhập lại.
+                _navigationEvent.postValue(NavigationEvent.GO_TO_HOME); // Dùng GO_TO_HOME để trigger navigation về Login
+            }
+
+            @Override
+            public void onError(String message) {
+                _loading.postValue(false);
+                _error.postValue(message);
+            }
+        });
+    }
+    // ========================================================
+
     public void onNavigationComplete() {
         _navigationEvent.setValue(NavigationEvent.STAY);
     }
@@ -100,8 +120,7 @@ public class AuthViewModel extends ViewModel {
     }
 
     public void logout() {
-        tokenManager.clear();
-        userRepository.clearCurrentUser();
         authRepository.logout();
+        userRepository.clearCurrentUser();
     }
 }
