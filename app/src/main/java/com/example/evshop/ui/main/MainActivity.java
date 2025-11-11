@@ -1,6 +1,7 @@
 package com.example.evshop.ui.main;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,6 +22,7 @@ import androidx.navigation.ui.NavigationUI;
 import com.example.evshop.R;
 import com.example.evshop.databinding.ActivityMainBinding;
 import com.example.evshop.ui.auth.AuthViewModel;
+import com.example.evshop.ui.cart.CartActivity;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -34,10 +36,8 @@ public class MainActivity extends AppCompatActivity {
     private NavController navController;
     private AuthViewModel authViewModel;
 
-    // Launcher để yêu cầu quyền thông báo
     private final ActivityResultLauncher<String> requestPermissionLauncher = 
         registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-            // Bạn có thể xử lý kết quả ở đây nếu cần, ví dụ: hiển thị thông báo cảm ơn
         });
 
     @Override
@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
 
         setupNavigation();
         observeLoginStatus();
-        askNotificationPermission(); // Yêu cầu quyền khi khởi động
+        askNotificationPermission();
     }
 
     private void askNotificationPermission() {
@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void observeLoginStatus() {
-        authViewModel.getIsLoggedInState().observe(this, isLoggedIn -> {
+        authViewModel.getCurrentUser().observe(this, user -> {
             invalidateOptionsMenu();
         });
     }
@@ -91,12 +91,10 @@ public class MainActivity extends AppCompatActivity {
     public boolean onPrepareOptionsMenu(Menu menu) {
         if (navController != null) {
             int currentDestinationId = navController.getCurrentDestination().getId();
-            Boolean isLoggedIn = authViewModel.getIsLoggedInState().getValue();
-            boolean loggedIn = isLoggedIn != null && isLoggedIn;
-
+            boolean loggedIn = authViewModel.getCurrentUser().getValue() != null;
             boolean shouldShowMenu = (currentDestinationId == R.id.homeFragment);
 
-            MenuItem cartItem = menu.findItem(R.id.cartFragment);
+            MenuItem cartItem = menu.findItem(R.id.action_open_cart);
             if (cartItem != null) {
                 cartItem.setVisible(shouldShowMenu);
             }
@@ -117,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        // Để NavController và Fragment tự xử lý
         return NavigationUI.onNavDestinationSelected(item, navController) || super.onOptionsItemSelected(item);
     }
 }

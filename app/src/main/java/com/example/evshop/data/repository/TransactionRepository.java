@@ -1,6 +1,6 @@
 package com.example.evshop.data.repository;
 
-import com.example.evshop.data.network.PaymentApiService;
+import com.example.evshop.data.ApiService;
 import com.example.evshop.domain.models.ApiEnvelope;
 import com.example.evshop.domain.models.TransactionResult;
 
@@ -14,18 +14,20 @@ import retrofit2.Response;
 @Singleton
 public class TransactionRepository {
 
-    private final PaymentApiService apiService;
+    private final ApiService apiService;
 
     @Inject
-    public TransactionRepository(PaymentApiService apiService) {
+    public TransactionRepository(ApiService apiService) {
         this.apiService = apiService;
     }
 
+    // ** ĐỊNH NGHĨA CALLBACK INTERFACE CÒN THIẾU **
     public interface TransactionCallback {
         void onSuccess(TransactionResult result);
         void onError(String message);
     }
 
+    // ** SỬA LẠI PHƯƠNG THỨC ĐỂ NHẬN CALLBACK **
     public void getTransactions(int page, int pageSize, TransactionCallback callback) {
         apiService.getAllTransactions(page, pageSize).enqueue(new Callback<ApiEnvelope<TransactionResult>>() {
             @Override

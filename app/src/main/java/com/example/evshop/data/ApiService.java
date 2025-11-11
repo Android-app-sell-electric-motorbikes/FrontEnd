@@ -1,117 +1,83 @@
-// File: ApiService.java
 package com.example.evshop.data;
 
 import com.example.evshop.data.network.requests.CreateTemplateVehicleRequest;
-// *** THÊM IMPORT MỚI ***
 import com.example.evshop.data.network.requests.GetUploadUrlRequest;
 import com.example.evshop.data.network.responses.UploadUrlResponse;
 import com.example.evshop.domain.models.ApiEnvelope;
 import com.example.evshop.domain.models.Color;
-import com.example.evshop.domain.models.InventoryResult;
+import com.example.evshop.domain.models.InventoryItem;
+import com.example.evshop.domain.models.InventoryResult; // **THÊM IMPORT**
 import com.example.evshop.domain.models.LoginRequest;
 import com.example.evshop.domain.models.LoginResult;
+import com.example.evshop.domain.models.RegisterRequest;
 import com.example.evshop.domain.models.TemplateResult;
 import com.example.evshop.domain.models.TemplateVehicle;
+import com.example.evshop.domain.models.TransactionResult;
 import com.example.evshop.domain.models.Version;
 import com.example.evshop.domain.models.VersionDetails;
-import com.example.evshop.domain.models.InventoryItem;
+import com.example.evshop.domain.models.VnpayResponse;
 
 import java.util.List;
 
-// *** THÊM IMPORT MỚI ***
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
-import retrofit2.http.Headers;
 import retrofit2.http.POST;
-// *** THÊM IMPORT MỚI ***
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
-// *** THÊM IMPORT MỚI ***
 import retrofit2.http.Query;
 import retrofit2.http.Url;
 
-
 public interface ApiService {
-        @Headers("Accept: application/json")
-        @POST("api/Auth/login-user")
-        Call<ApiEnvelope<LoginResult>> login(@Body LoginRequest body);
+    @POST("api/Auth/login-mobile")
+    Call<ApiEnvelope<LoginResult>> login(@Body LoginRequest loginRequest);
 
+    @POST("api/Auth/register-mobile")
+    Call<ApiEnvelope<String>> register(@Body RegisterRequest registerRequest);
 
-        //---Vehicle----
-        @GET("api/EVTemplate/Get-all-template-vehicles")
-        Call<ApiEnvelope<TemplateResult>> getAllTemplateVehicles(
-                @Query("pageNumber") int pageNumber,
-                @Query("pageSize") int pageSize,
-                @Query("search") String searchTerm,
-                @Query("minPrice") Long minPrice,                  // << THÊM MỚI
-                @Query("maxPrice") Long maxPrice,                  // << THÊM MỚI
-                @Query("sortByPriceAsc") Boolean sortByPriceAsc    // << THÊM MỚI
-        );
-        @GET("api/EVTemplate/get-template-by-id/{id}")
-        Call<ApiEnvelope<TemplateVehicle>> getVehicleById(@Path("id") String vehicleId);
+    @POST("api/Payment/create-vnpay-mobile/{amount}")
+    Call<VnpayResponse> createVnpayPayment(@Path("amount") long amount);
 
+    @GET("api/Payment/get-all-transactions-mobile")
+    Call<ApiEnvelope<TransactionResult>> getAllTransactions(
+        @Query("pageNumber") int pageNumber,
+        @Query("pageSize") int pageSize
+    );
 
-        // =========================================================
-        // ***           CÁC API MỚI CHO TRANG ADMIN             ***
-        // =========================================================
+    @GET("api/EVTemplate/Get-all-template-vehicles")
+    Call<ApiEnvelope<TemplateResult>> getAllTemplateVehicles(
+            @Query("pageNumber") int pageNumber,
+            @Query("pageSize") int pageSize,
+            @Query("search") String searchQuery,
+            @Query("minPrice") Long minPrice,
+            @Query("maxPrice") Long maxPrice,
+            @Query("sortByPriceAsc") Boolean sortByPriceAsc
+    );
 
-        @GET("api/ElectricVehicleVersion/get-all-versions")
-        Call<ApiEnvelope<List<Version>>> getVersions();
+    @GET("api/EVTemplate/get-template-vehicle-by-id/{id}")
+    Call<ApiEnvelope<TemplateVehicle>> getVehicleById(@Path("id") String id);
 
-        @GET("api/ElectricVehicleColor/get-all-colors")
-        Call<ApiEnvelope<List<Color>>> getColors();
+    @GET("api/Version/get-version-by-id/{id}")
+    Call<ApiEnvelope<VersionDetails>> getVersionDetails(@Path("id") String id);
 
+    @GET("api/Version/get-all-versions")
+    Call<ApiEnvelope<List<Version>>> getVersions();
 
-        // =========================================================================
-        // *** STEP 1: API ĐỂ XIN PRESIGNED URL TỪ BACKEND CỦA BẠN               ***
-        // =========================================================================
-        /**
-         * Yêu cầu backend tạo ra một URL để upload file lên.
-         * API này KHÔNG gửi file, chỉ xin URL.
-         */
-        @Headers("Content-Type: application/json")
-        @POST("api/ElectricVehicle/upload-file-url-electric-vehicle")
-        Call<UploadUrlResponse> getUploadUrl(@Body GetUploadUrlRequest request);
+    @GET("api/Color/get-all-colors")
+    Call<ApiEnvelope<List<Color>>> getColors();
 
-        // =========================================================================
-        // *** STEP 2: API ĐỂ UPLOAD FILE LÊN URL CỦA AMAZON S3                  ***
-        // =========================================================================
-        /**
-         * Upload một file ảnh bằng phương thức PUT lên một URL động (lấy từ Step 1).
-         * @param url Đây là `uploadUrl` nhận được từ API getUploadUrl().
-         * @param imageBody Nội dung của file ảnh.
-         * @param contentType Kiểu của file, ví dụ "image/jpeg".
-         */
-        @Headers("Accept: application/json") // Giữ lại header này cho an toàn
-        @PUT
-        Call<ResponseBody> uploadImageToS3(
-                @Url String url,
-                @Body RequestBody imageBody
-                // Header Content-Type sẽ được thêm vào trong Repository
-        );
+    @POST("api/Image/get-upload-url")
+    Call<UploadUrlResponse> getUploadUrl(@Body GetUploadUrlRequest request);
 
-        @GET("api/ElectricVehicle/get-evc-inventory")
-        Call<ApiEnvelope<InventoryResult>> getInventory(); // << SỬA Ở ĐÂY
+    @PUT
+    Call<ResponseBody> uploadImageToS3(@Url String uploadUrl, @Body RequestBody imageBody);
 
-        // =========================================================================
-        // *** STEP 3: API ĐỂ TẠO TEMPLATE (Đã có, giữ nguyên)                     ***
-        // =========================================================================
-        /**
-         * Gửi yêu cầu tạo một mẫu xe mới.
-         * Request body bây giờ sẽ chứa `objectKey` thay vì `attachmentId`.
-         */
-        @POST("api/EVTemplate/create-template-vehicles")
-        Call<ApiEnvelope<Boolean>> createTemplateVehicle(@Body CreateTemplateVehicleRequest request);
+    @POST("api/EVTemplate/create-template-vehicle")
+    Call<ApiEnvelope<Boolean>> createTemplateVehicle(@Body CreateTemplateVehicleRequest request);
 
-
-        // --- API cũ để lấy chi tiết version (giữ lại nếu cần) ---
-        @GET("api/ElectricVehicleVersion/get-version-by-id/{versionId}")
-        Call<ApiEnvelope<VersionDetails>> getVersionDetails(
-                @Path("versionId") String versionId
-        );
-
-        // --- HÀM UPLOAD CŨ ĐÃ BỊ XÓA VÌ KHÔNG CÒN SỬ DỤNG ---
+    // ** SỬA LẠI KIỂU DỮ LIỆU TRẢ VỀ **
+    @GET("api/Inventory/get-all")
+    Call<ApiEnvelope<InventoryResult>> getInventory();
 }

@@ -1,10 +1,11 @@
 package com.example.evshop.ui.map;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -15,13 +16,13 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.res.ResourcesCompat;
+import androidx.core.content.ContextCompat;
 
 import com.example.evshop.BuildConfig;
 import com.example.evshop.R;
-import com.example.evshop.util.IconUtils;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.geojson.Point;
@@ -34,10 +35,11 @@ import java.util.Map;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import vn.vietmap.services.android.navigation.v5.location.engine.LocationEngineProvider;
 import vn.vietmap.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import vn.vietmap.services.android.navigation.v5.navigation.NavigationRoute;
 import vn.vietmap.vietmapsdk.Vietmap;
+import vn.vietmap.vietmapsdk.annotations.Icon;
+import vn.vietmap.vietmapsdk.annotations.IconFactory;
 import vn.vietmap.vietmapsdk.annotations.Marker;
 import vn.vietmap.vietmapsdk.annotations.MarkerOptions;
 import vn.vietmap.vietmapsdk.camera.CameraPosition;
@@ -46,11 +48,9 @@ import vn.vietmap.vietmapsdk.geometry.LatLng;
 import vn.vietmap.vietmapsdk.geometry.LatLngBounds;
 import vn.vietmap.vietmapsdk.location.LocationComponent;
 import vn.vietmap.vietmapsdk.location.LocationComponentActivationOptions;
-import vn.vietmap.vietmapsdk.location.engine.LocationEngine;
 import vn.vietmap.vietmapsdk.location.modes.CameraMode;
 import vn.vietmap.vietmapsdk.location.modes.RenderMode;
 import vn.vietmap.vietmapsdk.maps.MapView;
-import vn.vietmap.vietmapsdk.maps.OnMapReadyCallback;
 import vn.vietmap.vietmapsdk.maps.Style;
 import vn.vietmap.vietmapsdk.maps.VietMapGL;
 
@@ -62,30 +62,19 @@ public class VietMapMapViewActivity extends AppCompatActivity
     private MapView mapView;
     private VietMapGL vietMapGL;
     private LocationComponent locationComponent;
-    private LocationEngine locationEngine;
     private FusedLocationProviderClient fusedLocationClient;
 
     private NavigationMapRoute navigationMapRoute;
-    private DirectionsRoute currentRoute;
 
-    // UI panel
     private LinearLayout storeInfoPanel;
-    private TextView txtStoreName, txtStoreAddr;
-    private Button btnFindRoute;
 
-    // Lưu marker<->store
     private final Map<Long, Store> markerStoreMap = new HashMap<>();
     private Store selectedStore = null;
-    private boolean mapReady = false;
-    private boolean styleLoaded = false;
-    private boolean permissionsGranted = false;
-    private static String API_KEY = BuildConfig.VIETMAP_API_KEY;
 
-    // ===== Demo store list =====
     private List<Store> getDemoStores() {
         List<Store> list = new ArrayList<>();
         list.add(new Store("S1", "Cửa hàng EVShop Quận 1", "22 Lê Lợi, Q1, TP.HCM", 10.772153, 106.701977));
-        list.add(new Store("S2", "Cửa hàng EVShop Quận 3", "100 Cách Mạng Tháng 8, Q3", 10.777628, 106.684900));
+        list.add(new Store("S2", "Cửa hàng EVShop Quận 3", "100 CMT8, Q3", 10.777628, 106.684900));
         list.add(new Store("S3", "Cửa hàng EVShop Quận 10", "285 CMT8, Q10", 10.778930, 106.666912));
         return list;
     }
@@ -99,120 +88,86 @@ public class VietMapMapViewActivity extends AppCompatActivity
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         mapView = findViewById(R.id.vmMapView);
+        storeInfoPanel = findViewById(R.id.storeInfoPanel);
+        Button btnFindRoute = findViewById(R.id.btnFindRoute);
+        FloatingActionButton fabMyLocation = findViewById(R.id.fabMyLocation);
+
         mapView.onCreate(savedInstanceState);
 
-        storeInfoPanel = findViewById(R.id.storeInfoPanel);
-        txtStoreName = findViewById(R.id.txtStoreName);
-        txtStoreAddr = findViewById(R.id.txtStoreAddr);
-        btnFindRoute = findViewById(R.id.btnFindRoute);
+        btnFindRoute.setOnClickListener(v -> navigateToSelectedStore());
 
-        btnFindRoute.setOnClickListener(v -> {
-            if (selectedStore == null) return;
-            Point origin = getCurrentPointOrNull();
-            if (origin == null) {
-                Toast.makeText(this, "Chưa lấy được vị trí hiện tại", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            Point dest = Point.fromLngLat(selectedStore.lng, selectedStore.lat);
-            fetchAndDrawRoute(origin, dest, true);
-        });
-
-        mapView.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(@NonNull VietMapGL map) {
-                vietMapGL = map;
-
-                vietMapGL.setStyle(new Style.Builder()
-                                .fromUri("https://maps.vietmap.vn/api/maps/light/styles.json?apikey=" + API_KEY),
-                        style -> {
-                            styleLoaded = true;
-
-                            initLocationEngine();
-                            // Chỉ bật location nếu có quyền
-                            if (hasLocationPermission()) {
-                                permissionsGranted = true;
-                                tryEnableLocationComponent();
-                            } else {
-                                permissionsGranted = false;
-                                requestLocationPermission();
-                            }
-
-                            addStoreMarkers(getDemoStores());
-                            moveCameraToUserOrDefault();
-                        });
-
-                vietMapGL.addOnMapClickListener(VietMapMapViewActivity.this);
-                vietMapGL.setOnMarkerClickListener(VietMapMapViewActivity.this);
+        // ** SỬA LẠI LOGIC NÚT BẤM **
+        fabMyLocation.setOnClickListener(v -> {
+            if (hasLocationPermission()) {
+                if (locationComponent != null && locationComponent.isLocationComponentActivated()) {
+                    locationComponent.setCameraMode(CameraMode.TRACKING_GPS_NORTH);
+                    locationComponent.zoomWhileTracking(16.5);
+                } else {
+                    // Có quyền nhưng component chưa bật, thử bật lại
+                    if (vietMapGL != null && vietMapGL.getStyle() != null) {
+                        tryEnableLocationComponent(vietMapGL.getStyle());
+                    }
+                }
+            } else {
+                // Chưa có quyền, hỏi xin quyền
+                requestLocationPermission();
             }
         });
 
-        // xin quyền nếu chưa có
-        if (!hasLocationPermission()) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
-                    REQ_LOC);
-        }
-    }
+        mapView.getMapAsync(map -> {
+            vietMapGL = map;
+            String styleUrl = "https://maps.vietmap.vn/api/maps/light/styles.json?apikey=" + BuildConfig.VIETMAP_API_KEY;
+            vietMapGL.setStyle(new Style.Builder().fromUri(styleUrl),
+                    style -> {
+                        if (hasLocationPermission()) {
+                            tryEnableLocationComponent(style);
+                        }
+                        addStoreMarkers(getDemoStores());
+                        moveCameraToUserOrDefault();
+                    });
 
-    private void initLocationEngine() {
-        locationEngine = LocationEngineProvider.getBestLocationEngine(this);
-    }
-
-    private void enableLocationComponent(@NonNull Style style) throws SecurityException {
-        if (!hasLocationPermission()) throw new SecurityException("Location permission missing");
-
-        locationComponent = vietMapGL.getLocationComponent();
-        if (locationComponent == null) return;
-
-        locationComponent.activateLocationComponent(
-                LocationComponentActivationOptions.builder(this, style).build()
-        );
-        locationComponent.setLocationComponentEnabled(true);
-        locationComponent.setCameraMode(CameraMode.TRACKING_GPS_NORTH, 750L, 18.0, 0.0, 0.0, null);
-        locationComponent.zoomWhileTracking(18.5);
-        locationComponent.setRenderMode(RenderMode.GPS);
-        locationComponent.setLocationEngine(locationEngine);
+            vietMapGL.addOnMapClickListener(VietMapMapViewActivity.this);
+            vietMapGL.setOnMarkerClickListener(VietMapMapViewActivity.this);
+        });
     }
 
     private void addStoreMarkers(List<Store> stores) {
+        Drawable storeDrawable = ContextCompat.getDrawable(this, R.drawable.ic_store_location);
+        if (storeDrawable == null) return;
+
+        Bitmap resizedBitmap = resizeBitmap(storeDrawable, 80, 80);
+        Icon icon = IconFactory.getInstance(this).fromBitmap(resizedBitmap);
+
         for (Store s : stores) {
             Marker m = vietMapGL.addMarker(new MarkerOptions()
                     .position(new LatLng(s.lat, s.lng))
                     .title(s.name)
                     .snippet(s.address)
-                    .icon(new IconUtils().drawableToIcon(
-                            this,
-                            R.drawable.ic_launcher_foreground,
-                            ResourcesCompat.getColor(getResources(), R.color.black, getTheme())
-                    )));
+                    .icon(icon));
             markerStoreMap.put(m.getId(), s);
         }
     }
 
-    private void moveCameraToUserOrDefault() {
-        LatLng target = new LatLng(10.776, 106.700); // fallback Q1
-        Location last = (locationComponent != null) ? locationComponent.getLastKnownLocation() : null;
-        if (last != null) target = new LatLng(last.getLatitude(), last.getLongitude());
-
-        CameraPosition pos = new CameraPosition.Builder()
-                .target(target).zoom(15.5).tilt(0.0).build();
-        vietMapGL.animateCamera(CameraUpdateFactory.newCameraPosition(pos), 800);
+    private Bitmap resizeBitmap(Drawable drawable, int width, int height) {
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
     }
 
-    // marker clicked
     @Override
     public boolean onMarkerClick(@NonNull Marker marker) {
         Store s = markerStoreMap.get(marker.getId());
         if (s != null) {
             selectedStore = s;
-            txtStoreName.setText(s.name);
-            txtStoreAddr.setText(s.address);
+            ((TextView) findViewById(R.id.txtStoreName)).setText(s.name);
+            ((TextView) findViewById(R.id.txtStoreAddr)).setText(s.address);
             storeInfoPanel.setVisibility(View.VISIBLE);
         }
-        return true; // đã xử lý
+        return true;
     }
 
-    // map clicked: ẩn panel
     @Override
     public boolean onMapClick(@NonNull LatLng point) {
         storeInfoPanel.setVisibility(View.GONE);
@@ -220,92 +175,91 @@ public class VietMapMapViewActivity extends AppCompatActivity
         return false;
     }
 
+    private void navigateToSelectedStore(){
+        if (selectedStore == null) return;
+        Point origin = getCurrentPointOrNull();
+        if (origin == null) {
+            Toast.makeText(this, "Chưa lấy được vị trí hiện tại", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Point dest = Point.fromLngLat(selectedStore.lng, selectedStore.lat);
+        fetchAndDrawRoute(origin, dest, true);
+    }
+
+    private void moveCameraToUserOrDefault() {
+        if (!hasLocationPermission()) return; // Không có quyền thì không làm gì
+        fusedLocationClient.getLastLocation().addOnSuccessListener(this, location -> {
+            LatLng target = (location != null)
+                    ? new LatLng(location.getLatitude(), location.getLongitude())
+                    : new LatLng(10.776, 106.700);
+
+            CameraPosition pos = new CameraPosition.Builder().target(target).zoom(15.5).build();
+            if(vietMapGL != null) vietMapGL.animateCamera(CameraUpdateFactory.newCameraPosition(pos), 800);
+        });
+    }
+
+    private void tryEnableLocationComponent(@NonNull Style style) {
+        try {
+            locationComponent = vietMapGL.getLocationComponent();
+            locationComponent.activateLocationComponent(LocationComponentActivationOptions.builder(this, style).build());
+            locationComponent.setLocationComponentEnabled(true);
+            locationComponent.setCameraMode(CameraMode.TRACKING_GPS_NORTH);
+            locationComponent.setRenderMode(RenderMode.GPS);
+        } catch (SecurityException ignored) {}
+    }
+
     private boolean hasLocationPermission() {
-        return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
     private void requestLocationPermission() {
-        ActivityCompat.requestPermissions(
-                this,
-                new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
-                REQ_LOC
-        );
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQ_LOC);
     }
 
-    private void openAppSettings() {
-        try {
-            Intent i = new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-            i.setData(Uri.parse("package:" + getPackageName()));
-            startActivity(i);
-        } catch (Exception ignored) {
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQ_LOC && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (vietMapGL != null && vietMapGL.getStyle() != null) {
+                tryEnableLocationComponent(vietMapGL.getStyle());
+                moveCameraToUserOrDefault();
+            }
+        } else {
+            Toast.makeText(this, "Bạn đã từ chối quyền vị trí.", Toast.LENGTH_LONG).show();
         }
     }
 
     private Point getCurrentPointOrNull() {
-        // Ưu tiên từ LocationComponent
-        try {
-            if (hasLocationPermission() && locationComponent != null && locationComponent.getLastKnownLocation() != null) {
-                Location l = locationComponent.getLastKnownLocation();
-                return Point.fromLngLat(l.getLongitude(), l.getLatitude());
-            }
-        } catch (SecurityException ignored) {
-            permissionsGranted = false;
+        if (hasLocationPermission() && locationComponent != null && locationComponent.getLastKnownLocation() != null) {
+            return Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(), locationComponent.getLastKnownLocation().getLatitude());
         }
-
-        // Fallback fused (cũng phải bọc try/catch)
-        try {
-            final Point[] out = {null};
-            if (hasLocationPermission()) {
-                fusedLocationClient.getLastLocation().addOnSuccessListener(loc -> {
-                    if (loc != null) {
-                        out[0] = Point.fromLngLat(loc.getLongitude(), loc.getLatitude());
-                    }
-                });
-            }
-            return out[0];
-        } catch (SecurityException ignored) {
-            permissionsGranted = false;
-            return null;
-        }
+        return null;
     }
 
     private void fetchAndDrawRoute(Point origin, Point dest, boolean overview) {
-        // Khởi tạo lớp vẽ route nếu chưa có
         if (navigationMapRoute == null) {
-            navigationMapRoute = new NavigationMapRoute(mapView, vietMapGL, /*layerAboveId*/ null);
+            navigationMapRoute = new NavigationMapRoute(mapView, vietMapGL, null);
         } else {
             navigationMapRoute.removeRoute();
         }
-
         NavigationRoute.builder(this)
-                .apikey(API_KEY)
+                .apikey(BuildConfig.VIETMAP_API_KEY)
                 .origin(origin)
                 .destination(dest)
                 .build()
                 .getRoute(new Callback<DirectionsResponse>() {
                     @Override
                     public void onResponse(@NonNull Call<DirectionsResponse> call, @NonNull Response<DirectionsResponse> response) {
-                        if (response.body() == null || response.body().routes() == null || response.body().routes().isEmpty()) {
+                        if (response.body() == null || response.body().routes().isEmpty()) {
                             Toast.makeText(VietMapMapViewActivity.this, "Không tìm thấy tuyến phù hợp", Toast.LENGTH_SHORT).show();
                             return;
                         }
-                        currentRoute = response.body().routes().get(0);
-                        navigationMapRoute.addRoute(currentRoute);
-
+                        navigationMapRoute.addRoute(response.body().routes().get(0));
                         if (overview) {
-                            // fit bounds theo origin-dest
-                            List<LatLng> pts = new ArrayList<>();
-                            pts.add(new LatLng(origin.latitude(), origin.longitude()));
-                            pts.add(new LatLng(dest.latitude(), dest.longitude()));
-                            LatLngBounds b = new LatLngBounds.Builder().includes(pts).build();
-                            vietMapGL.animateCamera(
-                                    CameraUpdateFactory.newLatLngBounds(b, 80, 320, 80, 320),
-                                    800
-                            );
+                            LatLngBounds bounds = new LatLngBounds.Builder().include(new LatLng(origin.latitude(), origin.longitude())).include(new LatLng(dest.latitude(), dest.longitude())).build();
+                            vietMapGL.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 150), 800);
                         }
                     }
-
                     @Override
                     public void onFailure(@NonNull Call<DirectionsResponse> call, @NonNull Throwable t) {
                         Toast.makeText(VietMapMapViewActivity.this, "Lỗi lấy tuyến: " + t.getMessage(), Toast.LENGTH_SHORT).show();
@@ -313,38 +267,6 @@ public class VietMapMapViewActivity extends AppCompatActivity
                 });
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQ_LOC) {
-            permissionsGranted = hasLocationPermission();
-            if (permissionsGranted) {
-                // Nếu style đã load → bật location ngay
-                if (mapReady && styleLoaded) {
-                    tryEnableLocationComponent();
-                    moveCameraToUserOrDefault(); // zoom vào user
-                }
-            } else {
-                Toast.makeText(this, "Bạn đã từ chối quyền vị trí. Một số tính năng sẽ bị hạn chế.", Toast.LENGTH_LONG).show();
-                // Tuỳ chọn: hiển thị nút mở cài đặt nếu người dùng chọn “Don’t ask again”
-                // openAppSettings();
-            }
-        }
-    }
-
-    private void tryEnableLocationComponent() {
-        try {
-            Style style = vietMapGL.getStyle();
-            if (style == null) return;
-            enableLocationComponent(style);
-        } catch (SecurityException se) {
-            // Người dùng vừa rút quyền hoặc thiết bị chặn – xử lý an toàn
-            permissionsGranted = false;
-            Toast.makeText(this, "Không thể bật vị trí do thiếu quyền.", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    // ===== lifecycle =====
     @Override
     protected void onStart() {
         super.onStart();
@@ -381,7 +303,6 @@ public class VietMapMapViewActivity extends AppCompatActivity
         if (mapView != null) mapView.onDestroy();
     }
 
-    // ===== simple inner model (nếu cô không muốn tạo file riêng) =====
     public static class Store {
         public final String id, name, address;
         public final double lat, lng;

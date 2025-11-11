@@ -19,14 +19,20 @@ public class CartManager {
         return instance;
     }
 
-    public void addToCart(TemplateVehicle vehicle) {
+    // ** SỬA LẠI: Thêm số lượng sản phẩm **
+    public void addToCart(TemplateVehicle vehicle, int quantity) {
         for (CartItem item : cartItems) {
             if (item.getVehicle().getId().equals(vehicle.getId())) {
-                item.setQuantity(item.getQuantity() + 1);
+                item.setQuantity(item.getQuantity() + quantity);
                 return;
             }
         }
-        cartItems.add(new CartItem(vehicle, 1));
+        cartItems.add(new CartItem(vehicle, quantity));
+    }
+
+    // Giữ lại hàm cũ để tương thích với các nơi khác
+    public void addToCart(TemplateVehicle vehicle) {
+        addToCart(vehicle, 1);
     }
 
     public void removeFromCart(String vehicleId) {
@@ -36,7 +42,9 @@ public class CartManager {
     public void updateQuantity(String vehicleId, int newQuantity) {
         for (CartItem item : cartItems) {
             if (item.getVehicle().getId().equals(vehicleId)) {
-                item.setQuantity(newQuantity);
+                if (newQuantity > 0) {
+                    item.setQuantity(newQuantity);
+                }
                 return;
             }
         }
@@ -58,7 +66,6 @@ public class CartManager {
         return total;
     }
 
-    // ** PHƯƠNG THỨC CÒN THIẾU ĐƯỢC THÊM VÀO ĐÂY **
     public int getTotalItemCount() {
         int count = 0;
         for (CartItem item : cartItems) {
